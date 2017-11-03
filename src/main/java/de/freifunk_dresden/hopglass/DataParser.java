@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package de.freifunk_dresden.hopglass;
 
 import com.google.gson.JsonObject;
@@ -121,7 +120,7 @@ public class DataParser {
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
                 String intf = l.get("interface").getAsString();
                 Link lnk = null;
-                switch(intf) {
+                switch (intf) {
                     case "wlan0":
                         lnk = new Link("wireless");
                         break;
@@ -149,7 +148,7 @@ public class DataParser {
                 JsonObject l = link.getAsJsonObject();
                 String intf = l.get("interface").getAsString();
                 Link lnk = null;
-                switch(intf) {
+                switch (intf) {
                     case "wlan0":
                         lnk = new Link("wireless", Integer.parseInt(l.get("tq").getAsString()));
                         break;
@@ -167,11 +166,11 @@ public class DataParser {
         }
         return linkmap;
     }
-    
+
     public String getName() {
         return data.get("contact").getAsJsonObject().get("name").getAsString();
     }
-    
+
     public String getEMail() {
         return data.get("contact").getAsJsonObject().get("email").getAsString();
     }

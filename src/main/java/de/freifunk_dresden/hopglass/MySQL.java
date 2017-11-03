@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package de.freifunk_dresden.hopglass;
 
 import java.io.BufferedReader;
@@ -68,15 +67,15 @@ public class MySQL {
             String line;
             while ((line = fr.readLine()) != null) {
                 if (line.startsWith("host=")) {
-                    host = line.replace(line, "host=");
+                    host = line.replace("host=", "");
                 } else if (line.startsWith("port=")) {
-                    port = Integer.parseInt(line.replace(line, "port="));
+                    port = Integer.parseInt(line.replace("port=", ""));
                 } else if (line.startsWith("username=")) {
-                    username = line.replace(line, "username=");
+                    username = line.replace("username=", "");
                 } else if (line.startsWith("password=")) {
-                    password = line.replace(line, "password=");
+                    password = line.replace("password=", "");
                 } else if (line.startsWith("database=")) {
-                    database = line.replace(line, "database=");
+                    database = line.replace("database=", "");
                 }
             }
         } catch (IOException ex) {

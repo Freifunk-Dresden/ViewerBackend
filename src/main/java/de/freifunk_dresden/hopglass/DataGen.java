@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package de.freifunk_dresden.hopglass;
 
 import com.google.gson.JsonObject;
@@ -88,7 +87,7 @@ public class DataGen {
         InputStreamReader reader;
         try (InputStream stream = register.getInputStream()) {
             reader = new InputStreamReader(stream, "UTF-8");
-            String html = new BufferedReader(reader).lines().collect(Collectors.joining("\n"));
+            String html = new BufferedReader(reader).lines().collect(Collectors.joining(" "));
             reader.close();
             Document doc = Jsoup.parse(html);
             Element tbody = doc.select("tbody").first();
@@ -119,8 +118,40 @@ public class DataGen {
     public static void main(String[] args) {
         LOG.log(Level.INFO, "Getting Connection to DB...");
         DB = new MySQL();
-        //@TODO: Create MySQL Commands: CREATE IF NOT EXISTS
         if (DB.hasConnection()) {
+            DB.queryUpdate("CREATE TABLE IF NOT EXISTS `links` ( "
+                    + "	`from` INT(11) NOT NULL, "
+                    + "	`to` INT(11) NOT NULL, "
+                    + "	`interface` VARCHAR(45) NOT NULL, "
+                    + "	`tq` INT(3) NOT NULL, "
+                    + "	PRIMARY KEY (`from`, `to`) "
+                    + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
+            DB.queryUpdate("CREATE TABLE IF NOT EXISTS `nodes` ( "
+                    + " `id` INT(11) NOT NULL, "
+                    + "	`community` VARCHAR(50) NULL DEFAULT NULL, "
+                    + "	`role` TEXT NULL, "
+                    + "	`model` TEXT NULL, "
+                    + "	`firmwareVersion` VARCHAR(10) NULL DEFAULT NULL, "
+                    + "	`firmwareBase` TEXT NULL, "
+                    + "	`firstseen` INT(11) NULL DEFAULT NULL, "
+                    + "	`lastseen` INT(11) NULL DEFAULT NULL, "
+                    + "	`gatewayIp` TEXT NULL, "
+                    + "	`latitude` DOUBLE NULL DEFAULT NULL, "
+                    + "	`longitude` DOUBLE NULL DEFAULT NULL, "
+                    + "	`uptime` DOUBLE NULL DEFAULT NULL, "
+                    + "	`memory_usage` DOUBLE NULL DEFAULT NULL, "
+                    + "	`loadavg` DOUBLE NULL DEFAULT NULL, "
+                    + "	`clients` INT(4) NULL DEFAULT NULL, "
+                    + "	`gateway` INT(1) NULL DEFAULT NULL, "
+                    + "	`online` INT(1) NULL DEFAULT NULL, "
+                    + "	`name` TEXT NULL, "
+                    + "	`email` TEXT NULL, "
+                    + "	PRIMARY KEY (`id`) "
+                    + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
+            DB.queryUpdate("CREATE TABLE `settings` ( "
+                    + "	`lastupdate` VARCHAR(20) NOT NULL, "
+                    + "	PRIMARY KEY (`lastupdate`) "
+                    + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
             DB.queryUpdate("TRUNCATE links");
             DataGen dataGen = new DataGen();
             try {
