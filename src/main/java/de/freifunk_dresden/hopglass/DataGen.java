@@ -148,7 +148,7 @@ public class DataGen {
                     + "	`email` TEXT NULL, "
                     + "	PRIMARY KEY (`id`) "
                     + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
-            DB.queryUpdate("CREATE TABLE `settings` ( "
+            DB.queryUpdate("CREATE TABLE IF NOT EXISTS `settings` ( "
                     + "	`lastupdate` VARCHAR(20) NOT NULL, "
                     + "	PRIMARY KEY (`lastupdate`) "
                     + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
