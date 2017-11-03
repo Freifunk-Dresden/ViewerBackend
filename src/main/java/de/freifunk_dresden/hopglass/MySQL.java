@@ -24,6 +24,10 @@
 
 package de.freifunk_dresden.hopglass;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -37,23 +41,64 @@ public class MySQL {
 
     private Connection conn;
     private static final Logger LOG = Logger.getLogger(MySQL.class.getName());
+    private String host;
+    private int port;
+    private String username;
+    private String password;
+    private String database;
 
     public MySQL() {
-        if (!this.openConnection()) {
-            LOG.log(Level.SEVERE, "Keine Datenbankverbindung!");
+        if (this.loadConfig()) {
+            if (!this.openConnection()) {
+                LOG.log(Level.SEVERE, "Keine Datenbankverbindung!");
+            }
+        } else {
+            LOG.log(Level.SEVERE, "Konfigurationsdatei konnte nicht gelesen werden!");
         }
+    }
+
+    private boolean loadConfig() {
+        File f = new File("conf.ini");
+        if (!f.exists() || !f.canRead()) {
+            return false;
+        }
+        BufferedReader fr = null;
+        try {
+            fr = new BufferedReader(new FileReader(f));
+            String line;
+            while ((line = fr.readLine()) != null) {
+                if (line.startsWith("host=")) {
+                    host = line.replace(line, "host=");
+                } else if (line.startsWith("port=")) {
+                    port = Integer.parseInt(line.replace(line, "port="));
+                } else if (line.startsWith("username=")) {
+                    username = line.replace(line, "username=");
+                } else if (line.startsWith("password=")) {
+                    password = line.replace(line, "password=");
+                } else if (line.startsWith("database=")) {
+                    database = line.replace(line, "database=");
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        } finally {
+            try {
+                if (fr != null) {
+                    fr.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean openConnection() {
         try {
-            //@TODO: load from config file
-            String host = "localhost";
-            int port = 3306;
-            String username = "freifunk";
-            String pw = "";
-            String dataB = "freifunk";
             Class.forName("com.mysql.jdbc.Driver");
-            this.conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dataB, username, pw);
+            this.conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
             return true;
         } catch (ClassNotFoundException | SQLException e) {
             LOG.log(Level.SEVERE, null, e);
@@ -81,7 +126,7 @@ public class MySQL {
             }
             st.executeUpdate();
         } catch (SQLException e) {
-            LOG.log(Level.SEVERE, "Failed to send update: {0} - {1}", new Object[] { query, e.getLocalizedMessage() });
+            LOG.log(Level.SEVERE, "Failed to send update: {0} - {1}", new Object[]{query, e.getLocalizedMessage()});
         }
         closeRessources(st);
     }
@@ -127,7 +172,8 @@ public class MySQL {
         if (st != null) {
             try {
                 st.close();
-            } catch (SQLException e) {}
+            } catch (SQLException e) {
+            }
         }
     }
 
