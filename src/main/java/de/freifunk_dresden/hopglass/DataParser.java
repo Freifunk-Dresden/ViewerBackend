@@ -124,6 +124,7 @@ public class DataParser {
                     case "wlan0":
                         lnk = new Link("wireless");
                         break;
+                    case "tbb-fastd":
                     case "tbb_fastd":
                         lnk = new Link("tunnel");
                         break;
@@ -155,6 +156,7 @@ public class DataParser {
                     case "br-tbb":
                         lnk = new Link("other", Integer.parseInt(l.get("tq").getAsString()));
                         break;
+                    case "tbb-fastd":
                     case "tbb_fastd":
                         lnk = new Link("tunnel", Integer.parseInt(l.get("tq").getAsString()));
                         break;
