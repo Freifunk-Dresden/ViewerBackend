@@ -38,15 +38,21 @@ public class DataParser {
 
     public String getCommunity() {
         String com = data.get("common").getAsJsonObject().get("city").getAsString();
-        if (com.startsWith("Mei") && com.endsWith("en")) {
+        if (com.equals("Meissen")) {
             return "Meißen";
-        } else if (com.startsWith("G") && com.endsWith("rlitz")) {
-            return "Görlitz";
         }
         return com;
     }
 
     public String getRole() {
+        if (version >= 13) {
+            String type = data.get("system").getAsJsonObject().get("node_type").getAsString();
+            switch(type) {
+                case "node":
+                    return "standard";
+                //@TODO: Include other node types
+            }
+        }
         return "standard";
     }
 
