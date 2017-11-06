@@ -49,10 +49,10 @@ public class MySQL {
     public MySQL() {
         if (this.loadConfig()) {
             if (!this.openConnection()) {
-                LOG.log(Level.SEVERE, "Keine Datenbankverbindung!");
+                LOG.log(Level.SEVERE, "No connection to database!");
             }
         } else {
-            LOG.log(Level.SEVERE, "Konfigurationsdatei konnte nicht gelesen werden!");
+            LOG.log(Level.SEVERE, "Configurationfile couldn't be read!");
         }
     }
 

@@ -116,7 +116,7 @@ public class DataGen {
     }
 
     public static void main(String[] args) {
-        LOG.log(Level.INFO, "Getting Connection to DB...");
+        LOG.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
         if (DB.hasConnection()) {
             DB.queryUpdate("CREATE TABLE IF NOT EXISTS `links` ( "
@@ -155,20 +155,21 @@ public class DataGen {
             DB.queryUpdate("TRUNCATE links");
             DataGen dataGen = new DataGen();
             try {
-                LOG.log(Level.INFO, "Getting Register...");
+                LOG.log(Level.INFO, "Getting register...");
                 dataGen.parseRegister();
-                LOG.log(Level.INFO, "Getting Nodes...");
+                LOG.log(Level.INFO, "Getting nodes...");
                 dataGen.getNodes();
             } catch (IOException ex) {
                 Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
             }
             POOL.shutdown();
-            LOG.log(Level.INFO, "Wating Threads for finish...");
+            LOG.log(Level.INFO, "Wating threads for finish...");
             try {
                 POOL.awaitTermination(3, TimeUnit.MINUTES);
             } catch (InterruptedException ex) {
                 Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
             }
+            LOG.log(Level.INFO, "Generate JSON files...");
             LOG.log(Level.INFO, "Done!");
         }
     }
