@@ -27,17 +27,20 @@ public class Link {
 
     private int tq = -1;
     private final String iface;
+    private final Node target;
 
-    public Link(String iface) {
+    public Link(String iface, Node target) {
         this.iface = iface;
+        this.target = target;
     }
 
-    public Link(String iface, int tq) {
+    public Link(String iface, int tq, Node target) {
         this.iface = iface;
         this.tq = tq;
+        this.target = target;
     }
 
-    public int getTq() {
+    public double getTq() {
         return tq;
     }
 
@@ -45,9 +48,29 @@ public class Link {
         return iface;
     }
 
+    public Node getTarget() {
+        return target;
+    }
+
     public void setTq(int quality) {
         if (quality != -1 && quality > this.tq) {
             this.tq = quality;
+        }
+    }
+
+    public String getType() {
+        switch (iface) {
+            case "wlan0":
+                return "wireless";
+            case "br-tbb":
+            case "br-meshwire":
+                return "other";
+            case "tbb-fastd":
+            case "tbb_fastd":
+            case "tbb_fastd2":
+                return "tunnel";
+            default:
+                return null;
         }
     }
 }

@@ -30,26 +30,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NodeThread implements Runnable {
 
-    private final int nodeId;
+    private final Node node;
 
-    public NodeThread(int nodeId) {
-        this.nodeId = nodeId;
+    public NodeThread(Node nodeId) {
+        this.node = nodeId;
     }
 
     @Override
     public void run() {
         try {
-            HttpURLConnection con = (HttpURLConnection) new URL("http://" + "10.200." + (nodeId / 255 % 256) + "." + ((nodeId % 255) + 1) + ".freifunk-dresden.de/sysinfo-json.cgi").openConnection();
-            con.setConnectTimeout(10000);
-            con.setReadTimeout(10000);
+            HttpURLConnection con = (HttpURLConnection) new URL("http://" + node.getIpAdress() + ".freifunk-dresden.de/sysinfo-json.cgi").openConnection();
+            con.setConnectTimeout(7500);
+            con.setReadTimeout(7500);
             if (con.getResponseCode() == 503) {
-                DataGen.getDB().queryUpdate("UPDATE nodes SET online = 0 WHERE id = ?", nodeId);
+                node.setOnline(false);
                 return;
             }
             InputStreamReader reader;
@@ -58,35 +57,13 @@ public class NodeThread implements Runnable {
                 JsonObject sysinfo = new JsonParser().parse(reader).getAsJsonObject();
                 reader.close();
                 DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
-                DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, lastseen = ?, gatewayIp = ?, uptime = ?, memory_usage = ?, loadavg = ?, clients = ?, online = 1, name = ?, email = ? WHERE id = ?",
-                        dp.getCommunity(),
-                        dp.getRole(),
-                        dp.getModel(),
-                        dp.getFirmwareVersion(),
-                        dp.getFirmwareBase(),
-                        System.currentTimeMillis() / 1000,
-                        dp.getGatewayIp(),
-                        dp.getUptime(),
-                        dp.getMemoryUsage(),
-                        dp.getLoadAvg(),
-                        dp.getClients(),
-                        dp.getName(),
-                        dp.getEMail(),
-                        nodeId);
-                HashMap<Integer, Link> linkmap = dp.getLinkMap();
-                if (!linkmap.isEmpty()) {
-                    MySQL.PreparedUpdate prep = DataGen.getDB().queryPrepUpdate("INSERT INTO links SET `from` = ?, `to` = ?, `interface` = ?, `tq` = ?");
-                    linkmap.entrySet().stream().forEach((e) -> {
-                        prep.add(nodeId, e.getKey(), e.getValue().getIface(), e.getValue().getTq());
-                    });
-                    prep.done();
-                }
+                node.parseData(dp);
             }
         } catch (IOException ex) {
-            DataGen.getDB().queryUpdate("UPDATE nodes SET online = 0 WHERE id = ?", nodeId);
+            node.setOnline(false);
         } catch (NullPointerException ex) {
-            DataGen.getDB().queryUpdate("UPDATE nodes SET online = 0 WHERE id = ?", nodeId);
-            Logger.getLogger(NodeThread.class.getName()).log(Level.SEVERE, "Node " + nodeId, ex);
+            node.setOnline(false);
+            Logger.getLogger(NodeThread.class.getName()).log(Level.SEVERE, "Node " + node, ex);
         }
     }
 }

@@ -47,7 +47,7 @@ public class DataParser {
     public String getRole() {
         if (version >= 13) {
             String type = data.get("system").getAsJsonObject().get("node_type").getAsString();
-            switch(type) {
+            switch (type) {
                 case "node":
                     return "standard";
                 //@TODO: Include other node types
@@ -113,8 +113,8 @@ public class DataParser {
         return Double.parseDouble(data.get("statistic").getAsJsonObject().get("cpu_load").getAsString().split(" ")[0]);
     }
 
-    public int getClients() {
-        return data.get("statistic").getAsJsonObject().get("accepted_user_count").getAsInt();
+    public short getClients() {
+        return data.get("statistic").getAsJsonObject().get("accepted_user_count").getAsShort();
     }
 
     public HashMap<Integer, Link> getLinkMap() {
@@ -124,20 +124,8 @@ public class DataParser {
                 JsonObject l = link.getAsJsonObject();
                 String[] split = l.get("target").getAsString().split("\\.");
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
-                String intf = l.get("interface").getAsString();
-                Link lnk = null;
-                switch (intf) {
-                    case "wlan0":
-                        lnk = new Link("wireless");
-                        break;
-                    case "tbb-fastd":
-                    case "tbb_fastd":
-                        lnk = new Link("tunnel");
-                        break;
-                }
-                if (lnk != null) {
-                    linkmap.put(targetId, lnk);
-                }
+                Link lnk = new Link(l.get("interface").getAsString(), DataGen.getNode(targetId));
+                linkmap.put(targetId, lnk);
             });
         }
         if (version == 10) {
@@ -153,23 +141,9 @@ public class DataParser {
         } else if (version >= 11) {
             data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
-                String intf = l.get("interface").getAsString();
-                Link lnk = null;
-                switch (intf) {
-                    case "wlan0":
-                        lnk = new Link("wireless", Integer.parseInt(l.get("tq").getAsString()));
-                        break;
-                    case "br-tbb":
-                        lnk = new Link("other", Integer.parseInt(l.get("tq").getAsString()));
-                        break;
-                    case "tbb-fastd":
-                    case "tbb_fastd":
-                        lnk = new Link("tunnel", Integer.parseInt(l.get("tq").getAsString()));
-                        break;
-                }
-                if (lnk != null) {
-                    linkmap.put(Integer.parseInt(l.get("node").getAsString()), lnk);
-                }
+                int targetId = l.get("node").getAsInt();
+                Link lnk = new Link(l.get("interface").getAsString(), Integer.parseInt(l.get("tq").getAsString()), DataGen.getNode(targetId));
+                linkmap.put(targetId, lnk);
             });
         }
         return linkmap;

@@ -29,11 +29,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,6 +52,7 @@ public class DataGen {
 
     private static final ExecutorService POOL = Executors.newFixedThreadPool(25);
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
+    private static final LinkedHashMap<Integer, Node> NODES = new LinkedHashMap<>();
     private static MySQL DB;
 
     private void getNodes() throws IOException {
@@ -58,12 +62,9 @@ public class DataGen {
             reader = new InputStreamReader(stream, "UTF-8");
             JsonObject api = new JsonParser().parse(reader).getAsJsonObject();
             reader.close();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-            DB.queryUpdate("UPDATE settings SET lastupdate = ?", sdf.format(new Date()));
             api.get("nodes").getAsJsonArray().forEach((node) -> {
                 JsonObject n = node.getAsJsonObject();
-                int id = n.get("id").getAsInt();
+                Node nod = getNode(n.get("id").getAsInt());
                 JsonObject pos = n.get("position").getAsJsonObject();
                 Double latitude = null;
                 Double longitude = null;
@@ -72,12 +73,10 @@ public class DataGen {
                     longitude = pos.get("long").getAsDouble();
                 } catch (NumberFormatException ex) {
                 }
-                if (latitude == null || longitude == null) {
-                    DB.queryUpdate("INSERT INTO nodes SET id = ?, latitude = NULL, longitude = NULL ON DUPLICATE KEY UPDATE latitude = NULL, longitude = NULL", id);
-                } else {
-                    DB.queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, latitude, longitude, latitude, longitude);
+                if (latitude != null && longitude != null) {
+                    nod.setLatitude(latitude);
+                    nod.setLongitude(longitude);
                 }
-                POOL.submit(new NodeThread(id));
             });
         }
     }
@@ -101,14 +100,27 @@ public class DataGen {
             int nodeId = Integer.parseInt(tr.child(1).child(0).text());
             boolean gateway = tr.child(3).child(1).attr("alt").equals("Ja");
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getDefault());
             String firstseen_html = tr.child(6).child(0).getElementsByTag("td").get(0).text();
             String lastseen_html = tr.child(6).child(0).getElementsByTag("td").get(1).text();
-            long firstseen = firstseen_html.isEmpty() ? -1 : sdf.parse(firstseen_html).getTime() / 1000 - 60 * 60;
-            long lastseen = lastseen_html.isEmpty() ? -1 : sdf.parse(lastseen_html).getTime() / 1000 - 60 * 60;
-            DB.queryUpdate("INSERT INTO nodes SET id = ?, firstseen = ?, lastseen = ?, gateway = ? ON DUPLICATE KEY UPDATE firstseen = ?, lastseen = ?, gateway = ?", nodeId, firstseen, lastseen, gateway, firstseen, lastseen, gateway);
+            long firstseen = firstseen_html.isEmpty() ? -1 : sdf.parse(firstseen_html).getTime();
+            long lastseen = lastseen_html.isEmpty() ? -1 : sdf.parse(lastseen_html).getTime();
+            Node node = getNode(nodeId);
+            node.setGateway(gateway);
+            node.setFirstseen(firstseen);
+            node.setLastseen(lastseen);
         } catch (ParseException ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, tr.child(1).child(0).text(), ex);
         }
+    }
+
+    public static Node getNode(int id) {
+        Node n = NODES.get(id);
+        if (n == null) {
+            n = new Node(id);
+            NODES.put(id, n);
+        }
+        return n;
     }
 
     public static MySQL getDB() {
@@ -148,28 +160,47 @@ public class DataGen {
                     + "	`email` TEXT NULL, "
                     + "	PRIMARY KEY (`id`) "
                     + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
-            DB.queryUpdate("CREATE TABLE IF NOT EXISTS `settings` ( "
-                    + "	`lastupdate` VARCHAR(20) NOT NULL, "
-                    + "	PRIMARY KEY (`lastupdate`) "
-                    + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
             DB.queryUpdate("TRUNCATE links");
             DataGen dataGen = new DataGen();
             try {
-                LOG.log(Level.INFO, "Getting register...");
-                dataGen.parseRegister();
                 LOG.log(Level.INFO, "Getting nodes...");
                 dataGen.getNodes();
+                LOG.log(Level.INFO, "Getting register...");
+                dataGen.parseRegister();
             } catch (IOException ex) {
                 Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
             }
+            NODES.values().forEach((n) -> POOL.submit(new NodeThread(n)));
             POOL.shutdown();
-            LOG.log(Level.INFO, "Wating threads for finish...");
+            LOG.log(Level.INFO, "Wating threads to finish...");
             try {
                 POOL.awaitTermination(3, TimeUnit.MINUTES);
             } catch (InterruptedException ex) {
                 Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
             }
+            LOG.log(Level.INFO, "Validate nodes...");
+            NODES.values().forEach((n) -> {
+                if (!n.isValid()) {
+                    ResultSet rs = DataGen.getDB().querySelect("SELECT * FROM nodes WHERE id = ?", n.getId());
+                    try {
+                        if (rs.first()) {
+                            n.parseData(rs);
+                        }
+                    } catch (SQLException | UnsupportedEncodingException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
             LOG.log(Level.INFO, "Generate JSON files...");
+            JsonFileGen jfg = new JsonFileGen(NODES.values());
+            try {
+                jfg.genNodes();
+                jfg.genGraph();
+            } catch (IOException ex) {
+                Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            LOG.log(Level.INFO, "Save to database...");
+            NODES.values().forEach((node) -> node.updateDatabase());
             LOG.log(Level.INFO, "Done!");
         }
     }
