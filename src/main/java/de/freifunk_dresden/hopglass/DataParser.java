@@ -77,8 +77,9 @@ public class DataParser {
     }
 
     public double getUptime() {
-        if (version < 10 && data.get("system").getAsJsonObject().get("uptime").getAsString().contains(":")) {
-            String[] uptime = data.get("system").getAsJsonObject().get("uptime").getAsString().split(" ");
+        String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
+        if (version < 10 && jsonUptime.contains(":")) {
+            String[] uptime = jsonUptime.split(" ");
             int days = Integer.parseInt(uptime[3]);
             double min;
             String minutes = uptime[5].replace(",", "");
@@ -99,7 +100,7 @@ public class DataParser {
             return min * 60 + days * 86400;
             //Ab v10
         } else {
-            return Double.parseDouble(data.get("system").getAsJsonObject().get("uptime").getAsString().split(" ")[0]);
+            return Double.parseDouble(jsonUptime.split(" ")[0]);
         }
     }
 

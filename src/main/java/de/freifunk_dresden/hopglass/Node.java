@@ -48,7 +48,7 @@ public class Node {
     private String firmwareVersion;
     private String firmwareBase;
     private String email;
-    private boolean online;
+    private boolean online = false;
     private double uptime;
     private double memoryUsage;
     private short clients;
@@ -162,7 +162,7 @@ public class Node {
     public void setLastseen(long lastseen) {
         this.lastseen = lastseen;
         //display only nodes lastseen within the last 30 days
-        displayed = lastseen > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30;
+        displayed = lastseen / 1000 > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30;
     }
 
     public void setFirstseen(long firstseen) {

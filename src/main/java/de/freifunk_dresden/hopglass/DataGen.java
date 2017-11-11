@@ -66,16 +66,10 @@ public class DataGen {
                 JsonObject n = node.getAsJsonObject();
                 Node nod = getNode(n.get("id").getAsInt());
                 JsonObject pos = n.get("position").getAsJsonObject();
-                Double latitude = null;
-                Double longitude = null;
                 try {
-                    latitude = pos.get("lat").getAsDouble();
-                    longitude = pos.get("long").getAsDouble();
+                    nod.setLatitude(pos.get("lat").getAsDouble());
+                    nod.setLongitude(pos.get("long").getAsDouble());
                 } catch (NumberFormatException ex) {
-                }
-                if (latitude != null && longitude != null) {
-                    nod.setLatitude(latitude);
-                    nod.setLongitude(longitude);
                 }
             });
         }
@@ -181,7 +175,7 @@ public class DataGen {
             LOG.log(Level.INFO, "Validate nodes...");
             NODES.values().forEach((n) -> {
                 if (!n.isValid()) {
-                    ResultSet rs = DataGen.getDB().querySelect("SELECT * FROM nodes WHERE id = ?", n.getId());
+                    ResultSet rs = DB.querySelect("SELECT * FROM nodes WHERE id = ?", n.getId());
                     try {
                         if (rs.first()) {
                             n.parseData(rs);
