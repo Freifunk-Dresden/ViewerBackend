@@ -35,6 +35,10 @@ public class DataParser {
         this.data = data;
         this.version = version;
     }
+    
+    public int getNodeId() {
+        return data.get("common").getAsJsonObject().get("node").getAsInt();
+    }
 
     public String getCommunity() {
         String com = data.get("common").getAsJsonObject().get("city").getAsString();
@@ -125,8 +129,7 @@ public class DataParser {
                 JsonObject l = link.getAsJsonObject();
                 String[] split = l.get("target").getAsString().split("\\.");
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
-                Link lnk = new Link(l.get("interface").getAsString(), DataGen.getNode(targetId));
-                linkmap.put(targetId, lnk);
+                linkmap.put(targetId, new Link(l.get("interface").getAsString(), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
             });
         }
         if (version == 10) {
@@ -143,8 +146,7 @@ public class DataParser {
             data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
                 int targetId = l.get("node").getAsInt();
-                Link lnk = new Link(l.get("interface").getAsString(), Integer.parseInt(l.get("tq").getAsString()), DataGen.getNode(targetId));
-                linkmap.put(targetId, lnk);
+                linkmap.put(targetId, new Link(l.get("interface").getAsString(), Integer.parseInt(l.get("tq").getAsString()), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
             });
         }
         return linkmap;

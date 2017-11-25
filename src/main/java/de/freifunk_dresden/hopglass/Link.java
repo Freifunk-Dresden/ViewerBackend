@@ -29,19 +29,22 @@ public class Link {
     private int targetTq = 0;
     private final String iface;
     private final Node target;
+    private final Node source;
 
-    public Link(String iface, Node target) {
+    public Link(String iface, Node target, Node source) {
         this.iface = iface;
         this.target = target;
+        this.source = source;
     }
 
-    public Link(String iface, int tq, Node target) {
+    public Link(String iface, int tq, Node target, Node source) {
         this.iface = iface;
         this.sourceTq = tq;
         this.target = target;
+        this.source = source;
     }
 
-    public double getSourceTq() {
+    public int getSourceTq() {
         return sourceTq;
     }
 
@@ -51,6 +54,10 @@ public class Link {
 
     public Node getTarget() {
         return target;
+    }
+
+    public Node getSource() {
+        return source;
     }
 
     public void setSourceTq(int tq) {

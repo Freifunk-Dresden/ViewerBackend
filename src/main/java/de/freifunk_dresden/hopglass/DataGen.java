@@ -36,6 +36,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
@@ -53,6 +54,7 @@ public class DataGen {
     private static final ExecutorService POOL = Executors.newFixedThreadPool(25);
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
     private static final LinkedHashMap<Integer, Node> NODES = new LinkedHashMap<>();
+    private static final HashMap<Integer, HashMap<Integer, Link>> LINKS = new HashMap<>();
     private static MySQL DB;
 
     private void getNodes() throws IOException {
@@ -121,6 +123,25 @@ public class DataGen {
         return DB;
     }
 
+    public static Link getLink(int node1, int node2) {
+        int min = Math.min(node1, node2);
+        int max = Math.max(node1, node2);
+        HashMap<Integer, Link> get = LINKS.get(min);
+        if (get == null) {
+            LINKS.put(min, new HashMap<>());
+        }
+        return LINKS.get(min).get(max);
+    }
+
+    public static void addLink(Link l) {
+        int min = Math.min(l.getSource().getId(), l.getTarget().getId());
+        int max = Math.max(l.getSource().getId(), l.getTarget().getId());
+        if (LINKS.get(min) == null) {
+            LINKS.put(min, new HashMap<>());
+        }
+        LINKS.get(min).put(max, l);
+    }
+
     public static void main(String[] args) {
         LOG.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
@@ -173,30 +194,53 @@ public class DataGen {
                 Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
             }
             LOG.log(Level.INFO, "Validate nodes...");
-            NODES.values().forEach((n) -> {
-                if (!n.isValid()) {
-                    ResultSet rs = DB.querySelect("SELECT * FROM nodes WHERE id = ?", n.getId());
-                    try {
-                        if (rs.first()) {
-                            n.parseData(rs);
-                        }
-                    } catch (SQLException | UnsupportedEncodingException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
+            validateNodes();
+            LOG.log(Level.INFO, "Collect Links");
+            collectLinks();
             LOG.log(Level.INFO, "Generate JSON files...");
-            JsonFileGen jfg = new JsonFileGen(NODES.values());
-            try {
-                jfg.genNodes();
-                jfg.genGraph();
-                jfg.genMeshViewer();
-            } catch (IOException ex) {
-                Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            genJson();
             LOG.log(Level.INFO, "Save to database...");
             NODES.values().forEach((node) -> node.updateDatabase());
             LOG.log(Level.INFO, "Done!");
+        }
+    }
+
+    public static void collectLinks() {
+        NODES.values().forEach((node) -> {
+            node.getLinks().forEach((link) -> {
+                Link lnk = getLink(link.getSource().getId(), link.getTarget().getId());
+                if (lnk == null) {
+                    addLink(lnk);
+                } else {
+                    lnk.setTargetTq(link.getSourceTq());
+                }
+            });
+        });
+    }
+
+    public static void validateNodes() {
+        NODES.values().forEach((n) -> {
+            if (!n.isValid()) {
+                ResultSet rs = DB.querySelect("SELECT * FROM nodes WHERE id = ?", n.getId());
+                try {
+                    if (rs.first()) {
+                        n.parseData(rs);
+                    }
+                } catch (SQLException | UnsupportedEncodingException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+    }
+
+    public static void genJson() {
+        JsonFileGen jfg = new JsonFileGen(NODES.values(), LINKS.values());
+        try {
+            jfg.genNodes();
+            jfg.genGraph();
+            jfg.genMeshViewer();
+        } catch (IOException ex) {
+            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

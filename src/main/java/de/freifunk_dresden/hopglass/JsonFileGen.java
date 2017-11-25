@@ -31,28 +31,69 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.TimeZone;
+import java.util.*;
 
 public class JsonFileGen {
 
-    private final Collection<Node> nodes;
     private final Gson gson;
+    private final JsonArray hopGlassNodes = new JsonArray();
+    private final JsonArray graphNodes = new JsonArray();
+    private final JsonArray graphLinks = new JsonArray();
+    private final JsonArray meshViewerNodes = new JsonArray();
+    private final JsonArray meshViewerLinks = new JsonArray();
+    private final HashMap<Integer, Integer> nodeIds = new HashMap<>();
 
-    public JsonFileGen(Collection<Node> nodes) {
-        this.nodes = nodes;
+    public JsonFileGen(Collection<Node> nodes, Collection<HashMap<Integer, Link>> links) {
         this.gson = new GsonBuilder().create();
+        int i = 0;
+        Iterator<Node> iterator = nodes.stream().filter((node) -> node.isDisplayed() && node.isValid()).iterator();
+        for (Iterator<Node> it = iterator; it.hasNext();) {
+            Node node = it.next();
+            hopGlassNodes.add(node.getJsonObject());
+            meshViewerNodes.add(node.getMeshViewerObj());
+            JsonObject jsonNode = new JsonObject();
+            jsonNode.addProperty("node_id", String.valueOf(node.getId()));
+            jsonNode.addProperty("id", String.valueOf(node.getId()));
+            jsonNode.addProperty("seq", i);
+            graphNodes.add(jsonNode);
+            nodeIds.put(node.getId(), i);
+            i++;
+        }
+        links.forEach((map) -> {
+            map.values().forEach((link) -> {
+                JsonObject jsonLink = new JsonObject();
+                jsonLink.addProperty("source", link.getSource().getId());
+                jsonLink.addProperty("target", link.getTarget().getId());
+                jsonLink.addProperty("source_tq", (double) link.getSourceTq() / 100d);
+                jsonLink.addProperty("target_tq", (double) link.getTargetTq() / 100d);
+                jsonLink.addProperty("type", link.getType());
+                meshViewerLinks.add(jsonLink);
+                try {
+                    Integer source = nodeIds.get(link.getSource().getId());
+                    Integer target = nodeIds.get(link.getTarget().getId());
+                    jsonLink = new JsonObject();
+                    jsonLink.addProperty("source", source);
+                    jsonLink.addProperty("target", target);
+                    jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100d / (double) link.getSourceTq()));
+                    jsonLink.addProperty("type", link.getType());
+                    graphLinks.add(jsonLink);
+                    jsonLink = new JsonObject();
+                    jsonLink.addProperty("source", target);
+                    jsonLink.addProperty("target", source);
+                    jsonLink.addProperty("tq", link.getTargetTq() < 1 ? 100000 : Math.round(100d / (double) link.getTargetTq()));
+                    jsonLink.addProperty("type", link.getType());
+                    graphLinks.add(jsonLink);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                }
+            });
+        });
     }
 
     public void genNodes() throws IOException {
-        JsonArray jsonNodes = new JsonArray();
-        nodes.stream().filter((node) -> node.isDisplayed() && node.isValid()).forEach((node) -> jsonNodes.add(node.getJsonObject()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         JsonObject jsonObject = new JsonObject();
-        jsonObject.add("nodes", jsonNodes);
+        jsonObject.add("nodes", hopGlassNodes);
         jsonObject.addProperty("timestamp", sdf.format(new Date()));
         jsonObject.addProperty("version", 2);
         File file = new File("nodes.json");
@@ -61,46 +102,16 @@ public class JsonFileGen {
             writer.flush();
         }
     }
-    
+
     public void genGraph() throws IOException {
-        JsonArray jsonNodes = new JsonArray();
-        int i = 0;
-        HashMap<Integer,Integer> nodeIds = new HashMap<>();
-        for (Node node : nodes) {
-            if (node.isDisplayed()) {
-                JsonObject jsonNode = new JsonObject();
-                jsonNode.addProperty("node_id", String.valueOf(node.getId()));
-                jsonNode.addProperty("id", String.valueOf(node.getId()));
-                jsonNode.addProperty("seq", i);
-                jsonNodes.add(jsonNode);
-                nodeIds.put(node.getId(), i);
-                i++;
-            }
-        }
-        JsonArray jsonLinks = new JsonArray();
-        nodes.stream().filter((node) -> node.isDisplayed()).forEach((node) -> {
-            node.getLinks().stream().filter((link) -> link.getType() != null && link.getTarget() != null && link.getTarget().isDisplayed()).forEach((link) -> {
-                try {
-                    Integer source = nodeIds.get(node.getId());
-                    Integer target = nodeIds.get(link.getTarget().getId());
-                    JsonObject jsonLink = new JsonObject();
-                    jsonLink.addProperty("source", source);
-                    jsonLink.addProperty("target", target);
-                    jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100d / link.getSourceTq()));
-                    jsonLink.addProperty("type", link.getType());
-                    jsonLinks.add(jsonLink);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                }
-            });
-        });
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("version", 1);
         JsonObject batadv = new JsonObject();
         batadv.addProperty("multigraph", false);
         batadv.addProperty("directed", true);
         batadv.add("graph", new JsonArray());
-        batadv.add("nodes", jsonNodes);
-        batadv.add("links", jsonLinks);
+        batadv.add("nodes", graphNodes);
+        batadv.add("links", graphLinks);
         jsonObject.add("batadv", batadv);
         File file = new File("graph.json");
         try (FileWriter writer = new FileWriter(file)) {
@@ -108,30 +119,13 @@ public class JsonFileGen {
             writer.flush();
         }
     }
-    
+
     public void genMeshViewer() throws IOException {
-        JsonArray jsonNodes = new JsonArray();
-        nodes.stream().filter((node) -> node.isDisplayed() && node.isValid()).forEach((node) -> jsonNodes.add(node.getMeshViewerObj()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("timestamp", sdf.format(new Date()));
-        jsonObject.add("nodes", jsonNodes);
-        
-        JsonArray jsonLinks = new JsonArray();
-        nodes.stream().filter((node) -> node.isDisplayed()).forEach((node) -> {
-            node.getLinks().stream().filter((link) -> link.getType() != null && link.getTarget() != null && link.getTarget().isDisplayed() && !link.getType().equals("tunnel")).forEach((link) -> {
-                try {
-                    JsonObject jsonLink = new JsonObject();
-                    jsonLink.addProperty("source", node.getId());
-                    jsonLink.addProperty("target", link.getTarget().getId());
-                    jsonLink.addProperty("source_tq", link.getSourceTq() / 100d);
-                    jsonLink.addProperty("type", link.getType());
-                    jsonLinks.add(jsonLink);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                }
-            });
-        });
-        jsonObject.add("links", jsonLinks);
+        jsonObject.add("nodes", meshViewerNodes);
+        jsonObject.add("links", meshViewerLinks);
         File file = new File("meshviewer.json");
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(gson.toJson(jsonObject));
