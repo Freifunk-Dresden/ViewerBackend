@@ -86,7 +86,7 @@ public class JsonFileGen {
                     JsonObject jsonLink = new JsonObject();
                     jsonLink.addProperty("source", source);
                     jsonLink.addProperty("target", target);
-                    jsonLink.addProperty("tq", link.getTq() < 1 ? 100000 : Math.round(100d / link.getTq()));
+                    jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100d / link.getSourceTq()));
                     jsonLink.addProperty("type", link.getType());
                     jsonLinks.add(jsonLink);
                 } catch (ArrayIndexOutOfBoundsException e) {
@@ -103,6 +103,36 @@ public class JsonFileGen {
         batadv.add("links", jsonLinks);
         jsonObject.add("batadv", batadv);
         File file = new File("graph.json");
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(gson.toJson(jsonObject));
+            writer.flush();
+        }
+    }
+    
+    public void genMeshViewer() throws IOException {
+        JsonArray jsonNodes = new JsonArray();
+        nodes.stream().filter((node) -> node.isDisplayed() && node.isValid()).forEach((node) -> jsonNodes.add(node.getMeshViewerObj()));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("timestamp", sdf.format(new Date()));
+        jsonObject.add("nodes", jsonNodes);
+        
+        JsonArray jsonLinks = new JsonArray();
+        nodes.stream().filter((node) -> node.isDisplayed()).forEach((node) -> {
+            node.getLinks().stream().filter((link) -> link.getType() != null && link.getTarget() != null && link.getTarget().isDisplayed() && !link.getType().equals("tunnel")).forEach((link) -> {
+                try {
+                    JsonObject jsonLink = new JsonObject();
+                    jsonLink.addProperty("source", node.getId());
+                    jsonLink.addProperty("target", link.getTarget().getId());
+                    jsonLink.addProperty("source_tq", link.getSourceTq() / 100d);
+                    jsonLink.addProperty("type", link.getType());
+                    jsonLinks.add(jsonLink);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                }
+            });
+        });
+        jsonObject.add("links", jsonLinks);
+        File file = new File("meshviewer.json");
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(gson.toJson(jsonObject));
             writer.flush();

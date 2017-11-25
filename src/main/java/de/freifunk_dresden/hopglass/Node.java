@@ -252,6 +252,58 @@ public class Node {
         }
         return null;
     }
+    
+    public JsonObject getMeshViewerObj() {
+        if (!isValid()) {
+            return null;
+        }
+        try {
+            JsonObject node = new JsonObject();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            node.addProperty("firstseen", sdf.format(new Date(firstseen)));
+            node.addProperty("lastseen", sdf.format(new Date(lastseen)));
+            node.addProperty("is_gateway", gateway);
+            node.addProperty("is_online", online);
+            node.addProperty("clients", clients);
+            node.addProperty("clients_wifi24", clients);
+            node.addProperty("clients_wifi5", 0);
+            node.addProperty("clients_other", 0);
+            node.addProperty("loadavg", loadAvg);
+            node.addProperty("memory_usage", memoryUsage);
+            Date date = new Date();
+            date.setTime(System.currentTimeMillis() - (long) (uptime * 1000));
+            node.addProperty("uptime", sdf.format(date));
+            if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
+                node.addProperty("gateway", gatewayIp);
+            }
+            node.addProperty("node_id", String.valueOf(id));
+            JsonArray addresses = new JsonArray();
+            addresses.add(getIpAdress());
+            node.add("addresses", addresses);
+            node.addProperty("site_code", community);
+            node.addProperty("hostname", hostname);
+            if (id > 1000 && !Double.isNaN(latitude) && !Double.isNaN(longitude)) {
+                JsonObject location = new JsonObject();
+                location.addProperty("latitude", latitude);
+                location.addProperty("longitude", longitude);
+                node.add("location", location);
+            }
+            if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
+                JsonObject firmware = new JsonObject();
+                firmware.addProperty("release", firmwareVersion);
+                firmware.addProperty("base", firmwareBase);
+                node.add("firmware", firmware);
+            }
+            if (model != null && !model.isEmpty()) {
+                node.addProperty("model", model);
+            }
+            node.addProperty("contact", email);
+            return node;
+        } catch (Exception e) {
+            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, "Fehler bei Node " + id, e);
+        }
+        return null;
+    }
 
     public void updateDatabase() {
         if (Double.isNaN(latitude) || Double.isNaN(longitude)) {
@@ -264,7 +316,7 @@ public class Node {
         if (!linkmap.isEmpty()) {
             MySQL.PreparedUpdate prep = DataGen.getDB().queryPrepUpdate("INSERT INTO links SET `from` = ?, `to` = ?, `interface` = ?, `tq` = ?");
             linkmap.entrySet().stream().forEach((e) -> {
-                prep.add(id, e.getKey(), e.getValue().getIface(), e.getValue().getTq());
+                prep.add(id, e.getKey(), e.getValue().getIface(), e.getValue().getSourceTq());
             });
             prep.done();
         }

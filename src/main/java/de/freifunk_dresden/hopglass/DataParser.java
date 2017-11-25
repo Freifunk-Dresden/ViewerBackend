@@ -135,7 +135,7 @@ public class DataParser {
                     JsonObject l = link.getAsJsonObject();
                     Link lnk = linkmap.get(Integer.parseInt(l.get("node").getAsString()));
                     if (lnk != null) {
-                        lnk.setTq(Integer.parseInt(l.get("tq").getAsString()));
+                        lnk.setSourceTq(Integer.parseInt(l.get("tq").getAsString()));
                     }
                 });
             }

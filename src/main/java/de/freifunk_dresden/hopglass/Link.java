@@ -25,7 +25,8 @@ package de.freifunk_dresden.hopglass;
 
 public class Link {
 
-    private int tq = -1;
+    private int sourceTq = -1;
+    private int targetTq = 0;
     private final String iface;
     private final Node target;
 
@@ -36,12 +37,12 @@ public class Link {
 
     public Link(String iface, int tq, Node target) {
         this.iface = iface;
-        this.tq = tq;
+        this.sourceTq = tq;
         this.target = target;
     }
 
-    public double getTq() {
-        return tq;
+    public double getSourceTq() {
+        return sourceTq;
     }
 
     public String getIface() {
@@ -52,10 +53,16 @@ public class Link {
         return target;
     }
 
-    public void setTq(int quality) {
-        if (quality != -1 && quality > this.tq) {
-            this.tq = quality;
-        }
+    public void setSourceTq(int tq) {
+        this.sourceTq = tq;
+    }
+
+    public int getTargetTq() {
+        return targetTq;
+    }
+
+    public void setTargetTq(int tq) {
+        this.targetTq = tq;
     }
 
     public String getType() {

@@ -190,6 +190,7 @@ public class DataGen {
             try {
                 jfg.genNodes();
                 jfg.genGraph();
+                jfg.genMeshViewer();
             } catch (IOException ex) {
                 Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
             }
