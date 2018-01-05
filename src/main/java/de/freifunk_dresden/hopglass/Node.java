@@ -49,10 +49,10 @@ public class Node {
     private String firmwareBase;
     private String email;
     private boolean online = false;
-    private double uptime;
+    private float uptime;
     private double memoryUsage;
     private short clients;
-    private double loadAvg;
+    private float loadAvg;
     private boolean gateway;
     private long lastseen;
     private long firstseen;
@@ -112,9 +112,9 @@ public class Node {
         if (rs.wasNull()) {
             longitude = Double.NaN;
         }
-        uptime = rs.getDouble("uptime");
+        uptime = rs.getFloat("uptime");
         memoryUsage = rs.getDouble("memory_usage");
-        loadAvg = rs.getDouble("loadavg");
+        loadAvg = rs.getFloat("loadavg");
         clients = rs.getShort("clients");
         gateway = rs.getBoolean("gateway");
         setName(rs.getString("name"));
@@ -174,7 +174,7 @@ public class Node {
     }
 
     public boolean isDisplayed() {
-        return displayed;
+        return displayed && isValid();
     }
 
     public Collection<Link> getLinks() {

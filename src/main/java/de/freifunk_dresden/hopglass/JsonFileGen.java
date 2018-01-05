@@ -46,7 +46,7 @@ public class JsonFileGen {
     public JsonFileGen(Collection<Node> nodes, Collection<HashMap<Integer, Link>> links) {
         this.gson = new GsonBuilder().create();
         int i = 0;
-        Iterator<Node> iterator = nodes.stream().filter((node) -> node.isDisplayed() && node.isValid()).iterator();
+        Iterator<Node> iterator = nodes.stream().filter((node) -> node.isDisplayed()).iterator();
         for (Iterator<Node> it = iterator; it.hasNext();) {
             Node node = it.next();
             hopGlassNodes.add(node.getJsonObject());
@@ -60,32 +60,36 @@ public class JsonFileGen {
             i++;
         }
         links.forEach((map) -> {
-            map.values().forEach((link) -> {
-                JsonObject jsonLink = new JsonObject();
-                jsonLink.addProperty("source", link.getSource().getId());
-                jsonLink.addProperty("target", link.getTarget().getId());
-                jsonLink.addProperty("source_tq", (double) link.getSourceTq() / 100d);
-                jsonLink.addProperty("target_tq", (double) link.getTargetTq() / 100d);
-                jsonLink.addProperty("type", link.getType());
-                meshViewerLinks.add(jsonLink);
-                try {
-                    Integer source = nodeIds.get(link.getSource().getId());
-                    Integer target = nodeIds.get(link.getTarget().getId());
-                    jsonLink = new JsonObject();
-                    jsonLink.addProperty("source", source);
-                    jsonLink.addProperty("target", target);
-                    jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100d / (double) link.getSourceTq()));
-                    jsonLink.addProperty("type", link.getType());
-                    graphLinks.add(jsonLink);
-                    jsonLink = new JsonObject();
-                    jsonLink.addProperty("source", target);
-                    jsonLink.addProperty("target", source);
-                    jsonLink.addProperty("tq", link.getTargetTq() < 1 ? 100000 : Math.round(100d / (double) link.getTargetTq()));
-                    jsonLink.addProperty("type", link.getType());
-                    graphLinks.add(jsonLink);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                }
-            });
+            map.values().stream()
+                    .filter((link) -> link.getSource().isDisplayed() && link.getTarget().isDisplayed())
+                    .forEach((link) -> {
+                        JsonObject jsonLink;
+                        //Meshviewer
+                        if (!link.getType().equals("tunnel")) {
+                            jsonLink = new JsonObject();
+                            jsonLink.addProperty("source", link.getSource().getId());
+                            jsonLink.addProperty("target", link.getTarget().getId());
+                            jsonLink.addProperty("source_tq", (float) link.getSourceTq() / 100f);
+                            jsonLink.addProperty("target_tq", (float) link.getTargetTq() / 100f);
+                            jsonLink.addProperty("type", link.getType());
+                            meshViewerLinks.add(jsonLink);
+                        }
+                        //Hopglass
+                        Integer source = nodeIds.get(link.getSource().getId());
+                        Integer target = nodeIds.get(link.getTarget().getId());
+                        jsonLink = new JsonObject();
+                        jsonLink.addProperty("source", source);
+                        jsonLink.addProperty("target", target);
+                        jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100d / (double) link.getSourceTq()));
+                        jsonLink.addProperty("type", link.getType());
+                        graphLinks.add(jsonLink);
+                        jsonLink = new JsonObject();
+                        jsonLink.addProperty("source", target);
+                        jsonLink.addProperty("target", source);
+                        jsonLink.addProperty("tq", link.getTargetTq() < 1 ? 100000 : Math.round(100d / (double) link.getTargetTq()));
+                        jsonLink.addProperty("type", link.getType());
+                        graphLinks.add(jsonLink);
+                    });
         });
     }
 

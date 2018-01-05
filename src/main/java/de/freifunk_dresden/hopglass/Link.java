@@ -25,8 +25,8 @@ package de.freifunk_dresden.hopglass;
 
 public class Link {
 
-    private int sourceTq = -1;
-    private int targetTq = 0;
+    private byte sourceTq = -1;
+    private byte targetTq = 0;
     private final String iface;
     private final Node target;
     private final Node source;
@@ -37,14 +37,14 @@ public class Link {
         this.source = source;
     }
 
-    public Link(String iface, int tq, Node target, Node source) {
+    public Link(String iface, byte tq, Node target, Node source) {
         this.iface = iface;
         this.sourceTq = tq;
         this.target = target;
         this.source = source;
     }
 
-    public int getSourceTq() {
+    public byte getSourceTq() {
         return sourceTq;
     }
 
@@ -60,15 +60,15 @@ public class Link {
         return source;
     }
 
-    public void setSourceTq(int tq) {
+    public void setSourceTq(byte tq) {
         this.sourceTq = tq;
     }
 
-    public int getTargetTq() {
+    public byte getTargetTq() {
         return targetTq;
     }
 
-    public void setTargetTq(int tq) {
+    public void setTargetTq(byte tq) {
         this.targetTq = tq;
     }
 
@@ -82,9 +82,8 @@ public class Link {
             case "tbb-fastd":
             case "tbb_fastd":
             case "tbb_fastd2":
-                return "tunnel";
             default:
-                return null;
+                return "tunnel";
         }
     }
 }

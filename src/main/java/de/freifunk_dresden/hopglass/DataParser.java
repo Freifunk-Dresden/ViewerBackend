@@ -80,12 +80,12 @@ public class DataParser {
         return data.get("bmxd").getAsJsonObject().get("gateways").getAsJsonObject().get("selected").getAsString();
     }
 
-    public double getUptime() {
+    public float getUptime() {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
         if (version < 10 && jsonUptime.contains(":")) {
             String[] uptime = jsonUptime.split(" ");
-            int days = Integer.parseInt(uptime[3]);
-            double min;
+            short days = Short.parseShort(uptime[3]);
+            int min;
             String minutes = uptime[5].replace(",", "");
             String time = uptime[6].replace(",", "");
             if (minutes.isEmpty()) {
@@ -104,18 +104,18 @@ public class DataParser {
             return min * 60 + days * 86400;
             //Ab v10
         } else {
-            return Double.parseDouble(jsonUptime.split(" ")[0]);
+            return Float.parseFloat(jsonUptime.split(" ")[0]);
         }
     }
 
     public double getMemoryUsage() {
-        double memTotal = Double.parseDouble(data.get("statistic").getAsJsonObject().get("meminfo_MemTotal").getAsString().split(" ")[0]);
-        double memFree = Double.parseDouble(data.get("statistic").getAsJsonObject().get("meminfo_MemFree").getAsString().split(" ")[0]);
+        double memTotal = Integer.parseInt(data.get("statistic").getAsJsonObject().get("meminfo_MemTotal").getAsString().split(" ")[0]);
+        double memFree = Integer.parseInt(data.get("statistic").getAsJsonObject().get("meminfo_MemFree").getAsString().split(" ")[0]);
         return (memTotal - memFree) / memTotal;
     }
 
-    public double getLoadAvg() {
-        return Double.parseDouble(data.get("statistic").getAsJsonObject().get("cpu_load").getAsString().split(" ")[0]);
+    public float getLoadAvg() {
+        return Float.parseFloat(data.get("statistic").getAsJsonObject().get("cpu_load").getAsString().split(" ")[0]);
     }
 
     public short getClients() {
@@ -138,7 +138,7 @@ public class DataParser {
                     JsonObject l = link.getAsJsonObject();
                     Link lnk = linkmap.get(Integer.parseInt(l.get("node").getAsString()));
                     if (lnk != null) {
-                        lnk.setSourceTq(Integer.parseInt(l.get("tq").getAsString()));
+                        lnk.setSourceTq(Byte.parseByte(l.get("tq").getAsString()));
                     }
                 });
             }
@@ -146,7 +146,7 @@ public class DataParser {
             data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
                 int targetId = l.get("node").getAsInt();
-                linkmap.put(targetId, new Link(l.get("interface").getAsString(), Integer.parseInt(l.get("tq").getAsString()), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
+                linkmap.put(targetId, new Link(l.get("interface").getAsString(), Byte.parseByte(l.get("tq").getAsString()), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
             });
         }
         return linkmap;

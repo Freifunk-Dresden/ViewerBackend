@@ -93,18 +93,14 @@ public class DataGen {
 
     private void parseRegister(Element tr) {
         try {
-            int nodeId = Integer.parseInt(tr.child(1).child(0).text());
-            boolean gateway = tr.child(3).child(1).attr("alt").equals("Ja");
+            Node node = getNode(Integer.parseInt(tr.child(1).child(0).text()));
+            node.setGateway(tr.child(3).child(1).attr("alt").equals("Ja"));
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             sdf.setTimeZone(TimeZone.getDefault());
-            String firstseen_html = tr.child(6).child(0).getElementsByTag("td").get(0).text();
-            String lastseen_html = tr.child(6).child(0).getElementsByTag("td").get(1).text();
-            long firstseen = firstseen_html.isEmpty() ? -1 : sdf.parse(firstseen_html).getTime();
-            long lastseen = lastseen_html.isEmpty() ? -1 : sdf.parse(lastseen_html).getTime();
-            Node node = getNode(nodeId);
-            node.setGateway(gateway);
-            node.setFirstseen(firstseen);
-            node.setLastseen(lastseen);
+            String firstseen = tr.child(6).child(0).getElementsByTag("td").get(0).text();
+            String lastseen = tr.child(6).child(0).getElementsByTag("td").get(1).text();
+            node.setFirstseen(firstseen.isEmpty() ? -1 : sdf.parse(firstseen).getTime());
+            node.setLastseen(lastseen.isEmpty() ? -1 : sdf.parse(lastseen).getTime());
         } catch (ParseException ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, tr.child(1).child(0).text(), ex);
         }
@@ -195,7 +191,7 @@ public class DataGen {
             }
             LOG.log(Level.INFO, "Validate nodes...");
             validateNodes();
-            LOG.log(Level.INFO, "Collect Links");
+            LOG.log(Level.INFO, "Collect links...");
             collectLinks();
             LOG.log(Level.INFO, "Generate JSON files...");
             genJson();
@@ -210,7 +206,7 @@ public class DataGen {
             node.getLinks().forEach((link) -> {
                 Link lnk = getLink(link.getSource().getId(), link.getTarget().getId());
                 if (lnk == null) {
-                    addLink(lnk);
+                    addLink(link);
                 } else {
                     lnk.setTargetTq(link.getSourceTq());
                 }

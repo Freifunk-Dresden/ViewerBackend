@@ -41,7 +41,7 @@ public class MySQL {
     private Connection conn;
     private static final Logger LOG = Logger.getLogger(MySQL.class.getName());
     private String host;
-    private int port;
+    private short port;
     private String username;
     private String password;
     private String database;
@@ -69,7 +69,7 @@ public class MySQL {
                 if (line.startsWith("host=")) {
                     host = line.replace("host=", "");
                 } else if (line.startsWith("port=")) {
-                    port = Integer.parseInt(line.replace("port=", ""));
+                    port = Short.parseShort(line.replace("port=", ""));
                 } else if (line.startsWith("username=")) {
                     username = line.replace("username=", "");
                 } else if (line.startsWith("password=")) {
