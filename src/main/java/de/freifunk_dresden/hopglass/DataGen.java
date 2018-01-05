@@ -25,6 +25,7 @@ package de.freifunk_dresden.hopglass;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import de.freifunk_dresden.hopglass.logging.FancyConsoleHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +43,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -139,6 +141,7 @@ public class DataGen {
     }
 
     public static void main(String[] args) {
+        setupLogging();
         LOG.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
         if (DB.hasConnection()) {
@@ -238,5 +241,13 @@ public class DataGen {
         } catch (IOException ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private static void setupLogging() {
+        for (Handler h : LOG.getHandlers()) {
+            LOG.removeHandler(h);
+        }
+        
+        LOG.addHandler(new FancyConsoleHandler());
     }
 }
