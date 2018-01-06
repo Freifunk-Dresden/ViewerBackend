@@ -112,10 +112,7 @@ public class Node {
         if (rs.wasNull()) {
             longitude = Double.NaN;
         }
-        uptime = rs.getFloat("uptime");
-        memoryUsage = rs.getDouble("memory_usage");
-        loadAvg = rs.getFloat("loadavg");
-        clients = rs.getShort("clients");
+        clients = 0;
         gateway = rs.getBoolean("gateway");
         setName(rs.getString("name"));
         setEmail(rs.getString("email"));
@@ -142,7 +139,7 @@ public class Node {
             this.email = URLDecoder.decode(email, "UTF-8");
         }
     }
-    
+
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
@@ -225,13 +222,11 @@ public class Node {
             }
             node.add("nodeinfo", nodeinfo);
             JsonObject statistics = new JsonObject();
+            statistics.addProperty("clients", clients);
             if (online) {
                 statistics.addProperty("uptime", uptime);
                 statistics.addProperty("memory_usage", memoryUsage);
-                statistics.addProperty("clients", clients);
                 statistics.addProperty("loadavg", loadAvg);
-            } else {
-                statistics.addProperty("clients", 0);
             }
             if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
                 statistics.addProperty("gateway", gatewayIp);
@@ -252,7 +247,7 @@ public class Node {
         }
         return null;
     }
-    
+
     public JsonObject getMeshViewerObj() {
         if (!isValid()) {
             return null;
@@ -268,11 +263,12 @@ public class Node {
             node.addProperty("clients_wifi24", clients);
             node.addProperty("clients_wifi5", 0);
             node.addProperty("clients_other", 0);
-            node.addProperty("loadavg", loadAvg);
-            node.addProperty("memory_usage", memoryUsage);
-            Date date = new Date();
-            date.setTime(System.currentTimeMillis() - (long) (uptime * 1000));
-            node.addProperty("uptime", sdf.format(date));
+            if (online) {
+                node.addProperty("loadavg", loadAvg);
+                node.addProperty("memory_usage", memoryUsage);
+                Date date = new Date(System.currentTimeMillis() - (long) (uptime * 1000));
+                node.addProperty("uptime", sdf.format(date));
+            }
             if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
                 node.addProperty("gateway", gatewayIp);
             }
