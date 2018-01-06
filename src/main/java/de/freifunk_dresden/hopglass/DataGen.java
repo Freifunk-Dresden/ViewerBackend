@@ -88,8 +88,8 @@ public class DataGen {
             reader.close();
             Document doc = Jsoup.parse(html);
             Element tbody = doc.select("tbody").first();
-            tbody.children().select(".node_db_color0").forEach((tr) -> parseRegister(tr));
-            tbody.children().select(".node_db_color2").forEach((tr) -> parseRegister(tr));
+            tbody.children().select(".node_db_color0").forEach(this::parseRegister);
+            tbody.children().select(".node_db_color2").forEach(this::parseRegister);
         }
     }
 
