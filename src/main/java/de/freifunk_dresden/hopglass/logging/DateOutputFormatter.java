@@ -20,7 +20,7 @@ public class DateOutputFormatter extends Formatter {
 
         builder.append(date.format(record.getMillis()));
         builder.append(" [");
-        builder.append(record.getLevel().getLocalizedName().toUpperCase());
+        builder.append(record.getLevel().getName().toUpperCase());
         builder.append("] ");
         builder.append(formatMessage(record));
         builder.append('\n');
