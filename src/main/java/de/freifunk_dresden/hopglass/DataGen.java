@@ -53,6 +53,8 @@ import org.jsoup.nodes.Element;
 
 public class DataGen {
 
+    public static SimpleDateFormat DATE_MESH = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    public static SimpleDateFormat DATE_HOP = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final ExecutorService POOL = Executors.newFixedThreadPool(25);
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
     private static final LinkedHashMap<Integer, Node> NODES = new LinkedHashMap<>();
@@ -141,6 +143,7 @@ public class DataGen {
     }
 
     public static void main(String[] args) {
+        DATE_HOP.setTimeZone(TimeZone.getTimeZone("UTC"));
         setupLogging();
         LOG.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();

@@ -30,7 +30,6 @@ import com.google.gson.JsonObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class JsonFileGen {
@@ -94,11 +93,9 @@ public class JsonFileGen {
     }
 
     public void genNodes() throws IOException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("nodes", hopGlassNodes);
-        jsonObject.addProperty("timestamp", sdf.format(new Date()));
+        jsonObject.addProperty("timestamp", DataGen.DATE_HOP.format(new Date()));
         jsonObject.addProperty("version", 2);
         File file = new File("nodes.json");
         try (FileWriter writer = new FileWriter(file)) {
@@ -125,9 +122,8 @@ public class JsonFileGen {
     }
 
     public void genMeshViewer() throws IOException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("timestamp", sdf.format(new Date()));
+        jsonObject.addProperty("timestamp", DataGen.DATE_MESH.format(new Date()));
         jsonObject.add("nodes", meshViewerNodes);
         jsonObject.add("links", meshViewerLinks);
         File file = new File("meshviewer.json");

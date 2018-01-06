@@ -29,11 +29,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -237,10 +235,8 @@ public class Node {
             flags.addProperty("uplink", gateway); //@TODO:correct with direct connection to internet
             flags.addProperty("online", online);
             node.add("flags", flags);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-            node.addProperty("firstseen", sdf.format(new Date(firstseen)));
-            node.addProperty("lastseen", sdf.format(new Date(lastseen)));
+            node.addProperty("firstseen", DataGen.DATE_HOP.format(new Date(firstseen)));
+            node.addProperty("lastseen", DataGen.DATE_HOP.format(new Date(lastseen)));
             return node;
         } catch (Exception e) {
             Logger.getLogger(Node.class.getName()).log(Level.SEVERE, "Fehler bei Node " + id, e);
@@ -254,9 +250,8 @@ public class Node {
         }
         try {
             JsonObject node = new JsonObject();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-            node.addProperty("firstseen", sdf.format(new Date(firstseen)));
-            node.addProperty("lastseen", sdf.format(new Date(lastseen)));
+            node.addProperty("firstseen", DataGen.DATE_MESH.format(new Date(firstseen)));
+            node.addProperty("lastseen", DataGen.DATE_MESH.format(new Date(lastseen)));
             node.addProperty("is_gateway", gateway);
             node.addProperty("is_online", online);
             node.addProperty("clients", clients);
@@ -267,7 +262,7 @@ public class Node {
                 node.addProperty("loadavg", loadAvg);
                 node.addProperty("memory_usage", memoryUsage);
                 Date date = new Date(System.currentTimeMillis() - (long) (uptime * 1000));
-                node.addProperty("uptime", sdf.format(date));
+                node.addProperty("uptime", DataGen.DATE_MESH.format(date));
             }
             if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
                 node.addProperty("gateway", gatewayIp);
