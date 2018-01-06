@@ -27,18 +27,18 @@ public class Link {
 
     private byte sourceTq = -1;
     private byte targetTq = 0;
-    private final String iface;
+    private final LinkType type;
     private final Node target;
     private final Node source;
 
-    public Link(String iface, Node target, Node source) {
-        this.iface = iface;
+    public Link(LinkType type, Node target, Node source) {
+        this.type = type;
         this.target = target;
         this.source = source;
     }
 
-    public Link(String iface, byte tq, Node target, Node source) {
-        this.iface = iface;
+    public Link(LinkType type, byte tq, Node target, Node source) {
+        this.type = type;
         this.sourceTq = tq;
         this.target = target;
         this.source = source;
@@ -46,10 +46,6 @@ public class Link {
 
     public byte getSourceTq() {
         return sourceTq;
-    }
-
-    public String getIface() {
-        return iface;
     }
 
     public Node getTarget() {
@@ -72,18 +68,28 @@ public class Link {
         this.targetTq = tq;
     }
 
-    public String getType() {
+    public LinkType getType() {
+        return type;
+    }
+
+    public enum LinkType {
+        WIRELESS,
+        TUNNEL,
+        OTHER
+    }
+
+    public static LinkType getLinkType(String iface) {
         switch (iface) {
             case "wlan0":
-                return "wireless";
+                return LinkType.WIRELESS;
             case "br-tbb":
             case "br-meshwire":
-                return "other";
+                return LinkType.OTHER;
             case "tbb-fastd":
             case "tbb_fastd":
             case "tbb_fastd2":
             default:
-                return "tunnel";
+                return LinkType.TUNNEL;
         }
     }
 }

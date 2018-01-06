@@ -28,7 +28,6 @@ import com.google.gson.JsonObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,7 +40,7 @@ public class Node {
     private String hostname;
     private String name;
     private String community;
-    private String role;
+    private NodeType role;
     private String model;
     private String firmwareVersion;
     private String firmwareBase;
@@ -93,9 +92,10 @@ public class Node {
         valid = true;
     }
 
-    public void parseData(ResultSet rs) throws SQLException, UnsupportedEncodingException {
+    public void parseData(ResultSet rs) throws Exception {
         community = rs.getString("community");
-        role = rs.getString("role");
+        String r = rs.getString("role");
+        role = r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
         model = rs.getString("model");
         firmwareVersion = rs.getString("firmwareVersion");
         firmwareBase = rs.getString("firmwareBase");
@@ -191,7 +191,7 @@ public class Node {
             nodeinfo.addProperty("hostname", hostname);
             JsonObject system = new JsonObject();
             system.addProperty("site_code", community);
-            system.addProperty("role", role);
+            system.addProperty("role", role.name().toLowerCase());
             nodeinfo.add("system", system);
             JsonObject hardware = new JsonObject();
             if (model != null && !model.isEmpty()) {
@@ -303,13 +303,17 @@ public class Node {
             DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, latitude, longitude, latitude, longitude);
         }
         DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, gatewayIp = ?, uptime = ?, memory_usage = ?, loadavg = ?, clients = ?, online = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
-                community, role, model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, gatewayIp, uptime, memoryUsage, loadAvg, clients, online, gateway, name, email, id);
+                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, gatewayIp, uptime, memoryUsage, loadAvg, clients, online, gateway, name, email, id);
         if (!linkmap.isEmpty()) {
             MySQL.PreparedUpdate prep = DataGen.getDB().queryPrepUpdate("INSERT INTO links SET `from` = ?, `to` = ?, `interface` = ?, `tq` = ?");
             linkmap.entrySet().stream().forEach((e) -> {
-                prep.add(id, e.getKey(), e.getValue().getIface(), e.getValue().getSourceTq());
+                prep.add(id, e.getKey(), e.getValue().getType().name().toLowerCase(), e.getValue().getSourceTq());
             });
             prep.done();
         }
+    }
+    
+    public enum NodeType {
+        STANDARD
     }
 }

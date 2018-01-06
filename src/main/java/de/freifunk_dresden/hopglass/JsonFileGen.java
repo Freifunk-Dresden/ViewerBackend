@@ -27,6 +27,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.freifunk_dresden.hopglass.Link.LinkType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -64,13 +65,13 @@ public class JsonFileGen {
                     .forEach((link) -> {
                         JsonObject jsonLink;
                         //Meshviewer
-                        if (!link.getType().equals("tunnel")) {
+                        if (!link.getType().equals(LinkType.TUNNEL)) {
                             jsonLink = new JsonObject();
                             jsonLink.addProperty("source", link.getSource().getId());
                             jsonLink.addProperty("target", link.getTarget().getId());
                             jsonLink.addProperty("source_tq", (float) link.getSourceTq() / 100f);
                             jsonLink.addProperty("target_tq", (float) link.getTargetTq() / 100f);
-                            jsonLink.addProperty("type", link.getType());
+                            jsonLink.addProperty("type", link.getType().name().toLowerCase());
                             meshViewerLinks.add(jsonLink);
                         }
                         //Hopglass
@@ -80,13 +81,13 @@ public class JsonFileGen {
                         jsonLink.addProperty("source", source);
                         jsonLink.addProperty("target", target);
                         jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100d / (double) link.getSourceTq()));
-                        jsonLink.addProperty("type", link.getType());
+                        jsonLink.addProperty("type", link.getType().name().toLowerCase());
                         graphLinks.add(jsonLink);
                         jsonLink = new JsonObject();
                         jsonLink.addProperty("source", target);
                         jsonLink.addProperty("target", source);
                         jsonLink.addProperty("tq", link.getTargetTq() < 1 ? 100000 : Math.round(100d / (double) link.getTargetTq()));
-                        jsonLink.addProperty("type", link.getType());
+                        jsonLink.addProperty("type", link.getType().name().toLowerCase());
                         graphLinks.add(jsonLink);
                     });
         });

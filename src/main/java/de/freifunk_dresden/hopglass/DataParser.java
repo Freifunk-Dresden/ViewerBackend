@@ -24,6 +24,8 @@
 package de.freifunk_dresden.hopglass;
 
 import com.google.gson.JsonObject;
+import de.freifunk_dresden.hopglass.Link.LinkType;
+import de.freifunk_dresden.hopglass.Node.NodeType;
 import java.util.HashMap;
 
 public class DataParser {
@@ -48,16 +50,15 @@ public class DataParser {
         return com;
     }
 
-    public String getRole() {
+    public NodeType getRole() {
         if (version >= 13) {
-            String type = data.get("system").getAsJsonObject().get("node_type").getAsString();
-            switch (type) {
+            switch (data.get("system").getAsJsonObject().get("node_type").getAsString()) {
                 case "node":
-                    return "standard";
+                    return NodeType.STANDARD;
                 //@TODO: Include other node types
             }
         }
-        return "standard";
+        return NodeType.STANDARD;
     }
 
     public String getModel() {
@@ -129,7 +130,8 @@ public class DataParser {
                 JsonObject l = link.getAsJsonObject();
                 String[] split = l.get("target").getAsString().split("\\.");
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
-                linkmap.put(targetId, new Link(l.get("interface").getAsString(), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
+                LinkType linkType = Link.getLinkType(l.get("interface").getAsString());
+                linkmap.put(targetId, new Link(linkType, DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
             });
         }
         if (version == 10) {
@@ -146,7 +148,8 @@ public class DataParser {
             data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
                 int targetId = l.get("node").getAsInt();
-                linkmap.put(targetId, new Link(l.get("interface").getAsString(), Byte.parseByte(l.get("tq").getAsString()), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
+                LinkType linkType = Link.getLinkType(l.get("interface").getAsString());
+                linkmap.put(targetId, new Link(linkType, Byte.parseByte(l.get("tq").getAsString()), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
             });
         }
         return linkmap;

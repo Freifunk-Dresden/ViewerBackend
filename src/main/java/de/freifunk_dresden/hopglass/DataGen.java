@@ -30,11 +30,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -228,7 +226,7 @@ public class DataGen {
                     if (rs.first()) {
                         n.parseData(rs);
                     }
-                } catch (SQLException | UnsupportedEncodingException ex) {
+                } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             }
