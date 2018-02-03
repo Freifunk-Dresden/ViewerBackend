@@ -27,7 +27,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.freifunk_dresden.hopglass.Link.LinkType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

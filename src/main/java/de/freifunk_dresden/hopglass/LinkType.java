@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Niklas Merkelt.
+ * Copyright 2018 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,52 +23,23 @@
  */
 package de.freifunk_dresden.hopglass;
 
-public class Link {
-
-    private byte sourceTq = 0;
-    private byte targetTq = -1;
-    private final LinkType type;
-    private final Node target;
-    private final Node source;
-
-    public Link(LinkType type, Node target, Node source) {
-        this.type = type;
-        this.target = target;
-        this.source = source;
-    }
-
-    public Link(LinkType type, byte tq, Node target, Node source) {
-        this.type = type;
-        this.sourceTq = tq;
-        this.target = target;
-        this.source = source;
-    }
-
-    public byte getSourceTq() {
-        return sourceTq;
-    }
-
-    public Node getTarget() {
-        return target;
-    }
-
-    public Node getSource() {
-        return source;
-    }
-
-    public void setSourceTq(byte tq) {
-        this.sourceTq = tq;
-    }
-
-    public byte getTargetTq() {
-        return targetTq;
-    }
-
-    public void setTargetTq(byte tq) {
-        this.targetTq = tq;
-    }
-
-    public LinkType getType() {
-        return type;
+public enum LinkType {
+    WIRELESS,
+    TUNNEL,
+    OTHER;
+    
+    public static LinkType getType(String iface) {
+        switch (iface) {
+            case "wlan0":
+                return LinkType.WIRELESS;
+            case "br-tbb":
+            case "br-meshwire":
+                return LinkType.OTHER;
+            case "tbb-fastd":
+            case "tbb_fastd":
+            case "tbb_fastd2":
+            default:
+                return LinkType.TUNNEL;
+        }
     }
 }
