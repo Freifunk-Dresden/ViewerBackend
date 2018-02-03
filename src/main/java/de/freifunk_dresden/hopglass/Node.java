@@ -289,6 +289,10 @@ public class Node {
                 node.addProperty("model", model);
             }
             node.addProperty("contact", email);
+            JsonObject autoupdater = new JsonObject();
+            autoupdater.addProperty("enabled", false);
+            autoupdater.addProperty("branch", "stable");
+            node.add("autoupdater", autoupdater);
             return node;
         } catch (Exception e) {
             Logger.getLogger(Node.class.getName()).log(Level.SEVERE, "Fehler bei Node " + id, e);
