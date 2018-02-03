@@ -25,8 +25,8 @@ package de.freifunk_dresden.hopglass;
 
 public class Link {
 
-    private byte sourceTq = -1;
-    private byte targetTq = 0;
+    private byte sourceTq = 0;
+    private byte targetTq = -1;
     private final LinkType type;
     private final Node target;
     private final Node source;

@@ -41,7 +41,7 @@ public class JsonFileGen {
     private final JsonArray graphLinks = new JsonArray();
     private final JsonArray meshViewerNodes = new JsonArray();
     private final JsonArray meshViewerLinks = new JsonArray();
-    private final HashMap<Integer, Integer> nodeIds = new HashMap<>();
+    private final HashMap<Node, Integer> nodeIds = new HashMap<>();
 
     public JsonFileGen(Collection<Node> nodes, Collection<HashMap<Integer, Link>> links) {
         this.gson = new GsonBuilder().create();
@@ -56,7 +56,7 @@ public class JsonFileGen {
             jsonNode.addProperty("id", String.valueOf(node.getId()));
             jsonNode.addProperty("seq", i);
             graphNodes.add(jsonNode);
-            nodeIds.put(node.getId(), i);
+            nodeIds.put(node, i);
             i++;
         }
         links.forEach((map) -> {
@@ -70,25 +70,27 @@ public class JsonFileGen {
                             jsonLink.addProperty("source", link.getSource().getId());
                             jsonLink.addProperty("target", link.getTarget().getId());
                             jsonLink.addProperty("source_tq", (float) link.getSourceTq() / 100f);
-                            jsonLink.addProperty("target_tq", (float) link.getTargetTq() / 100f);
+                            jsonLink.addProperty("target_tq", link.getTargetTq() == -1 ? 0 : (float) link.getTargetTq() / 100f);
                             jsonLink.addProperty("type", link.getType().name().toLowerCase());
                             meshViewerLinks.add(jsonLink);
                         }
                         //Hopglass
-                        Integer source = nodeIds.get(link.getSource().getId());
-                        Integer target = nodeIds.get(link.getTarget().getId());
+                        Integer source = nodeIds.get(link.getSource());
+                        Integer target = nodeIds.get(link.getTarget());
                         jsonLink = new JsonObject();
                         jsonLink.addProperty("source", source);
                         jsonLink.addProperty("target", target);
-                        jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100d / (double) link.getSourceTq()));
+                        jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100f / (float) link.getSourceTq()));
                         jsonLink.addProperty("type", link.getType().name().toLowerCase());
                         graphLinks.add(jsonLink);
-                        jsonLink = new JsonObject();
-                        jsonLink.addProperty("source", target);
-                        jsonLink.addProperty("target", source);
-                        jsonLink.addProperty("tq", link.getTargetTq() < 1 ? 100000 : Math.round(100d / (double) link.getTargetTq()));
-                        jsonLink.addProperty("type", link.getType().name().toLowerCase());
-                        graphLinks.add(jsonLink);
+                        if (link.getTargetTq() != -1) {
+                            jsonLink = new JsonObject();
+                            jsonLink.addProperty("source", target);
+                            jsonLink.addProperty("target", source);
+                            jsonLink.addProperty("tq", link.getTargetTq() < 1 ? 100000 : Math.round(100f / (float) link.getTargetTq()));
+                            jsonLink.addProperty("type", link.getType().name().toLowerCase());
+                            graphLinks.add(jsonLink);
+                        }
                     });
         });
     }
