@@ -30,7 +30,7 @@ import java.net.URLDecoder;
 import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,7 +58,7 @@ public class Node {
     private String gatewayIp;
     private boolean valid;
     private boolean displayed;
-    private final HashMap<Integer, Link> linkmap = new HashMap<>();
+    private HashSet<Link> linkset = new HashSet<>();
 
     public Node(int id) {
         this.id = id;
@@ -86,7 +86,7 @@ public class Node {
         clients = dp.getClients();
         loadAvg = dp.getLoadAvg();
         gatewayIp = dp.getGatewayIp();
-        linkmap.putAll(dp.getLinkMap());
+        linkset = dp.getLinkSet();
         online = true;
         lastseen = System.currentTimeMillis();
         valid = true;
@@ -173,7 +173,7 @@ public class Node {
     }
 
     public Collection<Link> getLinks() {
-        return linkmap.values();
+        return linkset;
     }
 
     public JsonObject getJsonObject() {
@@ -308,12 +308,5 @@ public class Node {
         }
         DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, gatewayIp = ?, uptime = ?, memory_usage = ?, loadavg = ?, clients = ?, online = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
                 community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, gatewayIp, uptime, memoryUsage, loadAvg, clients, online, gateway, name, email, id);
-        if (!linkmap.isEmpty()) {
-            MySQL.PreparedUpdate prep = DataGen.getDB().queryPrepUpdate("INSERT INTO links SET `from` = ?, `to` = ?, `interface` = ?, `tq` = ?");
-            linkmap.entrySet().stream().forEach((e) -> {
-                prep.add(id, e.getKey(), e.getValue().getType().name().toLowerCase(), e.getValue().getSourceTq());
-            });
-            prep.done();
-        }
     }
 }

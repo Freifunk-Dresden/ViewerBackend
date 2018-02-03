@@ -24,7 +24,7 @@
 package de.freifunk_dresden.hopglass;
 
 import com.google.gson.JsonObject;
-import java.util.HashMap;
+import java.util.HashSet;
 
 public class DataParser {
 
@@ -35,7 +35,7 @@ public class DataParser {
         this.data = data;
         this.version = version;
     }
-    
+
     public int getNodeId() {
         return data.get("common").getAsJsonObject().get("node").getAsInt();
     }
@@ -113,33 +113,36 @@ public class DataParser {
         return data.get("statistic").getAsJsonObject().get("accepted_user_count").getAsShort();
     }
 
-    public HashMap<Integer, Link> getLinkMap() {
-        HashMap<Integer, Link> linkmap = new HashMap<>();
+    public HashSet<Link> getLinkSet() {
+        HashSet<Link> linkmap = new HashSet<>();
+        Node node = DataGen.getNode(getNodeId());
+        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         if (version <= 10) {
-            data.get("bmxd").getAsJsonObject().get("routing_tables").getAsJsonObject().get("route").getAsJsonObject().get("link").getAsJsonArray().forEach((link) -> {
+            bmxd.get("routing_tables").getAsJsonObject().get("route").getAsJsonObject().get("link").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
                 String[] split = l.get("target").getAsString().split("\\.");
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
-                LinkType linkType = Link.getLinkType(l.get("interface").getAsString());
-                linkmap.put(targetId, new Link(linkType, DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
+                LinkType linkType = LinkType.getType(l.get("interface").getAsString());
+                Node target = DataGen.getNode(targetId);
+                linkmap.add(new Link(linkType, target, node));
             });
         }
-        if (version == 10) {
-            if (data.get("bmxd").getAsJsonObject().has("links")) {
-                data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray().forEach((link) -> {
-                    JsonObject l = link.getAsJsonObject();
-                    Link lnk = linkmap.get(Integer.parseInt(l.get("node").getAsString()));
-                    if (lnk != null) {
-                        lnk.setSourceTq(Byte.parseByte(l.get("tq").getAsString()));
-                    }
-                });
-            }
-        } else if (version >= 11) {
-            data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray().forEach((link) -> {
+        if (bmxd.has("links")) {
+            bmxd.get("links").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
-                int targetId = l.get("node").getAsInt();
-                LinkType linkType = Link.getLinkType(l.get("interface").getAsString());
-                linkmap.put(targetId, new Link(linkType, Byte.parseByte(l.get("tq").getAsString()), DataGen.getNode(targetId), DataGen.getNode(getNodeId())));
+                Node target = DataGen.getNode(l.get("node").getAsInt());
+                byte tq = Byte.parseByte(l.get("tq").getAsString());
+                if (version == 10) {
+                    for (Link lnk : linkmap) {
+                        if (lnk.getTarget().equals(target)) {
+                            lnk.setSourceTq(tq);
+                            return;
+                        }
+                    }
+                } else if (version >= 11) {
+                    LinkType linkType = LinkType.getType(l.get("interface").getAsString());
+                    linkmap.add(new Link(linkType, tq, target, node));
+                }
             });
         }
         return linkmap;
