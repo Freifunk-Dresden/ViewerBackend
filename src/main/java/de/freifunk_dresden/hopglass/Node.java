@@ -316,8 +316,4 @@ public class Node {
             prep.done();
         }
     }
-    
-    public enum NodeType {
-        STANDARD
-    }
 }

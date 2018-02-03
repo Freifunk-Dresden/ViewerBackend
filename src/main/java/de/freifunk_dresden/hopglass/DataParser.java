@@ -25,7 +25,6 @@ package de.freifunk_dresden.hopglass;
 
 import com.google.gson.JsonObject;
 import de.freifunk_dresden.hopglass.Link.LinkType;
-import de.freifunk_dresden.hopglass.Node.NodeType;
 import java.util.HashMap;
 
 public class DataParser {
