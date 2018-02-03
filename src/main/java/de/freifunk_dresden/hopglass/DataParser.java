@@ -83,29 +83,21 @@ public class DataParser {
 
     public float getUptime() {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
+        String[] uptime = jsonUptime.split(" ");
         if (version < 10 && jsonUptime.contains(":")) {
-            String[] uptime = jsonUptime.split(" ");
             short days = Short.parseShort(uptime[3]);
             int min;
             String minutes = uptime[5].replace(",", "");
             String time = uptime[6].replace(",", "");
             if (minutes.isEmpty()) {
-                if (time.contains(":")) {
-                    min = Integer.parseInt(time.split(":")[0]) * 60 + Integer.parseInt(time.split(":")[1]);
-                } else {
-                    min = Integer.parseInt(time);
-                }
+                min = parseMinutes(time);
             } else {
-                if (minutes.contains(":")) {
-                    min = Integer.parseInt(minutes.split(":")[0]) * 60 + Integer.parseInt(minutes.split(":")[1]);
-                } else {
-                    min = Integer.parseInt(minutes);
-                }
+                min = parseMinutes(minutes);
             }
             return min * 60 + days * 86400;
             //Ab v10
         } else {
-            return Float.parseFloat(jsonUptime.split(" ")[0]);
+            return Float.parseFloat(uptime[0]);
         }
     }
 
@@ -161,5 +153,13 @@ public class DataParser {
 
     public String getEMail() {
         return data.get("contact").getAsJsonObject().get("email").getAsString();
+    }
+
+    public static int parseMinutes(String time) {
+        if (time.contains(":")) {
+            return Integer.parseInt(time.split(":")[0]) * 60 + Integer.parseInt(time.split(":")[1]);
+        } else {
+            return Integer.parseInt(time);
+        }
     }
 }
