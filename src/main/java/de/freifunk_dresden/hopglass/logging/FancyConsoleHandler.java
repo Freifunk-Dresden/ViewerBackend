@@ -4,10 +4,8 @@ import java.util.logging.ConsoleHandler;
 
 public class FancyConsoleHandler extends ConsoleHandler {
     
-    private static final String CONSOLE_DATE = "HH:mm:ss";
-
     public FancyConsoleHandler() {
-        setFormatter(new DateOutputFormatter(CONSOLE_DATE));
+        setFormatter(new DateOutputFormatter());
         setOutputStream(System.out);
     }
 }

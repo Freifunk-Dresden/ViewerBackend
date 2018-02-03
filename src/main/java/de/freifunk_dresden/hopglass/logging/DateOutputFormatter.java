@@ -10,8 +10,8 @@ public class DateOutputFormatter extends Formatter {
 
     private final SimpleDateFormat date;
 
-    public DateOutputFormatter(String pattern) {
-        date = new SimpleDateFormat(pattern);
+    public DateOutputFormatter() {
+        date = new SimpleDateFormat("HH:mm:ss");
     }
 
     @Override
