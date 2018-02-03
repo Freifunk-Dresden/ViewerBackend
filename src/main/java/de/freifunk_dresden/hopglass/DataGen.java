@@ -53,7 +53,7 @@ public class DataGen {
 
     public static SimpleDateFormat DATE_MESH = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     public static SimpleDateFormat DATE_HOP = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    private static final ExecutorService POOL = Executors.newFixedThreadPool(25);
+    private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
     private static final LinkedHashMap<Integer, Node> NODES = new LinkedHashMap<>();
     private static final HashMap<Integer, HashMap<Integer, Link>> LINKS = new HashMap<>();
