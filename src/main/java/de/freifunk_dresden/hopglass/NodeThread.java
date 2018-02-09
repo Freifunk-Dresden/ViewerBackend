@@ -59,9 +59,7 @@ public class NodeThread implements Runnable {
                 DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
                 node.parseData(dp);
             }
-        } catch (IOException ex) {
-            node.setOnline(false);
-        } catch (NullPointerException ex) {
+        } catch (IOException | NullPointerException ex) {
             node.setOnline(false);
             Logger.getLogger(NodeThread.class.getName()).log(Level.SEVERE, "Node " + node, ex);
         }
