@@ -68,8 +68,8 @@ public class JsonFileGen {
                             jsonLink = new JsonObject();
                             jsonLink.addProperty("source", link.getSource().getId());
                             jsonLink.addProperty("target", link.getTarget().getId());
-                            jsonLink.addProperty("source_tq", (float) link.getSourceTq() / 100f);
-                            jsonLink.addProperty("target_tq", link.getTargetTq() == -1 ? 0 : (float) link.getTargetTq() / 100f);
+                            jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
+                            jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
                             jsonLink.addProperty("type", link.getType().name().toLowerCase());
                             meshViewerLinks.add(jsonLink);
                         }
@@ -79,14 +79,14 @@ public class JsonFileGen {
                         jsonLink = new JsonObject();
                         jsonLink.addProperty("source", source);
                         jsonLink.addProperty("target", target);
-                        jsonLink.addProperty("tq", link.getSourceTq() < 1 ? 100000 : Math.round(100f / (float) link.getSourceTq()));
+                        jsonLink.addProperty("tq", Link.convertToHop(link.getSourceTq()));
                         jsonLink.addProperty("type", link.getType().name().toLowerCase());
                         graphLinks.add(jsonLink);
                         if (link.getTargetTq() != -1) {
                             jsonLink = new JsonObject();
                             jsonLink.addProperty("source", target);
                             jsonLink.addProperty("target", source);
-                            jsonLink.addProperty("tq", link.getTargetTq() < 1 ? 100000 : Math.round(100f / (float) link.getTargetTq()));
+                            jsonLink.addProperty("tq", Link.convertToHop(link.getTargetTq()));
                             jsonLink.addProperty("type", link.getType().name().toLowerCase());
                             graphLinks.add(jsonLink);
                         }

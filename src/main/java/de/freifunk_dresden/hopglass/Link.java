@@ -71,4 +71,12 @@ public class Link {
     public LinkType getType() {
         return type;
     }
+    
+    public static float convertToHop(float rawTq) {
+        return rawTq < 1 ? 100000 : (Math.round(100f / rawTq * 1000f) / 1000f);
+    }
+    
+    public static float convertToMeshV(float rawTq) {
+        return rawTq == -1 ? 0 : rawTq / 100f;
+    }
 }
