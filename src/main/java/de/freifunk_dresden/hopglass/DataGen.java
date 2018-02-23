@@ -146,13 +146,6 @@ public class DataGen {
         LOG.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
         if (DB.hasConnection()) {
-            DB.queryUpdate("CREATE TABLE IF NOT EXISTS `links` ( "
-                    + "	`from` INT(11) NOT NULL, "
-                    + "	`to` INT(11) NOT NULL, "
-                    + "	`interface` VARCHAR(45) NOT NULL, "
-                    + "	`tq` INT(3) NOT NULL, "
-                    + "	PRIMARY KEY (`from`, `to`) "
-                    + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
             DB.queryUpdate("CREATE TABLE IF NOT EXISTS `nodes` ( "
                     + " `id` INT(11) NOT NULL, "
                     + "	`community` VARCHAR(50) NULL DEFAULT NULL, "
@@ -175,7 +168,6 @@ public class DataGen {
                     + "	`email` TEXT NULL, "
                     + "	PRIMARY KEY (`id`) "
                     + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
-            DB.queryUpdate("TRUNCATE links");
             DataGen dataGen = new DataGen();
             try {
                 LOG.log(Level.INFO, "Getting nodes...");
