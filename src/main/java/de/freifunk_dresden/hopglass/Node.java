@@ -58,6 +58,7 @@ public class Node {
     private String gatewayIp;
     private boolean valid;
     private boolean displayed;
+    private boolean autoupdate;
     private HashSet<Link> linkset = new HashSet<>();
 
     public Node(int id) {
@@ -87,6 +88,7 @@ public class Node {
         loadAvg = dp.getLoadAvg();
         gatewayIp = dp.getGatewayIp();
         linkset = dp.getLinkSet();
+        autoupdate = dp.getAutoUpdate();
         online = true;
         lastseen = System.currentTimeMillis();
         valid = true;
@@ -200,6 +202,10 @@ public class Node {
             nodeinfo.add("hardware", hardware);
             nodeinfo.addProperty("node_id", id);
             JsonObject software = new JsonObject();
+            JsonObject autoupdater = new JsonObject();
+            autoupdater.addProperty("enabled", autoupdate);
+            autoupdater.addProperty("branch", "aktiviert");
+            software.add("autoupdater", autoupdater);
             if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
                 JsonObject firmware = new JsonObject();
                 firmware.addProperty("release", firmwareVersion);
@@ -291,7 +297,7 @@ public class Node {
             node.addProperty("contact", email);
             JsonObject autoupdater = new JsonObject();
             autoupdater.addProperty("enabled", false);
-            autoupdater.addProperty("branch", "stable");
+            autoupdater.addProperty("branch", "aktiviert");
             node.add("autoupdater", autoupdater);
             return node;
         } catch (Exception e) {

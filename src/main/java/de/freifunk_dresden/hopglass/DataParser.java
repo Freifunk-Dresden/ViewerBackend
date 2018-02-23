@@ -60,7 +60,7 @@ public class DataParser {
     }
 
     public String getModel() {
-        return data.get("system").getAsJsonObject().get("model").getAsString();
+        return data.get("system").getAsJsonObject().get(version >= 14 ? "model2" : "model").getAsString();
     }
 
     public String getFirmwareVersion() {
@@ -154,6 +154,10 @@ public class DataParser {
 
     public String getEMail() {
         return data.get("contact").getAsJsonObject().get("email").getAsString();
+    }
+    
+    public boolean getAutoUpdate() {
+        return version >= 14 ? data.get("system").getAsJsonObject().get("autoupdate").getAsInt() == 1 : false;
     }
 
     public static int parseMinutes(String time) {
