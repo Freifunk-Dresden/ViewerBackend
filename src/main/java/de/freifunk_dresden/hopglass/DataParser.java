@@ -24,7 +24,10 @@
 package de.freifunk_dresden.hopglass;
 
 import com.google.gson.JsonObject;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashSet;
+import java.util.logging.Level;
 
 public class DataParser {
 
@@ -149,7 +152,12 @@ public class DataParser {
     }
 
     public String getName() {
-        return data.get("contact").getAsJsonObject().get("name").getAsString();
+        try {
+            return URLDecoder.decode(data.get("contact").getAsJsonObject().get("name").getAsString(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            DataGen.getLogger().log(Level.SEVERE, null, ex);
+            return data.get("contact").getAsJsonObject().get("name").getAsString();
+        }
     }
 
     public String getEMail() {
