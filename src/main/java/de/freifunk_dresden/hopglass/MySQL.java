@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 public class MySQL {
 
     private Connection conn;
-    private static final Logger LOG = Logger.getLogger(MySQL.class.getName());
+    private static final Logger LOG = DataGen.getLogger();
     private String host;
     private short port;
     private String username;

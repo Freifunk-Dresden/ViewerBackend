@@ -243,4 +243,8 @@ public class DataGen {
         
         LOG.addHandler(new FancyConsoleHandler());
     }
+
+    public static Logger getLogger() {
+        return LOG;
+    }
 }

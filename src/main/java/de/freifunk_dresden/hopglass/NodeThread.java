@@ -31,7 +31,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class NodeThread implements Runnable {
 
@@ -61,7 +60,7 @@ public class NodeThread implements Runnable {
             }
         } catch (IOException | NullPointerException ex) {
             node.setOnline(false);
-            Logger.getLogger(NodeThread.class.getName()).log(Level.SEVERE, "Node " + node, ex);
+            DataGen.getLogger().log(Level.SEVERE, "Node " + node, ex);
         }
     }
 }

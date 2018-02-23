@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Node {
 
@@ -245,7 +244,7 @@ public class Node {
             node.addProperty("lastseen", DataGen.DATE_HOP.format(new Date(lastseen)));
             return node;
         } catch (Exception e) {
-            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, "Fehler bei Node " + id, e);
+            DataGen.getLogger().log(Level.SEVERE, "Fehler bei Node " + id, e);
         }
         return null;
     }
@@ -301,7 +300,7 @@ public class Node {
             node.add("autoupdater", autoupdater);
             return node;
         } catch (Exception e) {
-            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, "Fehler bei Node " + id, e);
+            DataGen.getLogger().log(Level.SEVERE, "Fehler bei Node " + id, e);
         }
         return null;
     }
