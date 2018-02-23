@@ -127,7 +127,7 @@ public class Node {
             this.name = name;
         } else {
             this.name = URLDecoder.decode(name, "UTF-8");
-            this.hostname = id + "-" + name.replace(" ", "+");
+            this.hostname = id + "-" + name;
         }
     }
 
