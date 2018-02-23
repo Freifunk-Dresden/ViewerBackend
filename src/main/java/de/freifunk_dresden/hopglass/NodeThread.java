@@ -60,6 +60,7 @@ public class NodeThread implements Runnable {
                 node.parseData(dp);
             }
         } catch (SocketTimeoutException ex) {
+            node.setOnline(false);
             DataGen.getLogger().log(Level.WARNING, "Node {0}: Timeout", node.getId());
         } catch (IOException | NullPointerException ex) {
             node.setOnline(false);
