@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.logging.Level;
 
@@ -58,6 +59,8 @@ public class NodeThread implements Runnable {
                 DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
                 node.parseData(dp);
             }
+        } catch (SocketTimeoutException ex) {
+            DataGen.getLogger().log(Level.WARNING, "Node {0}: Timeout", node.getId());
         } catch (IOException | NullPointerException ex) {
             node.setOnline(false);
             DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
