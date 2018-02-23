@@ -60,7 +60,7 @@ public class NodeThread implements Runnable {
             }
         } catch (IOException | NullPointerException ex) {
             node.setOnline(false);
-            DataGen.getLogger().log(Level.SEVERE, "Node " + node, ex);
+            DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
         }
     }
 }
