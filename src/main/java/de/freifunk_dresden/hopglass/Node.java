@@ -73,49 +73,57 @@ public class Node {
         return (subnet201 ? "10.201." : "10.200.") + (id / 255 % 256) + "." + ((id % 255) + 1);
     }
 
-    public void parseData(DataParser dp) throws UnsupportedEncodingException {
-        setName(dp.getName());
-        community = dp.getCommunity().isEmpty() ? "Dresden" : dp.getCommunity();
-        role = dp.getRole();
-        model = dp.getModel();
-        firmwareVersion = dp.getFirmwareVersion();
-        firmwareBase = dp.getFirmwareBase();
-        setEmail(dp.getEMail());
-        uptime = dp.getUptime();
-        memoryUsage = dp.getMemoryUsage();
-        clients = dp.getClients();
-        loadAvg = dp.getLoadAvg();
-        gatewayIp = dp.getGatewayIp();
-        linkset = dp.getLinkSet();
-        autoupdate = dp.getAutoUpdate();
-        online = true;
-        lastseen = System.currentTimeMillis();
-        valid = true;
+    public void parseData(DataParser dp) {
+        try {
+            setName(dp.getName());
+            community = dp.getCommunity().isEmpty() ? "Dresden" : dp.getCommunity();
+            role = dp.getRole();
+            model = dp.getModel();
+            firmwareVersion = dp.getFirmwareVersion();
+            firmwareBase = dp.getFirmwareBase();
+            setEmail(dp.getEMail());
+            uptime = dp.getUptime();
+            memoryUsage = dp.getMemoryUsage();
+            clients = dp.getClients();
+            loadAvg = dp.getLoadAvg();
+            gatewayIp = dp.getGatewayIp();
+            linkset = dp.getLinkSet();
+            autoupdate = dp.getAutoUpdate();
+            online = true;
+            lastseen = System.currentTimeMillis();
+            valid = true;
+        } catch (Throwable t) {
+            DataGen.getLogger().log(Level.SEVERE, "Node " + getId(), t);
+        }
     }
 
-    public void parseData(ResultSet rs) throws Exception {
-        community = rs.getString("community");
-        String r = rs.getString("role");
-        role = r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
-        model = rs.getString("model");
-        firmwareVersion = rs.getString("firmwareVersion");
-        firmwareBase = rs.getString("firmwareBase");
-        firstseen = rs.getLong("firstseen") * 1000;
-        setLastseen(rs.getLong("lastseen") * 1000);
-        gatewayIp = rs.getString("gatewayIp");
-        latitude = rs.getDouble("latitude");
-        if (rs.wasNull()) {
-            latitude = Double.NaN;
+    public void parseData(ResultSet rs) {
+        try {
+            community = rs.getString("community");
+            String r = rs.getString("role");
+            role = r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
+            model = rs.getString("model");
+            firmwareVersion = rs.getString("firmwareVersion");
+            firmwareBase = rs.getString("firmwareBase");
+            firstseen = rs.getLong("firstseen") * 1000;
+            setLastseen(rs.getLong("lastseen") * 1000);
+            gatewayIp = rs.getString("gatewayIp");
+            latitude = rs.getDouble("latitude");
+            if (rs.wasNull()) {
+                latitude = Double.NaN;
+            }
+            longitude = rs.getDouble("longitude");
+            if (rs.wasNull()) {
+                longitude = Double.NaN;
+            }
+            clients = 0;
+            gateway = rs.getBoolean("gateway");
+            setName(rs.getString("name"));
+            setEmail(rs.getString("email"));
+            valid = true;
+        } catch (Throwable t) {
+            DataGen.getLogger().log(Level.SEVERE, "Node " + getId(), t);
         }
-        longitude = rs.getDouble("longitude");
-        if (rs.wasNull()) {
-            longitude = Double.NaN;
-        }
-        clients = 0;
-        gateway = rs.getBoolean("gateway");
-        setName(rs.getString("name"));
-        setEmail(rs.getString("email"));
-        valid = true;
     }
 
     public int getId() {
