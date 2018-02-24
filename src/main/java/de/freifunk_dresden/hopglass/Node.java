@@ -303,7 +303,7 @@ public class Node {
             }
             node.addProperty("contact", email);
             JsonObject autoupdater = new JsonObject();
-            autoupdater.addProperty("enabled", false);
+            autoupdater.addProperty("enabled", autoupdate);
             autoupdater.addProperty("branch", "stable");
             node.add("autoupdater", autoupdater);
             return node;
