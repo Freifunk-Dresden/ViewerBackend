@@ -28,7 +28,9 @@ import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.logging.Level;
@@ -44,13 +46,9 @@ public class NodeThread implements Runnable {
     @Override
     public void run() {
         try {
-            HttpURLConnection con = (HttpURLConnection) new URL("http://" + node.getIpAdress() + ".freifunk-dresden.de/sysinfo-json.cgi").openConnection();
-            con.setConnectTimeout(7500);
-            con.setReadTimeout(7500);
-            if (con.getResponseCode() == 503) {
-                node.setOnline(false);
-                return;
-            }
+            HttpURLConnection con = (HttpURLConnection) new URL("http://" + node.getIpAdress() + "/sysinfo-json.cgi").openConnection();
+            con.setConnectTimeout(10000);
+            con.setReadTimeout(10000);
             InputStreamReader reader;
             try (InputStream stream = con.getInputStream()) {
                 reader = new InputStreamReader(stream, "UTF-8");
@@ -59,9 +57,9 @@ public class NodeThread implements Runnable {
                 DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
                 node.parseData(dp);
             }
-        } catch (SocketTimeoutException ex) {
+        } catch (NoRouteToHostException | ConnectException | SocketTimeoutException ex) {
             node.setOnline(false);
-            DataGen.getLogger().log(Level.WARNING, "Node {0}: Timeout", node.getId());
+            DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{node.getId(), ex.getMessage()});
         } catch (IOException | NullPointerException ex) {
             node.setOnline(false);
             DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
