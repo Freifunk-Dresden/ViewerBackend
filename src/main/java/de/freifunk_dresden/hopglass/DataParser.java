@@ -32,11 +32,17 @@ import java.util.logging.Level;
 public class DataParser {
 
     private final JsonObject data;
+    private final JsonObject stats;
     private final int version;
 
     public DataParser(JsonObject data, int version) {
         this.data = data;
         this.version = version;
+        if (data.has("statistic")) {
+            stats = data.get("statistic").getAsJsonObject();
+        } else {
+            stats = data.get("statistics").getAsJsonObject();
+        }
     }
 
     public int getNodeId() {
@@ -84,18 +90,22 @@ public class DataParser {
 
     public float getUptime() {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
-        String[] uptime = jsonUptime.split(" ");
+        String[] uptime = jsonUptime.replace("  ", " ").split(" ");
         if (version < 10 && jsonUptime.contains(":")) {
-            short days = Short.parseShort(uptime[3]);
-            int min;
-            String minutes = uptime[5].replace(",", "");
-            String time = uptime[6].replace(",", "");
-            if (minutes.isEmpty()) {
-                min = parseMinutes(time);
+            if (uptime[3].replace(",", "").contains(":")) {
+                return parseMinutes(uptime[3].replace(",", "")) * 60;
             } else {
-                min = parseMinutes(minutes);
+                short days = Short.parseShort(uptime[3].replace(",", ""));
+                int min;
+                String minutes = uptime[5].replace(",", "");
+                String time = uptime[6].replace(",", "");
+                if (minutes.isEmpty()) {
+                    min = parseMinutes(time);
+                } else {
+                    min = parseMinutes(minutes);
+                }
+                return min * 60 + days * 86400;
             }
-            return min * 60 + days * 86400;
             //Ab v10
         } else {
             return Float.parseFloat(uptime[0]);
@@ -103,17 +113,21 @@ public class DataParser {
     }
 
     public double getMemoryUsage() {
-        double memTotal = Integer.parseInt(data.get("statistic").getAsJsonObject().get("meminfo_MemTotal").getAsString().split(" ")[0]);
-        double memFree = Integer.parseInt(data.get("statistic").getAsJsonObject().get("meminfo_MemFree").getAsString().split(" ")[0]);
-        return (memTotal - memFree) / memTotal;
+        if (stats.has("meminfo_MemTotal") && stats.has("meminfo_MemFree")) {
+            double memTotal = Integer.parseInt(stats.get("meminfo_MemTotal").getAsString().split(" ")[0]);
+            double memFree = Integer.parseInt(stats.get("meminfo_MemFree").getAsString().split(" ")[0]);
+            return (memTotal - memFree) / memTotal;
+        } else {
+            return 0;
+        }
     }
 
     public float getLoadAvg() {
-        return Float.parseFloat(data.get("statistic").getAsJsonObject().get("cpu_load").getAsString().split(" ")[0]);
+        return Float.parseFloat(stats.get("cpu_load").getAsString().split(" ")[0]);
     }
 
     public short getClients() {
-        return data.get("statistic").getAsJsonObject().get("accepted_user_count").getAsShort();
+        return stats.get("accepted_user_count").getAsShort();
     }
 
     public HashSet<Link> getLinkSet() {
@@ -121,7 +135,8 @@ public class DataParser {
         Node node = DataGen.getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         if (version <= 10) {
-            bmxd.get("routing_tables").getAsJsonObject().get("route").getAsJsonObject().get("link").getAsJsonArray().forEach((link) -> {
+            JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
+            rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
                 String[] split = l.get("target").getAsString().split("\\.");
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
@@ -163,7 +178,7 @@ public class DataParser {
     public String getEMail() {
         return data.get("contact").getAsJsonObject().get("email").getAsString();
     }
-    
+
     public boolean getAutoUpdate() {
         return version >= 14 ? data.get("system").getAsJsonObject().get("autoupdate").getAsInt() == 1 : false;
     }
