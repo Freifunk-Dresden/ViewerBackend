@@ -211,7 +211,7 @@ public class Node {
             JsonObject software = new JsonObject();
             JsonObject autoupdater = new JsonObject();
             autoupdater.addProperty("enabled", autoupdate);
-            autoupdater.addProperty("branch", "aktiviert");
+            autoupdater.addProperty("branch", "stable");
             software.add("autoupdater", autoupdater);
             if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
                 JsonObject firmware = new JsonObject();
@@ -304,7 +304,7 @@ public class Node {
             node.addProperty("contact", email);
             JsonObject autoupdater = new JsonObject();
             autoupdater.addProperty("enabled", false);
-            autoupdater.addProperty("branch", "aktiviert");
+            autoupdater.addProperty("branch", "stable");
             node.add("autoupdater", autoupdater);
             return node;
         } catch (Exception e) {
