@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunk_dresden.hopglass;
+package de.freifunkdresden.viewerbackend;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import de.freifunk_dresden.hopglass.logging.FancyConsoleHandler;
+import de.freifunkdresden.viewerbackend.logging.FancyConsoleHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunk_dresden.hopglass;
+package de.freifunkdresden.viewerbackend;
 
 import java.io.BufferedReader;
 import java.io.File;

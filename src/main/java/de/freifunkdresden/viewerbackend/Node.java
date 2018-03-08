@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunk_dresden.hopglass;
+package de.freifunkdresden.viewerbackend;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

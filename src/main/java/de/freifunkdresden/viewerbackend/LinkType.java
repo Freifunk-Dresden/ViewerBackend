@@ -21,8 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunk_dresden.hopglass;
+package de.freifunkdresden.viewerbackend;
 
-public enum NodeType {
-    STANDARD
+public enum LinkType {
+    WIRELESS,
+    TUNNEL,
+    OTHER;
+    
+    public static LinkType getType(String iface) {
+        switch (iface) {
+            case "wlan0":
+                return LinkType.WIRELESS;
+            case "br-tbb":
+            case "br-meshwire":
+                return LinkType.OTHER;
+            case "tbb-fastd":
+            case "tbb_fastd":
+            case "tbb_fastd2":
+            default:
+                return LinkType.TUNNEL;
+        }
+    }
 }

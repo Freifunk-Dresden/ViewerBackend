@@ -1,4 +1,4 @@
-package de.freifunk_dresden.hopglass.logging;
+package de.freifunkdresden.viewerbackend.logging;
 
 import java.util.logging.ConsoleHandler;
 
