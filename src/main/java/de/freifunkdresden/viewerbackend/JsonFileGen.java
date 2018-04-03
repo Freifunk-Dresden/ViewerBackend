@@ -61,6 +61,7 @@ public class JsonFileGen {
         links.forEach((map) -> {
             map.values().stream()
                     .filter((link) -> link.getSource().isDisplayed() && link.getTarget().isDisplayed())
+                    .filter((link) -> link.getSource().isOnline() && link.getTarget().isOnline())
                     .forEach((link) -> {
                         JsonObject jsonLink;
                         //Meshviewer

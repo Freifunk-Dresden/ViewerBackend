@@ -181,6 +181,10 @@ public class Node {
         return displayed && isValid();
     }
 
+    public boolean isOnline() {
+        return online;
+    }
+
     public Collection<Link> getLinks() {
         return linkset;
     }
