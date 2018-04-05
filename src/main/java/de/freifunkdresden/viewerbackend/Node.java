@@ -89,6 +89,8 @@ public class Node {
             gatewayIp = dp.getGatewayIp();
             linkset = dp.getLinkSet();
             autoupdate = dp.getAutoUpdate();
+            latitude = dp.getLatitude();
+            longitude = dp.getLongitude();
             online = true;
             lastseen = System.currentTimeMillis();
             valid = true;

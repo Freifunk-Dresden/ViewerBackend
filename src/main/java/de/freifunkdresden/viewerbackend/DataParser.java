@@ -182,6 +182,24 @@ public class DataParser {
     public boolean getAutoUpdate() {
         return version >= 14 ? data.get("system").getAsJsonObject().get("autoupdate").getAsInt() == 1 : false;
     }
+    
+    public double getLongitude() {
+        try {
+            double lon = data.get("gps").getAsJsonObject().get("longitude").getAsDouble();
+            return lon == 0 ? Double.NaN : lon;
+        } catch (NumberFormatException ex) {
+            return Double.NaN;
+        }
+    }
+    
+    public double getLatitude() {
+        try {
+            double lat = data.get("gps").getAsJsonObject().get("latitude").getAsDouble();
+            return lat == 0 ? Double.NaN : lat;
+        } catch (NumberFormatException ex) {
+            return Double.NaN;
+        }
+    }
 
     public static int parseMinutes(String time) {
         if (time.contains(":")) {
