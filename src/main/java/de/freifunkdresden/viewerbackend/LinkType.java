@@ -34,6 +34,7 @@ public enum LinkType {
                 return LinkType.WIRELESS;
             case "br-tbb":
             case "br-meshwire":
+            case "br-mesh_lan":
                 return LinkType.OTHER;
             case "tbb-fastd":
             case "tbb_fastd":
