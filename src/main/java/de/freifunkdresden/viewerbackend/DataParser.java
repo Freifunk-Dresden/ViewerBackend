@@ -140,7 +140,7 @@ public class DataParser {
                 JsonObject l = link.getAsJsonObject();
                 String[] split = l.get("target").getAsString().split("\\.");
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
-                LinkType linkType = LinkType.getType(l.get("interface").getAsString());
+                LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
                 Node target = DataGen.getNode(targetId);
                 linkmap.add(new Link(linkType, target, node));
             });
@@ -157,8 +157,11 @@ public class DataParser {
                             return;
                         }
                     }
-                } else if (version >= 11) {
-                    LinkType linkType = LinkType.getType(l.get("interface").getAsString());
+                } else if (version >= 11 && version < 14) {
+                    LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
+                    linkmap.add(new Link(linkType, tq, target, node));
+                } else if (version >= 14) {
+                    LinkType linkType = LinkType.getTypeByType(l.get("type").getAsString());
                     linkmap.add(new Link(linkType, tq, target, node));
                 }
             });

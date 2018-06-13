@@ -28,17 +28,30 @@ public enum LinkType {
     TUNNEL,
     OTHER;
     
-    public static LinkType getType(String iface) {
-        switch (iface) {
+    public static LinkType getTypeByInterface(String iface) {
+        switch (iface.toLowerCase()) {
             case "wlan0":
                 return LinkType.WIRELESS;
             case "br-tbb":
             case "br-meshwire":
             case "br-mesh_lan":
+            case "br-mesh_wan":
                 return LinkType.OTHER;
             case "tbb-fastd":
             case "tbb_fastd":
             case "tbb_fastd2":
+            default:
+                return LinkType.TUNNEL;
+        }
+    }
+    
+    public static LinkType getTypeByType(String type) {
+        switch (type.toLowerCase()) {
+            case "lan":
+                return LinkType.OTHER;
+            case "wifi":
+                return LinkType.WIRELESS;
+            case "backbone":
             default:
                 return LinkType.TUNNEL;
         }
