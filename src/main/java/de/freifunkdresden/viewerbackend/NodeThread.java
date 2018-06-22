@@ -37,6 +37,8 @@ import java.util.logging.Level;
 
 public class NodeThread implements Runnable {
 
+    private static final int RETRY_COUNT = 3;
+
     private final Node node;
 
     public NodeThread(Node nodeId) {
@@ -45,8 +47,16 @@ public class NodeThread implements Runnable {
 
     @Override
     public void run() {
+        for (int i = 0; i < RETRY_COUNT; i++) {
+            if (checkNode(node)) {
+                return;
+            }
+        }
+    }
+
+    private static boolean checkNode(Node n) {
         try {
-            HttpURLConnection con = (HttpURLConnection) new URL("http://" + node.getIpAdress() + "/sysinfo-json.cgi").openConnection();
+            HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAdress() + "/sysinfo-json.cgi").openConnection();
             con.setConnectTimeout(10000);
             con.setReadTimeout(10000);
             InputStreamReader reader;
@@ -55,14 +65,21 @@ public class NodeThread implements Runnable {
                 JsonObject sysinfo = new JsonParser().parse(reader).getAsJsonObject();
                 reader.close();
                 DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
-                node.parseData(dp);
+                n.parseData(dp);
             }
+            return true;
         } catch (NoRouteToHostException | ConnectException | SocketTimeoutException ex) {
-            node.setOnline(false);
-            DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{node.getId(), ex.getMessage()});
+            n.setOnline(false);
+            if (ex instanceof NoRouteToHostException || ex.getMessage().startsWith("No route to host")) {
+                return true;
+            } else {
+                DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{n.getId(), ex.getMessage()});
+                return false;
+            }
         } catch (IOException | NullPointerException ex) {
-            node.setOnline(false);
-            DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
+            n.setOnline(false);
+            DataGen.getLogger().log(Level.SEVERE, "Node " + n.getId(), ex);
+            return true;
         }
     }
 }
