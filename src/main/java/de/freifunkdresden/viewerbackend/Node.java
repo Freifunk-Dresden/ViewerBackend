@@ -92,7 +92,7 @@ public class Node {
             latitude = dp.getLatitude();
             longitude = dp.getLongitude();
             online = true;
-            lastseen = System.currentTimeMillis();
+            setLastseen(System.currentTimeMillis());
             valid = true;
         } catch (Throwable t) {
             DataGen.getLogger().log(Level.SEVERE, "Node " + getId(), t);
