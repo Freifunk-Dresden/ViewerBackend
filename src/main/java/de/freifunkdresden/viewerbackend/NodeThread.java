@@ -26,7 +26,6 @@ package de.freifunkdresden.viewerbackend;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
@@ -48,38 +47,30 @@ public class NodeThread implements Runnable {
     @Override
     public void run() {
         for (int i = 0; i < RETRY_COUNT; i++) {
-            if (checkNode(node)) {
+            try {
+                checkNode(node);
                 return;
+            } catch (NoRouteToHostException | ConnectException | SocketTimeoutException ex) {
+                node.setOnline(false);
+                if (!(ex instanceof NoRouteToHostException || ex.getMessage().startsWith("No route to host"))) {
+                    DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{String.valueOf(node.getId()), ex.getMessage()});
+                }
+            } catch (IOException | NullPointerException ex) {
+                node.setOnline(false);
+                DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
             }
         }
     }
 
-    private static boolean checkNode(Node n) {
-        try {
-            HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAdress() + "/sysinfo-json.cgi").openConnection();
-            con.setConnectTimeout(10000);
-            con.setReadTimeout(10000);
-            InputStreamReader reader;
-            try (InputStream stream = con.getInputStream()) {
-                reader = new InputStreamReader(stream, "UTF-8");
-                JsonObject sysinfo = new JsonParser().parse(reader).getAsJsonObject();
-                reader.close();
-                DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
-                n.parseData(dp);
-            }
-            return true;
-        } catch (NoRouteToHostException | ConnectException | SocketTimeoutException ex) {
-            n.setOnline(false);
-            if (ex instanceof NoRouteToHostException || ex.getMessage().startsWith("No route to host")) {
-                return true;
-            } else {
-                DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{n.getId(), ex.getMessage()});
-                return false;
-            }
-        } catch (IOException | NullPointerException ex) {
-            n.setOnline(false);
-            DataGen.getLogger().log(Level.SEVERE, "Node " + n.getId(), ex);
-            return true;
+    private static void checkNode(Node n) throws IOException {
+        HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAdress() + "/sysinfo-json.cgi").openConnection();
+        con.setConnectTimeout(10000);
+        con.setReadTimeout(10000);
+        JsonObject sysinfo;
+        try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), "UTF-8")) {
+            sysinfo = new JsonParser().parse(reader).getAsJsonObject();
         }
+        DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
+        n.parseData(dp);
     }
 }
