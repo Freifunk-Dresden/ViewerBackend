@@ -179,7 +179,7 @@ public class DataGen {
             }
             NODES.values().forEach((n) -> POOL.submit(new NodeThread(n)));
             POOL.shutdown();
-            LOG.log(Level.INFO, "Wating threads to finish...");
+            LOG.log(Level.INFO, "Waiting threads to finish...");
             try {
                 POOL.awaitTermination(3, TimeUnit.MINUTES);
             } catch (InterruptedException ex) {
@@ -235,12 +235,12 @@ public class DataGen {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private static void setupLogging() {
         for (Handler h : LOG.getHandlers()) {
             LOG.removeHandler(h);
         }
-        
+
         LOG.addHandler(new FancyConsoleHandler());
     }
 
