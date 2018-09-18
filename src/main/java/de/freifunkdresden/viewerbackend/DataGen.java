@@ -23,20 +23,18 @@
  */
 package de.freifunkdresden.viewerbackend;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
+import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.logging.FancyConsoleHandler;
-import java.io.BufferedReader;
+import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
+import de.freifunkdresden.viewerbackend.stats.StatsSQL;
+import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+import java.math.BigInteger;
 import java.sql.ResultSet;
-import java.text.ParseException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,104 +43,131 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 public class DataGen {
 
     public static SimpleDateFormat DATE_MESH = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     public static SimpleDateFormat DATE_HOP = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
-    private static final LinkedHashMap<Integer, Node> NODES = new LinkedHashMap<>();
-    private static final HashMap<Integer, HashMap<Integer, Link>> LINKS = new HashMap<>();
+    private static final DataHolder HOLDER = new DataHolder();
     private static MySQL DB;
-
-    private void getNodes() throws IOException {
-        URLConnection con = new URL("http://api.freifunk-dresden.de/freifunk-nodes.json").openConnection();
-        InputStreamReader reader;
-        try (InputStream stream = con.getInputStream()) {
-            reader = new InputStreamReader(stream, "UTF-8");
-            JsonObject api = new JsonParser().parse(reader).getAsJsonObject();
-            reader.close();
-            api.get("nodes").getAsJsonArray().forEach((node) -> {
-                JsonObject n = node.getAsJsonObject();
-                Node nod = getNode(n.get("id").getAsInt());
-                JsonObject pos = n.get("position").getAsJsonObject();
-                try {
-                    nod.setLatitude(pos.get("lat").getAsDouble());
-                    nod.setLongitude(pos.get("long").getAsDouble());
-                } catch (NumberFormatException ex) {
-                }
-            });
-        }
-    }
-
-    private void parseRegister() throws IOException {
-        URLConnection register = new URL("http://register.freifunk-dresden.de/").openConnection();
-        InputStreamReader reader;
-        try (InputStream stream = register.getInputStream()) {
-            reader = new InputStreamReader(stream, "UTF-8");
-            String html = new BufferedReader(reader).lines().collect(Collectors.joining(" "));
-            reader.close();
-            Document doc = Jsoup.parse(html);
-            Element tbody = doc.select("tbody").first();
-            tbody.children().select(".node_db_color0").forEach(this::parseRegister);
-            tbody.children().select(".node_db_color2").forEach(this::parseRegister);
-        }
-    }
-
-    private void parseRegister(Element tr) {
-        try {
-            Node node = getNode(Integer.parseInt(tr.child(1).child(0).text()));
-            node.setGateway(tr.child(3).child(1).attr("alt").equals("Ja"));
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getDefault());
-            String firstseen = tr.child(6).child(0).getElementsByTag("td").get(0).text();
-            String lastseen = tr.child(6).child(0).getElementsByTag("td").get(1).text();
-            node.setFirstseen(firstseen.isEmpty() ? -1 : sdf.parse(firstseen).getTime());
-            node.setLastseen(lastseen.isEmpty() ? -1 : sdf.parse(lastseen).getTime());
-        } catch (ParseException ex) {
-            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, tr.child(1).child(0).text(), ex);
-        }
-    }
-
-    public static Node getNode(int id) {
-        Node n = NODES.get(id);
-        if (n == null) {
-            n = new Node(id);
-            NODES.put(id, n);
-        }
-        return n;
-    }
 
     public static MySQL getDB() {
         return DB;
     }
 
-    public static Link getLink(int node1, int node2) {
-        int min = Math.min(node1, node2);
-        int max = Math.max(node1, node2);
-        HashMap<Integer, Link> get = LINKS.get(min);
-        if (get == null) {
-            LINKS.put(min, new HashMap<>());
-        }
-        return LINKS.get(min).get(max);
-    }
-
-    public static void addLink(Link l) {
-        int min = Math.min(l.getSource().getId(), l.getTarget().getId());
-        int max = Math.max(l.getSource().getId(), l.getTarget().getId());
-        if (LINKS.get(min) == null) {
-            LINKS.put(min, new HashMap<>());
-        }
-        LINKS.get(min).put(max, l);
-    }
-
     public static void main(String[] args) {
         DATE_HOP.setTimeZone(TimeZone.getTimeZone("UTC"));
         setupLogging();
+        setupDatabase();
+        collectAPIData();
+        collectNodeInfo();
+        fillOfflineNodes();
+        collectLinks();
+        genJson();
+        saveToDatabase();
+        LOG.log(Level.INFO, "Done!");
+    }
+
+    private static void collectAPIData() {
+        try {
+            LOG.log(Level.INFO, "Getting nodes...");
+            HOLDER.processAPI();
+            LOG.log(Level.INFO, "Getting register...");
+            HOLDER.processRegister();
+        } catch (Exception ex) {
+            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void collectNodeInfo() {
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        HOLDER.getNodes().values().forEach((n) -> pool.submit(new NodeSysinfoThread(n)));
+        pool.shutdown();
+        LOG.log(Level.INFO, "Waiting threads to finish...");
+        try {
+            pool.awaitTermination(2, TimeUnit.MINUTES);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void collectLinks() {
+        LOG.log(Level.INFO, "Collect links...");
+        HOLDER.getNodes().values().forEach((node) -> {
+            node.getLinks().forEach((link) -> {
+                Link lnk = HOLDER.getLink(link.getSource().getId(), link.getTarget().getId());
+                if (lnk == null) {
+                    HOLDER.addLink(link);
+                } else {
+                    lnk.setTargetTq(link.getSourceTq());
+                }
+            });
+        });
+    }
+
+    private static void fillOfflineNodes() {
+        LOG.log(Level.INFO, "Fill offline nodes from database...");
+        String ids = HOLDER.getNodes().values().stream()
+                .filter((n) -> !n.isOnline())
+                .map((n) -> String.valueOf(n.getId()))
+                .collect(Collectors.joining(","));
+        if (ids.isEmpty()) {
+            return;
+        }
+        try (ResultSet rs = DB.querySelect("SELECT * FROM nodes WHERE id IN (" + ids + ")")) {
+            while (rs.next()) {
+                HOLDER.getNode(rs.getInt("id")).fill(new DataParserDB(rs));
+            }
+        } catch (SQLException | RuntimeException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void genJson() {
+        LOG.log(Level.INFO, "Generate JSON files...");
+        JsonFileGen jfg = new JsonFileGen(HOLDER.getNodes().values(), HOLDER.getLinks().values());
+        try {
+            jfg.genNodes();
+            jfg.genGraph();
+            jfg.genMeshViewer();
+        } catch (IOException ex) {
+            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void saveToDatabase() {
+        LOG.log(Level.INFO, "Save to database...");
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        HOLDER.getNodes().values().stream()
+                .filter((node) -> node.getId() < 900 || node.getId() >= 1000)
+                .forEach((node) -> pool.submit(new NodeDatabaseThread(node)));
+        pool.shutdown();
+        try {
+            pool.awaitTermination(2, TimeUnit.MINUTES);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        LOG.log(Level.INFO, "Save stats to database...");
+        StatsSQL.addGeneralStats(GeneralStatType.NODES, HOLDER.getNodes().size());
+        StatsSQL.addGeneralStats(GeneralStatType.NODES_ONLINE, HOLDER.getNodes().values().stream().filter((n) -> n.isOnline()).count());
+        StatsSQL.addGeneralStats(GeneralStatType.CLIENTS, HOLDER.getNodes().values().stream()
+                .filter((n) -> n.isOnline())
+                .reduce(BigInteger.ZERO, (result, node) -> {
+                    return result.add(BigInteger.valueOf(node.getClients()));
+                }, BigInteger::add).intValue());
+        StatsSQL.processStats();
+    }
+
+    private static void setupLogging() {
+        for (Handler h : LOG.getHandlers()) {
+            LOG.removeHandler(h);
+        }
+
+        LOG.addHandler(new FancyConsoleHandler());
+    }
+
+    private static void setupDatabase() {
         LOG.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
         if (DB.hasConnection()) {
@@ -168,83 +193,16 @@ public class DataGen {
                     + "	`email` TEXT NULL, "
                     + "	PRIMARY KEY (`id`) "
                     + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
-            DataGen dataGen = new DataGen();
-            try {
-                LOG.log(Level.INFO, "Getting nodes...");
-                dataGen.getNodes();
-                LOG.log(Level.INFO, "Getting register...");
-                dataGen.parseRegister();
-            } catch (IOException ex) {
-                Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            NODES.values().forEach((n) -> POOL.submit(new NodeThread(n)));
-            POOL.shutdown();
-            LOG.log(Level.INFO, "Waiting threads to finish...");
-            try {
-                POOL.awaitTermination(3, TimeUnit.MINUTES);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            LOG.log(Level.INFO, "Validate nodes...");
-            validateNodes();
-            LOG.log(Level.INFO, "Collect links...");
-            collectLinks();
-            LOG.log(Level.INFO, "Generate JSON files...");
-            genJson();
-            LOG.log(Level.INFO, "Save to database...");
-            NODES.values().forEach((node) -> node.updateDatabase());
-            LOG.log(Level.INFO, "Done!");
+        } else {
+            throw new RuntimeException("No Database Connection!");
         }
-    }
-
-    public static void collectLinks() {
-        NODES.values().forEach((node) -> {
-            node.getLinks().forEach((link) -> {
-                Link lnk = getLink(link.getSource().getId(), link.getTarget().getId());
-                if (lnk == null) {
-                    addLink(link);
-                } else {
-                    lnk.setTargetTq(link.getSourceTq());
-                }
-            });
-        });
-    }
-
-    public static void validateNodes() {
-        NODES.values().forEach((n) -> {
-            if (!n.isValid()) {
-                ResultSet rs = DB.querySelect("SELECT * FROM nodes WHERE id = ?", n.getId());
-                try {
-                    if (rs.first()) {
-                        n.parseData(rs);
-                    }
-                } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
-            }
-        });
-    }
-
-    public static void genJson() {
-        JsonFileGen jfg = new JsonFileGen(NODES.values(), LINKS.values());
-        try {
-            jfg.genNodes();
-            jfg.genGraph();
-            jfg.genMeshViewer();
-        } catch (IOException ex) {
-            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private static void setupLogging() {
-        for (Handler h : LOG.getHandlers()) {
-            LOG.removeHandler(h);
-        }
-
-        LOG.addHandler(new FancyConsoleHandler());
     }
 
     public static Logger getLogger() {
         return LOG;
+    }
+
+    public static DataHolder getDataHolder() {
+        return HOLDER;
     }
 }

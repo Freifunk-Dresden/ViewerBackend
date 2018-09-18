@@ -21,39 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunkdresden.viewerbackend.logging;
+package de.freifunkdresden.viewerbackend.dataparser;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+import java.util.TimeZone;
+import org.jsoup.nodes.Element;
 
-public class DateOutputFormatter extends Formatter {
+public class DataParserRegister extends DataParser {
 
-    private final SimpleDateFormat date;
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final Element tr;
 
-    public DateOutputFormatter() {
-        date = new SimpleDateFormat("HH:mm:ss");
+    static {
+        sdf.setTimeZone(TimeZone.getDefault());
+    }
+
+    public DataParserRegister(Element tr) {
+        this.tr = tr;
     }
 
     @Override
-    public String format(LogRecord record) {
-        StringBuilder builder = new StringBuilder();
+    public Long getFirstseen() throws Exception {
+        String firstseen = tr.child(6).child(0).getElementsByTag("td").get(0).text();
+        return firstseen.isEmpty() ? null : sdf.parse(firstseen).getTime();
+    }
 
-        builder.append(date.format(record.getMillis()));
-        builder.append(" [");
-        builder.append(record.getLevel().getName().toUpperCase());
-        builder.append("] ");
-        builder.append(formatMessage(record));
-        builder.append('\n');
+    @Override
+    public Long getLastseen() throws Exception {
+        String lastseen = tr.child(6).child(0).getElementsByTag("td").get(1).text();
+        return lastseen.isEmpty() ? null : sdf.parse(lastseen).getTime();
+    }
 
-        if (record.getThrown() != null) {
-            StringWriter writer = new StringWriter();
-            record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer);
-        }
-
-        return builder.toString();
+    @Override
+    public Boolean isGateway() throws Exception {
+        return tr.child(3).child(1).attr("alt").equals("Ja");
     }
 }

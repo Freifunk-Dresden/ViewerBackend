@@ -25,9 +25,12 @@ package de.freifunkdresden.viewerbackend;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.dataparser.DataParser;
+import de.freifunkdresden.viewerbackend.stats.Stat;
+import de.freifunkdresden.viewerbackend.stats.Stat.StatType;
+import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -36,10 +39,11 @@ import java.util.logging.Level;
 public class Node {
 
     private final int id;
+    private final HashSet<Link> linkset = new HashSet<>();
     private String hostname;
     private String name;
     private String community;
-    private NodeType role;
+    private NodeType role = NodeType.STANDARD;
     private String model;
     private String firmwareVersion;
     private String firmwareBase;
@@ -50,15 +54,14 @@ public class Node {
     private short clients;
     private float loadAvg;
     private boolean gateway;
-    private long lastseen;
-    private long firstseen;
+    private long lastseen = -1;
+    private long firstseen = -1;
     private double latitude = Double.NaN;
     private double longitude = Double.NaN;
     private String gatewayIp;
-    private boolean valid;
+    private boolean valid = false;
     private boolean displayed;
     private boolean autoupdate;
-    private HashSet<Link> linkset = new HashSet<>();
 
     public Node(int id) {
         this.id = id;
@@ -70,61 +73,75 @@ public class Node {
     }
 
     public String getIpAdress(boolean subnet201) {
-        return (subnet201 ? "10.201." : "10.200.") + (id / 255 % 256) + "." + ((id % 255) + 1);
+        return String.format("10.%s.%s.%s", (subnet201 ? "201" : "200"), (id / 255 % 256), ((id % 255) + 1));
     }
 
-    public void parseData(DataParser dp) {
+    public void fill(DataParser dp) {
         try {
-            setName(dp.getName());
-            community = dp.getCommunity().isEmpty() ? "Dresden" : dp.getCommunity();
-            role = dp.getRole();
-            model = dp.getModel();
-            firmwareVersion = dp.getFirmwareVersion();
-            firmwareBase = dp.getFirmwareBase();
-            setEmail(dp.getEMail());
-            uptime = dp.getUptime();
-            memoryUsage = dp.getMemoryUsage();
-            clients = dp.getClients();
-            loadAvg = dp.getLoadAvg();
-            gatewayIp = dp.getGatewayIp();
-            linkset = dp.getLinkSet();
-            autoupdate = dp.getAutoUpdate();
-            latitude = dp.getLatitude();
-            longitude = dp.getLongitude();
-            online = true;
-            setLastseen(System.currentTimeMillis());
-            valid = true;
-        } catch (Throwable t) {
-            DataGen.getLogger().log(Level.SEVERE, "Node " + getId(), t);
-        }
-    }
-
-    public void parseData(ResultSet rs) {
-        try {
-            community = rs.getString("community");
-            String r = rs.getString("role");
-            role = r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
-            model = rs.getString("model");
-            firmwareVersion = rs.getString("firmwareVersion");
-            firmwareBase = rs.getString("firmwareBase");
-            firstseen = rs.getLong("firstseen") * 1000;
-            setLastseen(rs.getLong("lastseen") * 1000);
-            gatewayIp = rs.getString("gatewayIp");
-            latitude = rs.getDouble("latitude");
-            if (rs.wasNull()) {
-                latitude = Double.NaN;
+            if (dp.getName() != null) {
+                setName(dp.getName());
             }
-            longitude = rs.getDouble("longitude");
-            if (rs.wasNull()) {
-                longitude = Double.NaN;
+            if (dp.getCommunity() != null) {
+                community = dp.getCommunity().isEmpty() ? "Dresden" : dp.getCommunity();
             }
-            clients = 0;
-            gateway = rs.getBoolean("gateway");
-            setName(rs.getString("name"));
-            setEmail(rs.getString("email"));
+            if (dp.getRole() != null) {
+                role = dp.getRole();
+            }
+            if (dp.getModel() != null) {
+                model = dp.getModel();
+            }
+            if (dp.getFirmwareVersion() != null) {
+                firmwareVersion = dp.getFirmwareVersion();
+            }
+            if (dp.getFirmwareBase() != null) { 
+                firmwareBase = dp.getFirmwareBase();
+            }
+            if (dp.getEMail() != null) {
+                setEmail(dp.getEMail());
+            }
+            if (dp.getUptime() != null) {
+                uptime = dp.getUptime();
+            }
+            if (dp.getMemoryUsage() != null) {
+                memoryUsage = dp.getMemoryUsage();
+            }
+            if (dp.getClients() != null) {
+                clients = dp.getClients();
+            }
+            if (dp.getLoadAvg() != null) {
+                loadAvg = dp.getLoadAvg();
+            }
+            if (dp.getGatewayIp() != null) {
+                gatewayIp = dp.getGatewayIp();
+            }
+            if (dp.getLinkSet() != null) {
+                linkset.addAll(dp.getLinkSet());
+            }
+            if (dp.getAutoUpdate() != null) {
+                autoupdate = dp.getAutoUpdate();
+            }
+            if (dp.getLatitude() != null) {
+                latitude = dp.getLatitude();
+            }
+            if (dp.getLongitude() != null) {
+                longitude = dp.getLongitude();
+            }
+            if (dp.isOnline() != null) {
+                online = dp.isOnline();
+            }
+            if (dp.isGateway() != null) {
+                gateway = dp.isGateway();
+            }
+            if (dp.getLastseen() != null) {
+                setLastseen(dp.getLastseen());
+            }
+            if (dp.getFirstseen() != null) {
+                firstseen = dp.getFirstseen();
+            }
             valid = true;
-        } catch (Throwable t) {
-            DataGen.getLogger().log(Level.SEVERE, "Node " + getId(), t);
+        } catch (Exception e) {
+            valid = false;
+            DataGen.getLogger().log(Level.SEVERE, "Node " + getId(), e);
         }
     }
 
@@ -149,30 +166,14 @@ public class Node {
         }
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
     public void setOnline(boolean online) {
         this.online = online;
     }
 
-    public void setGateway(boolean gateway) {
-        this.gateway = gateway;
-    }
-
-    public void setLastseen(long lastseen) {
+    private void setLastseen(long lastseen) {
         this.lastseen = lastseen;
         //display only nodes lastseen within the last 30 days
         displayed = lastseen / 1000 > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30;
-    }
-
-    public void setFirstseen(long firstseen) {
-        this.firstseen = firstseen;
     }
 
     public boolean isValid() {
@@ -189,6 +190,14 @@ public class Node {
 
     public Collection<Link> getLinks() {
         return linkset;
+    }
+
+    public short getClients() {
+        return clients;
+    }
+    
+    public boolean hasValidLocation() {
+        return !Double.isNaN(latitude) && !Double.isNaN(longitude);
     }
 
     public JsonObject getJsonObject() {
@@ -231,7 +240,7 @@ public class Node {
                 owner.addProperty("contact", email);
             }
             nodeinfo.add("owner", owner);
-            if (id > 1000 && !Double.isNaN(latitude) && !Double.isNaN(longitude)) {
+            if (id > 1000 && hasValidLocation()) {
                 JsonObject location = new JsonObject();
                 location.addProperty("latitude", latitude);
                 location.addProperty("longitude", longitude);
@@ -292,7 +301,7 @@ public class Node {
             node.add("addresses", addresses);
             node.addProperty("site_code", community);
             node.addProperty("hostname", hostname);
-            if (id > 1000 && !Double.isNaN(latitude) && !Double.isNaN(longitude)) {
+            if (id > 1000 && hasValidLocation()) {
                 JsonObject location = new JsonObject();
                 location.addProperty("latitude", latitude);
                 location.addProperty("longitude", longitude);
@@ -320,12 +329,18 @@ public class Node {
     }
 
     public void updateDatabase() {
-        if (Double.isNaN(latitude) || Double.isNaN(longitude)) {
+        if (!hasValidLocation()) {
             DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ? ON DUPLICATE KEY UPDATE id = id", id);
         } else {
             DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, latitude, longitude, latitude, longitude);
         }
-        DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, gatewayIp = ?, uptime = ?, memory_usage = ?, loadavg = ?, clients = ?, online = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
-                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, gatewayIp, uptime, memoryUsage, loadAvg, clients, online, gateway, name, email, id);
+        DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, online = ?, autoupdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
+                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, online, autoupdate, gateway, name, email, id);
+        //Statistics
+        if (isOnline() && (id >= 1000 && id < 51000)) {
+            StatsSQL.addStat(new Stat(StatType.CLIENTS, id, clients));
+            StatsSQL.addStat(new Stat(StatType.MEMORY, id, memoryUsage));
+            StatsSQL.addStat(new Stat(StatType.LOAD, id, loadAvg));
+        }        
     }
 }

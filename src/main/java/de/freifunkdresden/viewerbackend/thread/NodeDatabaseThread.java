@@ -21,39 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunkdresden.viewerbackend.logging;
+package de.freifunkdresden.viewerbackend.thread;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+import de.freifunkdresden.viewerbackend.Node;
 
-public class DateOutputFormatter extends Formatter {
+public class NodeDatabaseThread implements Runnable {
 
-    private final SimpleDateFormat date;
+    private final Node node;
 
-    public DateOutputFormatter() {
-        date = new SimpleDateFormat("HH:mm:ss");
+    public NodeDatabaseThread(Node node) {
+        this.node = node;
     }
 
     @Override
-    public String format(LogRecord record) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(date.format(record.getMillis()));
-        builder.append(" [");
-        builder.append(record.getLevel().getName().toUpperCase());
-        builder.append("] ");
-        builder.append(formatMessage(record));
-        builder.append('\n');
-
-        if (record.getThrown() != null) {
-            StringWriter writer = new StringWriter();
-            record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer);
-        }
-
-        return builder.toString();
+    public void run() {
+        node.updateDatabase();
     }
 }

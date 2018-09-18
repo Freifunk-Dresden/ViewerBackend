@@ -21,39 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunkdresden.viewerbackend.logging;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+package de.freifunkdresden.viewerbackend.stats;
 
-public class DateOutputFormatter extends Formatter {
+public class Stat {
+    
+    private final StatType type;
+    private final int nodeId;
+    private final double value;
 
-    private final SimpleDateFormat date;
-
-    public DateOutputFormatter() {
-        date = new SimpleDateFormat("HH:mm:ss");
+    public Stat(StatType type, int nodeId, double value) {
+        this.type = type;
+        this.nodeId = nodeId;
+        this.value = value;
     }
 
-    @Override
-    public String format(LogRecord record) {
-        StringBuilder builder = new StringBuilder();
+    public StatType getType() {
+        return type;
+    }
 
-        builder.append(date.format(record.getMillis()));
-        builder.append(" [");
-        builder.append(record.getLevel().getName().toUpperCase());
-        builder.append("] ");
-        builder.append(formatMessage(record));
-        builder.append('\n');
+    public int getNodeId() {
+        return nodeId;
+    }
 
-        if (record.getThrown() != null) {
-            StringWriter writer = new StringWriter();
-            record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer);
-        }
-
-        return builder.toString();
+    public double getValue() {
+        return value;
+    }
+    
+    public enum StatType {
+        CLIENTS,
+        MEMORY,
+        LOAD
     }
 }

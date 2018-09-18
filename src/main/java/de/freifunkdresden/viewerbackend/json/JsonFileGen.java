@@ -21,12 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunkdresden.viewerbackend;
+package de.freifunkdresden.viewerbackend.json;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.DataGen;
+import de.freifunkdresden.viewerbackend.Link;
+import de.freifunkdresden.viewerbackend.LinkType;
+import de.freifunkdresden.viewerbackend.Node;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,19 +37,17 @@ import java.util.*;
 
 public class JsonFileGen {
 
-    private final Gson gson;
+    private final Gson gson = new Gson();
     private final JsonArray hopGlassNodes = new JsonArray();
     private final JsonArray graphNodes = new JsonArray();
     private final JsonArray graphLinks = new JsonArray();
     private final JsonArray meshViewerNodes = new JsonArray();
     private final JsonArray meshViewerLinks = new JsonArray();
-    private final HashMap<Node, Integer> nodeIds = new HashMap<>();
+    private final Map<Node, Integer> nodeIds = new HashMap<>();
 
-    public JsonFileGen(Collection<Node> nodes, Collection<HashMap<Integer, Link>> links) {
-        this.gson = new GsonBuilder().create();
-        int i = 0;
-        Iterator<Node> iterator = nodes.stream().filter((node) -> node.isDisplayed()).iterator();
-        for (Iterator<Node> it = iterator; it.hasNext();) {
+    public JsonFileGen(Collection<Node> nodes, Collection<Map<Integer, Link>> links) {
+        Iterator<Node> it = nodes.stream().filter((node) -> node.isDisplayed()).iterator();
+        for (int i = 0; it.hasNext(); i++) {
             Node node = it.next();
             hopGlassNodes.add(node.getJsonObject());
             meshViewerNodes.add(node.getMeshViewerObj());
@@ -56,7 +57,6 @@ public class JsonFileGen {
             jsonNode.addProperty("seq", i);
             graphNodes.add(jsonNode);
             nodeIds.put(node, i);
-            i++;
         }
         links.forEach((map) -> {
             map.values().stream()

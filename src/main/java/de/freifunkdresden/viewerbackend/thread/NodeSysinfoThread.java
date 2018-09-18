@@ -21,10 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunkdresden.viewerbackend;
+package de.freifunkdresden.viewerbackend.thread;
 
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import de.freifunkdresden.viewerbackend.DataGen;
+import de.freifunkdresden.viewerbackend.Node;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -34,13 +37,13 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.logging.Level;
 
-public class NodeThread implements Runnable {
+public class NodeSysinfoThread implements Runnable {
 
     private static final int RETRY_COUNT = 3;
 
     private final Node node;
 
-    public NodeThread(Node nodeId) {
+    public NodeSysinfoThread(Node nodeId) {
         this.node = nodeId;
     }
 
@@ -52,7 +55,7 @@ public class NodeThread implements Runnable {
                 return;
             } catch (NoRouteToHostException | ConnectException | SocketTimeoutException ex) {
                 node.setOnline(false);
-                if (!(ex instanceof NoRouteToHostException || ex.getMessage().startsWith("No route to host"))) {
+                if (i + 1 == RETRY_COUNT && !(ex instanceof NoRouteToHostException || ex.getMessage().startsWith("No route to host"))) {
                     DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{String.valueOf(node.getId()), ex.getMessage()});
                 }
             } catch (IOException | NullPointerException ex) {
@@ -65,12 +68,11 @@ public class NodeThread implements Runnable {
     private static void checkNode(Node n) throws IOException {
         HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAdress() + "/sysinfo-json.cgi").openConnection();
         con.setConnectTimeout(10000);
-        con.setReadTimeout(10000);
+        con.setReadTimeout(15000);
         JsonObject sysinfo;
         try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), "UTF-8")) {
             sysinfo = new JsonParser().parse(reader).getAsJsonObject();
         }
-        DataParser dp = new DataParser(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt());
-        n.parseData(dp);
+        n.fill(new DataParserSysinfo(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt()));
     }
 }

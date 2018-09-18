@@ -21,39 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunkdresden.viewerbackend.logging;
+package de.freifunkdresden.viewerbackend.dataparser;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+import com.google.gson.JsonObject;
 
-public class DateOutputFormatter extends Formatter {
+public class DataParserAPI extends DataParser {
+    
+    private final JsonObject node;
 
-    private final SimpleDateFormat date;
-
-    public DateOutputFormatter() {
-        date = new SimpleDateFormat("HH:mm:ss");
+    public DataParserAPI(JsonObject node) {
+        this.node = node;
     }
 
     @Override
-    public String format(LogRecord record) {
-        StringBuilder builder = new StringBuilder();
+    public Short getClients() throws Exception {
+        return node.get("status").getAsJsonObject().get("clients").getAsShort();
+    }
 
-        builder.append(date.format(record.getMillis()));
-        builder.append(" [");
-        builder.append(record.getLevel().getName().toUpperCase());
-        builder.append("] ");
-        builder.append(formatMessage(record));
-        builder.append('\n');
+    @Override
+    public Double getLatitude() throws Exception {
+        return node.get("position").getAsJsonObject().get("lat").getAsDouble();
+    }
 
-        if (record.getThrown() != null) {
-            StringWriter writer = new StringWriter();
-            record.getThrown().printStackTrace(new PrintWriter(writer));
-            builder.append(writer);
-        }
+    @Override
+    public Double getLongitude() throws Exception {
+        return node.get("position").getAsJsonObject().get("long").getAsDouble();
+    }
 
-        return builder.toString();
+    @Override
+    public Boolean isOnline() throws Exception {
+        return node.get("status").getAsJsonObject().get("online").getAsBoolean();
     }
 }

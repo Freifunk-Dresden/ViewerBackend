@@ -21,21 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.freifunkdresden.viewerbackend;
+package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.DataGen;
+import de.freifunkdresden.viewerbackend.Link;
+import de.freifunkdresden.viewerbackend.LinkType;
+import de.freifunkdresden.viewerbackend.Node;
+import de.freifunkdresden.viewerbackend.NodeType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.logging.Level;
 
-public class DataParser {
+public class DataParserSysinfo extends DataParser {
 
     private final JsonObject data;
     private final JsonObject stats;
     private final int version;
 
-    public DataParser(JsonObject data, int version) {
+    public DataParserSysinfo(JsonObject data, int version) {
         this.data = data;
         this.version = version;
         if (data.has("statistic")) {
@@ -45,11 +50,17 @@ public class DataParser {
         }
     }
 
-    public int getNodeId() {
+    @Override
+    public Long getLastseen() throws Exception {
+        return System.currentTimeMillis();
+    }
+
+    private int getNodeId() {
         return data.get("common").getAsJsonObject().get("node").getAsInt();
     }
 
-    public String getCommunity() {
+    @Override
+    public String getCommunity() throws Exception {
         String com = data.get("common").getAsJsonObject().get("city").getAsString();
         if (com.equals("Meissen")) {
             return "Meißen";
@@ -57,7 +68,8 @@ public class DataParser {
         return com;
     }
 
-    public NodeType getRole() {
+    @Override
+    public NodeType getRole() throws Exception {
         if (version >= 13) {
             switch (data.get("system").getAsJsonObject().get("node_type").getAsString()) {
                 case "node":
@@ -68,15 +80,18 @@ public class DataParser {
         return NodeType.STANDARD;
     }
 
-    public String getModel() {
+    @Override
+    public String getModel() throws Exception {
         return data.get("system").getAsJsonObject().get(version >= 14 ? "model2" : "model").getAsString();
     }
 
-    public String getFirmwareVersion() {
+    @Override
+    public String getFirmwareVersion() throws Exception {
         return data.get("firmware").getAsJsonObject().get("version").getAsString();
     }
 
-    public String getFirmwareBase() {
+    @Override
+    public String getFirmwareBase() throws Exception {
         JsonObject firmware = data.get("firmware").getAsJsonObject();
         String DISTRIB_ID = firmware.get("DISTRIB_ID").getAsString();
         String DISTRIB_RELEASE = firmware.get("DISTRIB_RELEASE").getAsString();
@@ -84,16 +99,18 @@ public class DataParser {
         return DISTRIB_ID + " " + DISTRIB_RELEASE + " " + DISTRIB_REVISION;
     }
 
-    public String getGatewayIp() {
+    @Override
+    public String getGatewayIp() throws Exception {
         return data.get("bmxd").getAsJsonObject().get("gateways").getAsJsonObject().get("selected").getAsString();
     }
 
-    public float getUptime() {
+    @Override
+    public Float getUptime() throws Exception {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
         String[] uptime = jsonUptime.replace("  ", " ").split(" ");
         if (version < 10 && jsonUptime.contains(":")) {
             if (uptime[3].replace(",", "").contains(":")) {
-                return parseMinutes(uptime[3].replace(",", "")) * 60;
+                return parseMinutes(uptime[3].replace(",", "")) * 60f;
             } else {
                 short days = Short.parseShort(uptime[3].replace(",", ""));
                 int min;
@@ -104,7 +121,7 @@ public class DataParser {
                 } else {
                     min = parseMinutes(minutes);
                 }
-                return min * 60 + days * 86400;
+                return min * 60f + days * 86400f;
             }
             //Ab v10
         } else {
@@ -112,27 +129,31 @@ public class DataParser {
         }
     }
 
-    public double getMemoryUsage() {
+    @Override
+    public Double getMemoryUsage() throws Exception {
         if (stats.has("meminfo_MemTotal") && stats.has("meminfo_MemFree")) {
             double memTotal = Integer.parseInt(stats.get("meminfo_MemTotal").getAsString().split(" ")[0]);
             double memFree = Integer.parseInt(stats.get("meminfo_MemFree").getAsString().split(" ")[0]);
             return (memTotal - memFree) / memTotal;
         } else {
-            return 0;
+            return null;
         }
     }
 
-    public float getLoadAvg() {
+    @Override
+    public Float getLoadAvg() throws Exception {
         return Float.parseFloat(stats.get("cpu_load").getAsString().split(" ")[0]);
     }
 
-    public short getClients() {
+    @Override
+    public Short getClients() throws Exception {
         return stats.get("accepted_user_count").getAsShort();
     }
 
-    public HashSet<Link> getLinkSet() {
+    @Override
+    public HashSet<Link> getLinkSet() throws Exception {
         HashSet<Link> linkmap = new HashSet<>();
-        Node node = DataGen.getNode(getNodeId());
+        Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         if (version <= 10) {
             JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
@@ -141,14 +162,14 @@ public class DataParser {
                 String[] split = l.get("target").getAsString().split("\\.");
                 int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
                 LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
-                Node target = DataGen.getNode(targetId);
+                Node target = DataGen.getDataHolder().getNode(targetId);
                 linkmap.add(new Link(linkType, target, node));
             });
         }
         if (bmxd.has("links")) {
             bmxd.get("links").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
-                Node target = DataGen.getNode(l.get("node").getAsInt());
+                Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
                 byte tq = Byte.parseByte(l.get("tq").getAsString());
                 if (version == 10) {
                     for (Link lnk : linkmap) {
@@ -169,7 +190,8 @@ public class DataParser {
         return linkmap;
     }
 
-    public String getName() {
+    @Override
+    public String getName() throws Exception {
         try {
             return URLDecoder.decode(data.get("contact").getAsJsonObject().get("name").getAsString(), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
@@ -178,37 +200,46 @@ public class DataParser {
         }
     }
 
-    public String getEMail() {
+    @Override
+    public String getEMail() throws Exception {
         return data.get("contact").getAsJsonObject().get("email").getAsString();
     }
 
-    public boolean getAutoUpdate() {
+    @Override
+    public Boolean getAutoUpdate() throws Exception {
         return version >= 14 ? data.get("system").getAsJsonObject().get("autoupdate").getAsInt() == 1 : false;
     }
     
-    public double getLongitude() {
+    @Override
+    public Double getLongitude() throws Exception {
         try {
             double lon = data.get("gps").getAsJsonObject().get("longitude").getAsDouble();
             return lon == 0 ? Double.NaN : lon;
         } catch (NumberFormatException ex) {
-            return Double.NaN;
+            return null;
         }
     }
     
-    public double getLatitude() {
+    @Override
+    public Double getLatitude() throws Exception {
         try {
             double lat = data.get("gps").getAsJsonObject().get("latitude").getAsDouble();
             return lat == 0 ? Double.NaN : lat;
         } catch (NumberFormatException ex) {
-            return Double.NaN;
+            return null;
         }
     }
 
-    public static int parseMinutes(String time) {
+    private static int parseMinutes(String time) {
         if (time.contains(":")) {
             return Integer.parseInt(time.split(":")[0]) * 60 + Integer.parseInt(time.split(":")[1]);
         } else {
             return Integer.parseInt(time);
         }
+    }
+
+    @Override
+    public Boolean isOnline() throws Exception {
+        return true;
     }
 }
