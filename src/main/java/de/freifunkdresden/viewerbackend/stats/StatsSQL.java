@@ -24,21 +24,31 @@
 package de.freifunkdresden.viewerbackend.stats;
 
 import de.freifunkdresden.viewerbackend.DataGen;
+import de.freifunkdresden.viewerbackend.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 public class StatsSQL {
 
-    private static final Set<Stat> stats = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<GeneralStatType, Double> generalStats = new EnumMap<GeneralStatType, Double>(GeneralStatType.class);
+    private static final Map<Node, Short> clients = Collections.synchronizedMap(new LinkedHashMap<>());
+    private static final Map<Node, Float> load = Collections.synchronizedMap(new LinkedHashMap<>());
+    private static final Map<Node, Double> memory = Collections.synchronizedMap(new LinkedHashMap<>());
 
-    public static void addStat(Stat s) {
-        stats.add(s);
+    public static void addClientStat(Node n, short c) {
+        clients.put(n, c);
+    }
+    
+    public static void addLoadStat(Node n, float l) {
+        load.put(n, l);
+    }
+    
+    public static void addMemoryStat(Node n, double m) {
+        memory.put(n, m);
     }
     
     public static void addGeneralStats(GeneralStatType type, double value) {
@@ -46,14 +56,35 @@ public class StatsSQL {
     }
 
     public static void processStats() {
-        if (!stats.isEmpty()) {
-            String query = "INSERT INTO stats (node, type, value) VALUES ";
+        if (!clients.isEmpty()) {
+            String query = "INSERT INTO statsClients (node, value) VALUES ";
             ArrayList<Object> data = new ArrayList<>();
-            for (Stat stat : stats) {
-                query += "(?,?,?),";
-                data.add(stat.getNodeId());
-                data.add(stat.getType().name().toLowerCase());
-                data.add(stat.getValue());
+            for (Entry<Node, Short> e : clients.entrySet()) {
+                query += "(?,?),";
+                data.add(e.getKey().getId());
+                data.add(e.getValue());
+            }
+            query = query.substring(0, query.length() - 1);
+            DataGen.getDB().queryUpdate(query, data.toArray());
+        }
+        if (!load.isEmpty()) {
+            String query = "INSERT INTO statsLoad (node, value) VALUES ";
+            ArrayList<Object> data = new ArrayList<>();
+            for (Entry<Node, Float> e : load.entrySet()) {
+                query += "(?,?),";
+                data.add(e.getKey().getId());
+                data.add(e.getValue());
+            }
+            query = query.substring(0, query.length() - 1);
+            DataGen.getDB().queryUpdate(query, data.toArray());
+        }
+        if (!memory.isEmpty()) {
+            String query = "INSERT INTO statsMemory (node, value) VALUES ";
+            ArrayList<Object> data = new ArrayList<>();
+            for (Entry<Node, Double> e : memory.entrySet()) {
+                query += "(?,?),";
+                data.add(e.getKey().getId());
+                data.add(e.getValue());
             }
             query = query.substring(0, query.length() - 1);
             DataGen.getDB().queryUpdate(query, data.toArray());
