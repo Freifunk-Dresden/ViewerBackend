@@ -24,12 +24,10 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserRegister;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -37,10 +35,6 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 public class DataHolder {
     
@@ -82,35 +76,17 @@ public class DataHolder {
         return new HashMap<>(links);
     }
     
-    public void processAPI() throws IOException {
-        URLConnection con = new URL("http://api.freifunk-dresden.de/freifunk-nodes.json").openConnection();
+    public void processAPI() throws Exception {
+        URLConnection con = new URL("http://api.freifunk-dresden.de/freifunk-niklas-hopglass.json").openConnection();
         InputStreamReader reader;
         try (InputStream stream = con.getInputStream()) {
             reader = new InputStreamReader(stream, "UTF-8");
-            JsonObject api = new JsonParser().parse(reader).getAsJsonObject();
+            JsonArray api = new JsonParser().parse(reader).getAsJsonArray();
             reader.close();
-            api.get("nodes").getAsJsonArray().forEach((node) -> {
+            api.forEach((node) -> {
                 JsonObject n = node.getAsJsonObject();
                 getNode(n.get("id").getAsInt()).fill(new DataParserAPI(n));
             });
         }
-    }
-    
-    public void processRegister() throws IOException {
-        URLConnection register = new URL("http://register.freifunk-dresden.de/").openConnection();
-        InputStreamReader reader;
-        try (InputStream stream = register.getInputStream()) {
-            reader = new InputStreamReader(stream, "UTF-8");
-            String html = new BufferedReader(reader).lines().collect(Collectors.joining(" "));
-            reader.close();
-            Document doc = Jsoup.parse(html);
-            Element tbody = doc.select("tbody").first();
-            tbody.children().select(".node_db_color0").forEach(this::parseRegister);
-            tbody.children().select(".node_db_color2").forEach(this::parseRegister);
-        }
-    }
-
-    private void parseRegister(Element tr) {
-        getNode(Integer.parseInt(tr.child(1).child(0).text())).fill(new DataParserRegister(tr));
     }
 }

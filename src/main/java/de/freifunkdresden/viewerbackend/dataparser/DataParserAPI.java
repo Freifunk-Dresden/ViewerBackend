@@ -26,7 +26,7 @@ package de.freifunkdresden.viewerbackend.dataparser;
 import com.google.gson.JsonObject;
 
 public class DataParserAPI extends DataParser {
-    
+
     private final JsonObject node;
 
     public DataParserAPI(JsonObject node) {
@@ -40,16 +40,42 @@ public class DataParserAPI extends DataParser {
 
     @Override
     public Double getLatitude() throws Exception {
-        return node.get("position").getAsJsonObject().get("lat").getAsDouble();
+        try {
+            double lat = node.get("position").getAsJsonObject().get("lat").getAsDouble();
+            return lat == 0 ? Double.NaN : lat;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
     @Override
     public Double getLongitude() throws Exception {
-        return node.get("position").getAsJsonObject().get("long").getAsDouble();
+        try {
+            double lon = node.get("position").getAsJsonObject().get("lon").getAsDouble();
+            return lon == 0 ? Double.NaN : lon;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
     @Override
     public Boolean isOnline() throws Exception {
         return node.get("status").getAsJsonObject().get("online").getAsBoolean();
     }
+
+    @Override
+    public Long getFirstseen() throws Exception {
+        return node.get("status").getAsJsonObject().get("firstseen").getAsLong() * 1000;
+    }
+
+    @Override
+    public Long getLastseen() throws Exception {
+        return node.get("status").getAsJsonObject().get("lastseen").getAsLong() * 1000;
+    }
+
+    @Override
+    public Boolean isGateway() throws Exception {
+        return node.get("status").getAsJsonObject().get("gateway").getAsBoolean();
+    }
+
 }

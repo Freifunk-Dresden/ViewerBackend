@@ -71,10 +71,8 @@ public class DataGen {
 
     private static void collectAPIData() {
         try {
-            LOG.log(Level.INFO, "Getting nodes...");
+            LOG.log(Level.INFO, "Processing API...");
             HOLDER.processAPI();
-            LOG.log(Level.INFO, "Getting register...");
-            HOLDER.processRegister();
         } catch (Exception ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
