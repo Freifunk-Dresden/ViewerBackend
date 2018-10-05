@@ -24,6 +24,7 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.Location;
 
 public class DataParserAPI extends DataParser {
 
@@ -39,20 +40,13 @@ public class DataParserAPI extends DataParser {
     }
 
     @Override
-    public Double getLatitude() throws Exception {
+    public Location getLocation() throws Exception {
         try {
             double lat = node.get("position").getAsJsonObject().get("lat").getAsDouble();
-            return lat == 0 ? Double.NaN : lat;
-        } catch (NumberFormatException ex) {
-            return null;
-        }
-    }
-
-    @Override
-    public Double getLongitude() throws Exception {
-        try {
+            lat = lat == 0 ? Double.NaN : lat;
             double lon = node.get("position").getAsJsonObject().get("lon").getAsDouble();
-            return lon == 0 ? Double.NaN : lon;
+            lon = lon == 0 ? Double.NaN : lon;
+            return new Location(lat, lon);
         } catch (NumberFormatException ex) {
             return null;
         }

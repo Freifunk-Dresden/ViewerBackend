@@ -27,6 +27,7 @@ import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.LinkType;
+import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.io.UnsupportedEncodingException;
@@ -211,20 +212,13 @@ public class DataParserSysinfo extends DataParser {
     }
     
     @Override
-    public Double getLongitude() throws Exception {
-        try {
-            double lon = data.get("gps").getAsJsonObject().get("longitude").getAsDouble();
-            return lon == 0 ? Double.NaN : lon;
-        } catch (NumberFormatException ex) {
-            return null;
-        }
-    }
-    
-    @Override
-    public Double getLatitude() throws Exception {
+    public Location getLocation() throws Exception {
         try {
             double lat = data.get("gps").getAsJsonObject().get("latitude").getAsDouble();
-            return lat == 0 ? Double.NaN : lat;
+            lat = lat == 0 ? Double.NaN : lat;
+            double lon = data.get("gps").getAsJsonObject().get("longitude").getAsDouble();
+            lon = lon == 0 ? Double.NaN : lon;
+            return new Location(lat, lon);
         } catch (NumberFormatException ex) {
             return null;
         }

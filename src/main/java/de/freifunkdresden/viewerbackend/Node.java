@@ -54,8 +54,7 @@ public class Node {
     private boolean gateway;
     private long lastseen = -1;
     private long firstseen = -1;
-    private double latitude = Double.NaN;
-    private double longitude = Double.NaN;
+    private Location location;
     private String gatewayIp;
     private boolean valid = false;
     private boolean displayed;
@@ -91,7 +90,7 @@ public class Node {
             if (dp.getFirmwareVersion() != null) {
                 firmwareVersion = dp.getFirmwareVersion();
             }
-            if (dp.getFirmwareBase() != null) { 
+            if (dp.getFirmwareBase() != null) {
                 firmwareBase = dp.getFirmwareBase();
             }
             if (dp.getEMail() != null) {
@@ -118,11 +117,8 @@ public class Node {
             if (dp.getAutoUpdate() != null) {
                 autoupdate = dp.getAutoUpdate();
             }
-            if (dp.getLatitude() != null) {
-                latitude = dp.getLatitude();
-            }
-            if (dp.getLongitude() != null) {
-                longitude = dp.getLongitude();
+            if (dp.getLocation() != null) {
+                location = dp.getLocation();
             }
             if (dp.isOnline() != null) {
                 online = dp.isOnline();
@@ -193,9 +189,9 @@ public class Node {
     public short getClients() {
         return clients;
     }
-    
+
     public boolean hasValidLocation() {
-        return !Double.isNaN(latitude) && !Double.isNaN(longitude);
+        return location != null && location.isValid();
     }
 
     public JsonObject getJsonObject() {
@@ -239,10 +235,7 @@ public class Node {
             }
             nodeinfo.add("owner", owner);
             if (id > 1000 && hasValidLocation()) {
-                JsonObject location = new JsonObject();
-                location.addProperty("latitude", latitude);
-                location.addProperty("longitude", longitude);
-                nodeinfo.add("location", location);
+                nodeinfo.add("location", location.toJson());
             }
             node.add("nodeinfo", nodeinfo);
             JsonObject statistics = new JsonObject();
@@ -300,10 +293,7 @@ public class Node {
             node.addProperty("site_code", community);
             node.addProperty("hostname", hostname);
             if (id > 1000 && hasValidLocation()) {
-                JsonObject location = new JsonObject();
-                location.addProperty("latitude", latitude);
-                location.addProperty("longitude", longitude);
-                node.add("location", location);
+                node.add("location", location.toJson());
             }
             if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
                 JsonObject firmware = new JsonObject();
@@ -330,7 +320,7 @@ public class Node {
         if (!hasValidLocation()) {
             DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ? ON DUPLICATE KEY UPDATE id = id", id);
         } else {
-            DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, latitude, longitude, latitude, longitude);
+            DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, location.getLatitude(), location.getLongitude(), location.getLatitude(), location.getLongitude());
         }
         DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, online = ?, autoupdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
                 community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, online, autoupdate, gateway, name, email, id);

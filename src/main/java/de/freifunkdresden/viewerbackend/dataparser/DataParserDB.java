@@ -24,6 +24,7 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import de.freifunkdresden.viewerbackend.Link;
+import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.sql.ResultSet;
 import java.util.HashSet;
@@ -73,20 +74,21 @@ public class DataParserDB extends DataParser {
     }
 
     @Override
-    public Double getLatitude() throws Exception {
-        double latitude = rs.getDouble("latitude");
-        return rs.wasNull() ? null : latitude;
-    }
-
-    @Override
     public HashSet<Link> getLinkSet() throws Exception {
         return new HashSet<>();
     }
-
+    
     @Override
-    public Double getLongitude() throws Exception {
-        double longitude = rs.getDouble("longitude");
-        return rs.wasNull() ? null : longitude;
+    public Location getLocation() throws Exception {
+        try {
+            double latitude = rs.getDouble("latitude");
+            latitude = rs.wasNull() ? Double.NaN : latitude;
+            double longitude = rs.getDouble("longitude");
+            longitude = rs.wasNull() ? Double.NaN : longitude;
+            return new Location(latitude, longitude);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
     @Override

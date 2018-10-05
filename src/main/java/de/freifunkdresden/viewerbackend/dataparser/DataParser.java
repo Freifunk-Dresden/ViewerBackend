@@ -24,6 +24,7 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import de.freifunkdresden.viewerbackend.Link;
+import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.util.HashSet;
 
@@ -65,10 +66,6 @@ public abstract class DataParser {
         return null;
     }
 
-    public Double getLatitude() throws Exception {
-        return null;
-    }
-
     public HashSet<Link> getLinkSet() throws Exception {
         return null;
     }
@@ -76,8 +73,8 @@ public abstract class DataParser {
     public Float getLoadAvg() throws Exception {
         return null;
     }
-
-    public Double getLongitude() throws Exception {
+    
+    public Location getLocation() throws Exception {
         return null;
     }
 
