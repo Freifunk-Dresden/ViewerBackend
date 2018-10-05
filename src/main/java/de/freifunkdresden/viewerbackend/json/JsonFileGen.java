@@ -28,7 +28,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
-import de.freifunkdresden.viewerbackend.LinkType;
 import de.freifunkdresden.viewerbackend.Node;
 import java.io.File;
 import java.io.FileWriter;
@@ -65,15 +64,15 @@ public class JsonFileGen {
                     .forEach((link) -> {
                         JsonObject jsonLink;
                         //Meshviewer
-                        if (!link.getType().equals(LinkType.TUNNEL)) {
-                            jsonLink = new JsonObject();
-                            jsonLink.addProperty("source", link.getSource().getId());
-                            jsonLink.addProperty("target", link.getTarget().getId());
-                            jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
-                            jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
-                            jsonLink.addProperty("type", link.getType().name().toLowerCase());
-                            meshViewerLinks.add(jsonLink);
-                        }
+                        jsonLink = new JsonObject();
+                        jsonLink.addProperty("source", String.valueOf(link.getSource().getId()));
+                        jsonLink.addProperty("target", String.valueOf(link.getTarget().getId()));
+                        jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
+                        jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
+                        jsonLink.addProperty("type", link.getType().getMeshviewer());
+                        jsonLink.addProperty("source_addr", Node.convertIdToMac(link.getSource().getId()));
+                        jsonLink.addProperty("target_addr", Node.convertIdToMac(link.getTarget().getId()));
+                        meshViewerLinks.add(jsonLink);
                         //Hopglass
                         Integer source = nodeIds.get(link.getSource());
                         Integer target = nodeIds.get(link.getTarget());
@@ -81,14 +80,14 @@ public class JsonFileGen {
                         jsonLink.addProperty("source", source);
                         jsonLink.addProperty("target", target);
                         jsonLink.addProperty("tq", Link.convertToHop(link.getSourceTq()));
-                        jsonLink.addProperty("type", link.getType().name().toLowerCase());
+                        jsonLink.addProperty("type", link.getType().getHopglass());
                         graphLinks.add(jsonLink);
                         if (link.getTargetTq() != -1) {
                             jsonLink = new JsonObject();
                             jsonLink.addProperty("source", target);
                             jsonLink.addProperty("target", source);
                             jsonLink.addProperty("tq", Link.convertToHop(link.getTargetTq()));
-                            jsonLink.addProperty("type", link.getType().name().toLowerCase());
+                            jsonLink.addProperty("type", link.getType().getHopglass());
                             graphLinks.add(jsonLink);
                         }
                     });

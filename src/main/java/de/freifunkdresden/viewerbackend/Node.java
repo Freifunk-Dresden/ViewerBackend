@@ -282,9 +282,11 @@ public class Node {
                 node.addProperty("memory_usage", memoryUsage);
                 Date date = new Date(System.currentTimeMillis() - (long) (uptime * 1000));
                 node.addProperty("uptime", DataGen.DATE_MESH.format(date));
+                node.addProperty("nproc", 1); //TODO: Correct processor count
             }
             if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
-                node.addProperty("gateway", gatewayIp);
+                node.addProperty("gateway", String.valueOf(convertIpToId(gatewayIp)));
+                node.addProperty("gateway_nexthop", String.valueOf(convertIpToId(gatewayIp))); //TODO: Correct value
             }
             node.addProperty("node_id", String.valueOf(id));
             JsonArray addresses = new JsonArray();
@@ -309,6 +311,8 @@ public class Node {
             autoupdater.addProperty("enabled", autoupdate);
             autoupdater.addProperty("branch", "stable");
             node.add("autoupdater", autoupdater);
+            node.addProperty("vpn", gateway); //TODO: Correct value
+            node.addProperty("mac", convertIdToMac(id));
             return node;
         } catch (Exception e) {
             DataGen.getLogger().log(Level.SEVERE, "Fehler bei Node " + id, e);
@@ -329,6 +333,22 @@ public class Node {
             StatsSQL.addClientStat(this, clients);
             StatsSQL.addLoadStat(this, loadAvg);
             StatsSQL.addMemoryStat(this, memoryUsage);
-        }        
+        }
+    }
+
+    public static int convertIpToId(String ip) {
+        String[] split = ip.split("\\.");
+        if (split.length == 4) {
+            int third = Integer.parseInt(split[2]);
+            int fourth = Integer.parseInt(split[3]);
+            return third * 255 + (fourth - 1);
+        }
+        return -1;
+    }
+
+    public static String convertIdToMac(int id) {
+        int third = id / 255 % 256;
+        int fourth = (id % 255) + 1;
+        return "ff:dd:00:00:" + String.format("%02x", third) + ":" + String.format("%02x", fourth);
     }
 }

@@ -24,10 +24,26 @@
 package de.freifunkdresden.viewerbackend;
 
 public enum LinkType {
-    WIRELESS,
-    TUNNEL,
-    OTHER;
+    WIRELESS("wireless", "wifi"),
+    TUNNEL("tunnel", "vpn"),
+    OTHER("other", "other");
     
+    private final String hopglass;
+    private final String meshviewer;
+
+    private LinkType(String hopglass, String meshviewer) {
+        this.hopglass = hopglass;
+        this.meshviewer = meshviewer;
+    }
+
+    public String getHopglass() {
+        return hopglass;
+    }
+
+    public String getMeshviewer() {
+        return meshviewer;
+    }
+
     public static LinkType getTypeByInterface(String iface) {
         switch (iface.toLowerCase()) {
             case "wlan0":
