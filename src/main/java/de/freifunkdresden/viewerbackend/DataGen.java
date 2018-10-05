@@ -23,17 +23,19 @@
  */
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.exception.APIProcessingException;
 import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
+import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
+import de.freifunkdresden.viewerbackend.exception.NodeInfoCollectionException;
+import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
 import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.logging.FancyConsoleHandler;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
@@ -57,36 +59,40 @@ public class DataGen {
     }
 
     public static void main(String[] args) {
-        DATE_HOP.setTimeZone(TimeZone.getTimeZone("UTC"));
-        setupLogging();
-        setupDatabase();
-        collectAPIData();
-        collectNodeInfo();
-        fillOfflineNodes();
-        collectLinks();
-        genJson();
-        saveToDatabase();
-        LOG.log(Level.INFO, "Done!");
-    }
-
-    private static void collectAPIData() {
         try {
-            LOG.log(Level.INFO, "Processing API...");
-            HOLDER.processAPI();
-        } catch (Exception ex) {
+            DATE_HOP.setTimeZone(TimeZone.getTimeZone("UTC"));
+            setupLogging();
+            setupDatabase();
+            collectAPIData();
+            collectNodeInfo();
+            fillOfflineNodes();
+            collectLinks();
+            genJson();
+            saveToDatabase();
+            LOG.log(Level.INFO, "Done!");
+        } catch (Throwable ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private static void collectNodeInfo() {
-        ExecutorService pool = Executors.newFixedThreadPool(10);
-        HOLDER.getNodes().values().forEach((n) -> pool.submit(new NodeSysinfoThread(n)));
-        pool.shutdown();
-        LOG.log(Level.INFO, "Waiting threads to finish...");
+    private static void collectAPIData() throws APIProcessingException {
         try {
+            LOG.log(Level.INFO, "Processing API...");
+            HOLDER.processAPI();
+        } catch (Throwable ex) {
+            throw new APIProcessingException(ex);
+        }
+    }
+
+    private static void collectNodeInfo() throws NodeInfoCollectionException {
+        try {
+            ExecutorService pool = Executors.newFixedThreadPool(10);
+            HOLDER.getNodes().values().forEach((n) -> pool.submit(new NodeSysinfoThread(n)));
+            pool.shutdown();
+            LOG.log(Level.INFO, "Waiting threads to finish...");
             pool.awaitTermination(2, TimeUnit.MINUTES);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Throwable ex) {
+            throw new NodeInfoCollectionException(ex);
         }
     }
 
@@ -104,7 +110,7 @@ public class DataGen {
         });
     }
 
-    private static void fillOfflineNodes() {
+    private static void fillOfflineNodes() throws OfflineNodeProcessingException {
         LOG.log(Level.INFO, "Fill offline nodes from database...");
         String ids = HOLDER.getNodes().values().stream()
                 .filter((n) -> !n.isOnline())
@@ -117,20 +123,20 @@ public class DataGen {
             while (rs.next()) {
                 HOLDER.getNode(rs.getInt("id")).fill(new DataParserDB(rs));
             }
-        } catch (SQLException | RuntimeException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+        } catch (Throwable ex) {
+            throw new OfflineNodeProcessingException(ex);
         }
     }
 
-    private static void genJson() {
-        LOG.log(Level.INFO, "Generate JSON files...");
-        JsonFileGen jfg = new JsonFileGen(HOLDER.getNodes().values(), HOLDER.getLinks().values());
+    private static void genJson() throws JsonGenerationException {
         try {
+            LOG.log(Level.INFO, "Generate JSON files...");
+            JsonFileGen jfg = new JsonFileGen(HOLDER.getNodes().values(), HOLDER.getLinks().values());
             jfg.genNodes();
             jfg.genGraph();
             jfg.genMeshViewer();
-        } catch (IOException ex) {
-            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Throwable ex) {
+            throw new JsonGenerationException(ex);
         }
     }
 
