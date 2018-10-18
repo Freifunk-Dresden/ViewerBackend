@@ -52,8 +52,7 @@ public class DataHolder {
     public Link getLink(int node1, int node2) {
         int min = Math.min(node1, node2);
         int max = Math.max(node1, node2);
-        Map<Integer, Link> get = links.get(min);
-        if (get == null) {
+        if (!links.containsKey(min)) {
             links.put(min, new HashMap<>());
         }
         return links.get(min).get(max);
@@ -62,7 +61,7 @@ public class DataHolder {
     public void addLink(Link l) {
         int min = Math.min(l.getSource().getId(), l.getTarget().getId());
         int max = Math.max(l.getSource().getId(), l.getTarget().getId());
-        if (links.get(min) == null) {
+        if (!links.containsKey(min)) {
             links.put(min, new HashMap<>());
         }
         links.get(min).put(max, l);

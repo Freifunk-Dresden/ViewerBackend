@@ -70,8 +70,8 @@ public class JsonFileGen {
                         jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
                         jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
                         jsonLink.addProperty("type", link.getType().getMeshviewer());
-                        jsonLink.addProperty("source_addr", Node.convertIdToMac(link.getSource().getId()));
-                        jsonLink.addProperty("target_addr", Node.convertIdToMac(link.getTarget().getId()));
+                        jsonLink.addProperty("source_addr", link.getSource().getFakeMac());
+                        jsonLink.addProperty("target_addr", link.getTarget().getFakeMac());
                         meshViewerLinks.add(jsonLink);
                         //Hopglass
                         Integer source = nodeIds.get(link.getSource());

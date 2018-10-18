@@ -27,8 +27,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.dataparser.DataParser;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -38,7 +36,6 @@ public class Node {
 
     private final int id;
     private final HashSet<Link> linkset = new HashSet<>();
-    private String hostname;
     private String name;
     private String community;
     private NodeType role = NodeType.STANDARD;
@@ -57,12 +54,10 @@ public class Node {
     private Location location;
     private String gatewayIp;
     private boolean valid = false;
-    private boolean displayed;
     private boolean autoupdate;
 
     public Node(int id) {
         this.id = id;
-        this.hostname = String.valueOf(id);
     }
 
     public String getIpAdress() {
@@ -76,10 +71,10 @@ public class Node {
     public void fill(DataParser dp) {
         try {
             if (dp.getName() != null) {
-                setName(dp.getName());
+                name = dp.getName();
             }
             if (dp.getCommunity() != null) {
-                community = dp.getCommunity().isEmpty() ? "Dresden" : dp.getCommunity();
+                community = dp.getCommunity();
             }
             if (dp.getRole() != null) {
                 role = dp.getRole();
@@ -94,7 +89,7 @@ public class Node {
                 firmwareBase = dp.getFirmwareBase();
             }
             if (dp.getEMail() != null) {
-                setEmail(dp.getEMail());
+                email = dp.getEMail();
             }
             if (dp.getUptime() != null) {
                 uptime = dp.getUptime();
@@ -127,7 +122,7 @@ public class Node {
                 gateway = dp.isGateway();
             }
             if (dp.getLastseen() != null) {
-                setLastseen(dp.getLastseen());
+                lastseen = dp.getLastseen();
             }
             if (dp.getFirstseen() != null) {
                 firstseen = dp.getFirstseen();
@@ -143,31 +138,8 @@ public class Node {
         return id;
     }
 
-    private void setName(String name) throws UnsupportedEncodingException {
-        if (name == null || name.isEmpty()) {
-            this.name = name;
-        } else {
-            this.name = URLDecoder.decode(name, "UTF-8");
-            this.hostname = id + "-" + name;
-        }
-    }
-
-    private void setEmail(String email) throws UnsupportedEncodingException {
-        if (email == null) {
-            this.email = email;
-        } else {
-            this.email = URLDecoder.decode(email, "UTF-8");
-        }
-    }
-
     public void setOnline(boolean online) {
         this.online = online;
-    }
-
-    private void setLastseen(long lastseen) {
-        this.lastseen = lastseen;
-        //display only nodes lastseen within the last 30 days
-        displayed = lastseen / 1000 > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30;
     }
 
     public boolean isValid() {
@@ -175,7 +147,8 @@ public class Node {
     }
 
     public boolean isDisplayed() {
-        return displayed && isValid();
+        //display only nodes lastseen within the last 30 days
+        return isValid() && (lastseen / 1000 > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30);
     }
 
     public boolean isOnline() {
@@ -188,6 +161,16 @@ public class Node {
 
     public short getClients() {
         return clients;
+    }
+
+    public String getHostname() {
+        return name.isEmpty() ? String.valueOf(id) : id + "-" + name;
+    }
+    
+    public String getFakeMac() {
+        int third = id / 255 % 256;
+        int fourth = (id % 255) + 1;
+        return "ff:dd:00:00:" + String.format("%02x", third) + ":" + String.format("%02x", fourth);
     }
 
     public boolean hasValidLocation() {
@@ -206,7 +189,7 @@ public class Node {
             addresses.add(getIpAdress());
             network.add("addresses", addresses);
             nodeinfo.add("network", network);
-            nodeinfo.addProperty("hostname", hostname);
+            nodeinfo.addProperty("hostname", getHostname());
             JsonObject system = new JsonObject();
             system.addProperty("site_code", community);
             system.addProperty("role", role.name().toLowerCase());
@@ -293,7 +276,7 @@ public class Node {
             addresses.add(getIpAdress());
             node.add("addresses", addresses);
             node.addProperty("site_code", community);
-            node.addProperty("hostname", hostname);
+            node.addProperty("hostname", getHostname());
             if (id > 1000 && hasValidLocation()) {
                 node.add("location", location.toJson());
             }
@@ -312,7 +295,7 @@ public class Node {
             autoupdater.addProperty("branch", "stable");
             node.add("autoupdater", autoupdater);
             node.addProperty("vpn", gateway); //TODO: Correct value
-            node.addProperty("mac", convertIdToMac(id));
+            node.addProperty("mac", getFakeMac());
             return node;
         } catch (Exception e) {
             DataGen.getLogger().log(Level.SEVERE, "Fehler bei Node " + id, e);
@@ -344,11 +327,5 @@ public class Node {
             return third * 255 + (fourth - 1);
         }
         return -1;
-    }
-
-    public static String convertIdToMac(int id) {
-        int third = id / 255 % 256;
-        int fourth = (id % 255) + 1;
-        return "ff:dd:00:00:" + String.format("%02x", third) + ":" + String.format("%02x", fourth);
     }
 }

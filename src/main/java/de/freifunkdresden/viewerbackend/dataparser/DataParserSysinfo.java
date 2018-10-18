@@ -63,6 +63,9 @@ public class DataParserSysinfo extends DataParser {
     @Override
     public String getCommunity() throws Exception {
         String com = data.get("common").getAsJsonObject().get("city").getAsString();
+        if (com.isEmpty()) {
+            return "Dresden";
+        }
         if (com.equals("Meissen")) {
             return "Meißen";
         }
@@ -203,7 +206,12 @@ public class DataParserSysinfo extends DataParser {
 
     @Override
     public String getEMail() throws Exception {
-        return data.get("contact").getAsJsonObject().get("email").getAsString();
+        try {
+            return URLDecoder.decode(data.get("contact").getAsJsonObject().get("email").getAsString(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            DataGen.getLogger().log(Level.SEVERE, null, ex);
+            return data.get("contact").getAsJsonObject().get("email").getAsString();
+        }
     }
 
     @Override
