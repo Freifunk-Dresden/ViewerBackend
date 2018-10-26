@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.freifunk-dresden</groupId>
     <artifactId>ViewerBackend</artifactId>
-    <version>0.8.0</version>
+    <version>0.8.1</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.12</version>
+            <version>8.0.13</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
