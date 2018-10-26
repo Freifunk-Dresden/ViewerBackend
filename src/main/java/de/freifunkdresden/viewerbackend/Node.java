@@ -164,7 +164,7 @@ public class Node {
     }
 
     public String getHostname() {
-        return name.isEmpty() ? String.valueOf(id) : id + "-" + name;
+        return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
     }
     
     public String getFakeMac() {
