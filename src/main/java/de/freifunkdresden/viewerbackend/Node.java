@@ -199,7 +199,7 @@ public class Node {
                 hardware.addProperty("model", model);
             }
             nodeinfo.add("hardware", hardware);
-            nodeinfo.addProperty("node_id", id);
+            nodeinfo.addProperty("node_id", String.valueOf(id));
             JsonObject software = new JsonObject();
             JsonObject autoupdater = new JsonObject();
             autoupdater.addProperty("enabled", autoupdate);
