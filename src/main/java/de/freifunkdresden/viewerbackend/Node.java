@@ -150,6 +150,10 @@ public class Node {
         //display only nodes lastseen within the last 30 days
         return isValid() && (lastseen / 1000 > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30);
     }
+    
+    public boolean isShown() {
+        return id >= 1000 && hasValidLocation() && role.equals(NodeType.STANDARD);
+    }
 
     public boolean isOnline() {
         return online;
@@ -217,7 +221,7 @@ public class Node {
                 owner.addProperty("contact", email);
             }
             nodeinfo.add("owner", owner);
-            if (id > 1000 && hasValidLocation() && !role.equals(NodeType.MOBILE)) {
+            if (isShown()) {
                 nodeinfo.add("location", location.toJson());
             }
             node.add("nodeinfo", nodeinfo);
@@ -277,7 +281,7 @@ public class Node {
             node.add("addresses", addresses);
             node.addProperty("site_code", community);
             node.addProperty("hostname", getHostname());
-            if (id > 1000 && hasValidLocation() && !role.equals(NodeType.MOBILE)) {
+            if (isShown()) {
                 node.add("location", location.toJson());
             }
             if (firmwareVersion != null && !firmwareVersion.isEmpty()) {

@@ -25,5 +25,6 @@ package de.freifunkdresden.viewerbackend;
 
 public enum NodeType {
     STANDARD,
-    MOBILE
+    MOBILE,
+    SERVER
 }

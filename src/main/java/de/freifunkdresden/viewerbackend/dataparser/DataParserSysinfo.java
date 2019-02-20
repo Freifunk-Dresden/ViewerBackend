@@ -75,12 +75,13 @@ public class DataParserSysinfo extends DataParser {
     @Override
     public NodeType getRole() throws Exception {
         if (version >= 13) {
-            switch (data.get("system").getAsJsonObject().get("node_type").getAsString()) {
+            switch (data.get("system").getAsJsonObject().get("node_type").getAsString().toLowerCase()) {
                 case "node":
                     return NodeType.STANDARD;
                 case "mobile":
                     return NodeType.MOBILE;
-                //@TODO: Include other node types
+                case "server":
+                    return NodeType.SERVER;
             }
         }
         return NodeType.STANDARD;
