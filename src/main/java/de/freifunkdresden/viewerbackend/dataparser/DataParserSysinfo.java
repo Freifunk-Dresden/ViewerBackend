@@ -78,6 +78,8 @@ public class DataParserSysinfo extends DataParser {
             switch (data.get("system").getAsJsonObject().get("node_type").getAsString()) {
                 case "node":
                     return NodeType.STANDARD;
+                case "mobile":
+                    return NodeType.MOBILE;
                 //@TODO: Include other node types
             }
         }
