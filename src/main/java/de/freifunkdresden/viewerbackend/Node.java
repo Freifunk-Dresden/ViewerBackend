@@ -217,7 +217,7 @@ public class Node {
                 owner.addProperty("contact", email);
             }
             nodeinfo.add("owner", owner);
-            if (id > 1000 && hasValidLocation()) {
+            if (id > 1000 && hasValidLocation() && !role.equals(NodeType.MOBILE)) {
                 nodeinfo.add("location", location.toJson());
             }
             node.add("nodeinfo", nodeinfo);
@@ -277,7 +277,7 @@ public class Node {
             node.add("addresses", addresses);
             node.addProperty("site_code", community);
             node.addProperty("hostname", getHostname());
-            if (id > 1000 && hasValidLocation()) {
+            if (id > 1000 && hasValidLocation() && !role.equals(NodeType.MOBILE)) {
                 node.add("location", location.toJson());
             }
             if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
