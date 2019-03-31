@@ -74,6 +74,7 @@ public class DataGen {
             collectLinks();
             genJson();
             saveToDatabase();
+            INFLUX.closeConnection();
             LOG.log(Level.INFO, "Done!");
         } catch (Throwable ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
