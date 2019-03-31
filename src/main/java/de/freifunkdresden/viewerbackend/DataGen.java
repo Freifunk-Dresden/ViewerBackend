@@ -34,11 +34,7 @@ import de.freifunkdresden.viewerbackend.logging.FancyConsoleHandler;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -71,19 +67,14 @@ public class DataGen {
         try {
             DATE_HOP.setTimeZone(TimeZone.getTimeZone("UTC"));
             setupLogging();
-            if (checkLock()) {
-                setupDatabase();
-                collectAPIData();
-                collectNodeInfo();
-                fillOfflineNodes();
-                collectLinks();
-                genJson();
-                deleteLock();
-                saveToDatabase();
-                INFLUX.closeConnection();
-            } else {
-                LOG.log(Level.WARNING, "Lock file existing exiting!");
-            }
+            setupDatabase();
+            collectAPIData();
+            collectNodeInfo();
+            fillOfflineNodes();
+            collectLinks();
+            genJson();
+            saveToDatabase();
+            INFLUX.closeConnection();
             LOG.log(Level.INFO, "Done!");
         } catch (Throwable ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
@@ -216,21 +207,6 @@ public class DataGen {
             throw new RuntimeException("No Database Connection!");
         }
         INFLUX = new Influx();
-    }
-    
-    private static boolean checkLock() throws IOException {
-        Path path = FileSystems.getDefault().getPath("ViewerBackend.lock");
-        boolean locked = Files.exists(path);
-        if (!locked) {
-            Files.createFile(path);
-            return true;
-        }
-        return false;
-    }
-    
-    private static void deleteLock() throws IOException {
-        Path path = FileSystems.getDefault().getPath("ViewerBackend.lock");
-        Files.deleteIfExists(path);
     }
 
     public static Logger getLogger() {
