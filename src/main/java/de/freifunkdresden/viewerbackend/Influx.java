@@ -43,7 +43,6 @@ public class Influx {
     private String username;
     private String password;
     private String database;
-    private int udp;
 
     public Influx() {
         if (this.loadConfig()) {
@@ -67,8 +66,6 @@ public class Influx {
             while ((line = fr.readLine()) != null) {
                 if (line.startsWith("url=")) {
                     url = line.replace("url=", "");
-                } else if (line.startsWith("udp=")) {
-                    udp = Short.parseShort(line.replace("udp=", ""));
                 } else if (line.startsWith("username=")) {
                     username = line.replace("username=", "");
                 } else if (line.startsWith("password=")) {
