@@ -110,7 +110,7 @@ public class Influx {
     }
     
     public void write(Point p) {
-        this.connection.write(udp, p);
+        this.connection.write(p);
     }
     
     public void closeConnection() {
