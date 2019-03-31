@@ -167,6 +167,14 @@ public class Node {
         return clients;
     }
 
+    public double getMemoryUsage() {
+        return memoryUsage;
+    }
+
+    public float getLoadAvg() {
+        return loadAvg;
+    }
+
     public String getHostname() {
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
     }
@@ -317,9 +325,7 @@ public class Node {
                 community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, online, autoupdate, gateway, name, email, id);
         //Statistics
         if (isOnline() && (id >= 1000 && id < 51000)) {
-            StatsSQL.addClientStat(this, clients);
-            StatsSQL.addLoadStat(this, loadAvg);
-            StatsSQL.addMemoryStat(this, memoryUsage);
+            StatsSQL.addToStats(this);
         }
     }
 

@@ -53,9 +53,14 @@ public class DataGen {
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
     private static final DataHolder HOLDER = new DataHolder();
     private static MySQL DB;
+    private static Influx INFLUX;
 
     public static MySQL getDB() {
         return DB;
+    }
+    
+    public static Influx getInflux() {
+        return INFLUX;
     }
 
     public static void main(String[] args) {
@@ -200,6 +205,7 @@ public class DataGen {
         } else {
             throw new RuntimeException("No Database Connection!");
         }
+        INFLUX = new Influx();
     }
 
     public static Logger getLogger() {
