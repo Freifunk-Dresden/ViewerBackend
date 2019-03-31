@@ -94,6 +94,11 @@ public abstract class DataParser {
         return null;
     }
 
+    /**
+     * Get uptime in secounds
+     * @return uptime in secounds
+     * @throws Exception
+     */
     public Float getUptime() throws Exception {
         return null;
     }
