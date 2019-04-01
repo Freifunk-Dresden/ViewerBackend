@@ -27,11 +27,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 
 public class Influx {
@@ -94,7 +95,6 @@ public class Influx {
         try {
             this.connection = InfluxDBFactory.connect(url, username, password);
             this.connection.setDatabase(database);
-            this.connection.enableBatch(BatchOptions.DEFAULTS.actions(2000).flushDuration(100));
             return true;
         } catch (IllegalArgumentException e) {
             LOG.log(Level.SEVERE, null, e);
@@ -108,6 +108,10 @@ public class Influx {
     
     public void write(Point p) {
         this.connection.write(p);
+    }
+    
+    public void write(Collection<Point> points) {
+        this.connection.write(BatchPoints.builder().points(points).build());
     }
     
     public void closeConnection() {

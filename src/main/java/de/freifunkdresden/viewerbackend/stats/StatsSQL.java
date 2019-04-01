@@ -25,9 +25,11 @@ package de.freifunkdresden.viewerbackend.stats;
 
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.influxdb.dto.Point;
@@ -46,24 +48,32 @@ public class StatsSQL {
     }
 
     public static void processStats() {
+        List<Point> general = new ArrayList<>();
+        generalStats.entrySet().forEach((e) -> {
+            general.add(Point.measurement(e.getKey().name().toLowerCase())
+                    .addField("value", e.getValue())
+                    .build());
+        });
+        DataGen.getInflux().write(general);
+        List<Point> node_clients = new ArrayList<>();
+        List<Point> node_load = new ArrayList<>();
+        List<Point> node_memory = new ArrayList<>();
         nodes.forEach((e) -> {
-            DataGen.getInflux().write(Point.measurement("node_clients")
+            node_clients.add(Point.measurement("node_clients")
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getClients())
                     .build());
-            DataGen.getInflux().write(Point.measurement("node_load")
+            node_load.add(Point.measurement("node_load")
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getLoadAvg())
                     .build());
-            DataGen.getInflux().write(Point.measurement("node_memory")
+            node_memory.add(Point.measurement("node_memory")
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getMemoryUsage())
                     .build());
         });
-        generalStats.entrySet().forEach((e) -> {
-            DataGen.getInflux().write(Point.measurement(e.getKey().name().toLowerCase())
-                    .addField("value", e.getValue())
-                    .build());
-        });
+        DataGen.getInflux().write(node_clients);
+        DataGen.getInflux().write(node_load);
+        DataGen.getInflux().write(node_memory);
     }
 }
