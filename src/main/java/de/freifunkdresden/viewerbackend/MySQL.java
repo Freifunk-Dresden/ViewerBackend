@@ -96,10 +96,9 @@ public class MySQL {
 
     private boolean openConnection() {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
             this.conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
             return true;
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             LOG.log(Level.SEVERE, null, e);
             return false;
         }
