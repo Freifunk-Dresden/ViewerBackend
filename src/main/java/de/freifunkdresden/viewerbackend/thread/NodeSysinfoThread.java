@@ -43,8 +43,8 @@ public class NodeSysinfoThread implements Runnable {
 
     private final Node node;
 
-    public NodeSysinfoThread(Node nodeId) {
-        this.node = nodeId;
+    public NodeSysinfoThread(Node node) {
+        this.node = node;
     }
 
     @Override
