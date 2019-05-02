@@ -330,6 +330,8 @@ public class Node {
         //Statistics
         if (isOnline() && (id >= 1000 && id < 51000)) {
             StatsSQL.addToStats(this);
+        } else {
+            StatsSQL.addVersion(getFirmwareVersion());
         }
     }
 

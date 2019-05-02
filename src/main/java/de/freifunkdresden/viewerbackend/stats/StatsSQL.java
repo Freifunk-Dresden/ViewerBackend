@@ -50,7 +50,7 @@ public class StatsSQL {
         generalStats.put(type, value);
     }
     
-    private static void addVersion(String version) {
+    public static void addVersion(String version) {
         versions.put(version, versions.getOrDefault(version, 0) + 1);
     }
 
