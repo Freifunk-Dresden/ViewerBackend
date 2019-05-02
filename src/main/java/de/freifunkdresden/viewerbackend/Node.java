@@ -175,6 +175,10 @@ public class Node {
         return loadAvg;
     }
 
+    public String getFirmwareVersion() {
+        return firmwareVersion;
+    }
+
     public String getHostname() {
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
     }

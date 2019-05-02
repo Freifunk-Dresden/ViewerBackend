@@ -28,6 +28,7 @@ import de.freifunkdresden.viewerbackend.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,13 +39,19 @@ public class StatsSQL {
 
     private static final Map<GeneralStatType, Double> generalStats = new EnumMap<GeneralStatType, Double>(GeneralStatType.class);
     private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
+    private static final Map<String, Integer> versions = Collections.synchronizedMap(new LinkedHashMap<>());
 
     public static void addToStats(Node n) {
         nodes.add(n);
+        addVersion(n.getFirmwareVersion());
     }
 
     public static void addGeneralStats(GeneralStatType type, double value) {
         generalStats.put(type, value);
+    }
+    
+    private static void addVersion(String version) {
+        versions.put(version, versions.getOrDefault(version, 0) + 1);
     }
 
     public static void processStats() {
@@ -75,5 +82,13 @@ public class StatsSQL {
         DataGen.getInflux().write(node_clients);
         DataGen.getInflux().write(node_load);
         DataGen.getInflux().write(node_memory);
+        List<Point> nodes_versions = new ArrayList<>();
+        versions.forEach((v, c) -> {
+            nodes_versions.add(Point.measurement("nodes_versions")
+                    .tag("version", v)
+                    .addField("value", c)
+                    .build());
+        });
+        DataGen.getInflux().write(nodes_versions);
     }
 }
