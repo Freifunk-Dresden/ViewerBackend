@@ -51,7 +51,9 @@ public class StatsSQL {
     }
     
     public static void addVersion(String version) {
-        versions.put(version, versions.getOrDefault(version, 0) + 1);
+        if (!version.isEmpty()) {
+            versions.put(version, versions.getOrDefault(version, 0) + 1);
+        }
     }
 
     public static void processStats() {
