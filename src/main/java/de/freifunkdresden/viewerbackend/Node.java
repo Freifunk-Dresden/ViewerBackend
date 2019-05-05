@@ -55,6 +55,7 @@ public class Node {
     private String gatewayIp;
     private boolean valid = false;
     private boolean autoupdate;
+    private int nproc = 1;
 
     public Node(int id) {
         this.id = id;
@@ -127,6 +128,9 @@ public class Node {
             if (dp.getFirstseen() != null) {
                 firstseen = dp.getFirstseen();
             }
+            if (dp.getCPUCount() != null) {
+                nproc = dp.getCPUCount();
+            }
             valid = true;
         } catch (Exception e) {
             valid = false;
@@ -150,7 +154,7 @@ public class Node {
         //display only nodes lastseen within the last 30 days
         return isValid() && (lastseen / 1000 > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30);
     }
-    
+
     public boolean isShown() {
         return id >= 1000 && hasValidLocation() && role.equals(NodeType.STANDARD);
     }
@@ -182,7 +186,7 @@ public class Node {
     public String getHostname() {
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
     }
-    
+
     public String getFakeMac() {
         int third = id / 255 % 256;
         int fourth = (id % 255) + 1;
@@ -275,7 +279,7 @@ public class Node {
                 node.addProperty("memory_usage", memoryUsage);
                 Date date = new Date(System.currentTimeMillis() - (long) (uptime * 1000));
                 node.addProperty("uptime", DataGen.DATE_MESH.format(date));
-                node.addProperty("nproc", 1); //TODO: Correct processor count
+                node.addProperty("nproc", nproc);
             }
             if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
                 node.addProperty("gateway", String.valueOf(convertIpToId(gatewayIp)));

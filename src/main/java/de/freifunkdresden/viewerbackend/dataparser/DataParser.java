@@ -105,4 +105,8 @@ public abstract class DataParser {
     public Boolean isGateway() throws Exception {
         return null;
     }
+    
+    public Integer getCPUCount() throws Exception {
+        return null;
+    }
 }

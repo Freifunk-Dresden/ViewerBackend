@@ -247,4 +247,10 @@ public class DataParserSysinfo extends DataParser {
     public Boolean isOnline() throws Exception {
         return true;
     }
+
+    @Override
+    public Integer getCPUCount() throws Exception {
+        JsonObject system = data.get("system").getAsJsonObject();
+        return system.has("cpucount") ? system.get("cpucount").getAsInt() : null;
+    }
 }
