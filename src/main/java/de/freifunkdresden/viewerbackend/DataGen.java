@@ -155,7 +155,9 @@ public class DataGen {
                 .forEach((node) -> pool.submit(new NodeDatabaseThread(node)));
         pool.shutdown();
         try {
-            pool.awaitTermination(2, TimeUnit.MINUTES);
+            if (!pool.awaitTermination(3, TimeUnit.MINUTES)) {
+                LOG.log(Level.SEVERE, "3 min limit!");
+            }
         } catch (InterruptedException ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
