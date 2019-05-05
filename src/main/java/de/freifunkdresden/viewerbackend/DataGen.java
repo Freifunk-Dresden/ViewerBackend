@@ -34,6 +34,7 @@ import de.freifunkdresden.viewerbackend.logging.FancyConsoleHandler;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
@@ -76,7 +77,7 @@ public class DataGen {
             saveToDatabase();
             INFLUX.closeConnection();
             LOG.log(Level.INFO, "Done!");
-        } catch (Throwable ex) {
+        } catch (APIProcessingException | JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -85,7 +86,7 @@ public class DataGen {
         try {
             LOG.log(Level.INFO, "Processing API...");
             HOLDER.processAPI();
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             throw new APIProcessingException(ex);
         }
     }
@@ -97,7 +98,7 @@ public class DataGen {
             pool.shutdown();
             LOG.log(Level.INFO, "Waiting threads to finish...");
             pool.awaitTermination(2, TimeUnit.MINUTES);
-        } catch (Throwable ex) {
+        } catch (InterruptedException ex) {
             throw new NodeInfoCollectionException(ex);
         }
     }
@@ -141,7 +142,7 @@ public class DataGen {
             jfg.genNodes();
             jfg.genGraph();
             jfg.genMeshViewer();
-        } catch (Throwable ex) {
+        } catch (IOException ex) {
             throw new JsonGenerationException(ex);
         }
     }
