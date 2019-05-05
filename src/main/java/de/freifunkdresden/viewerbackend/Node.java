@@ -65,7 +65,7 @@ public class Node {
     }
 
     public String getIpAdress(boolean subnet201) {
-        return String.format("10.%s.%s.%s", (subnet201 ? "201" : "200"), (id / 255 % 256), ((id % 255) + 1));
+        return String.format("10.%s.%s.%s", (subnet201 ? "201" : "200"), (id / 255), ((id % 255) + 1));
     }
 
     public void fill(DataParser dp) {
@@ -194,9 +194,6 @@ public class Node {
     }
 
     public JsonObject getJsonObject() {
-        if (!isValid()) {
-            return null;
-        }
         try {
             JsonObject node = new JsonObject();
             JsonObject nodeinfo = new JsonObject();
@@ -263,9 +260,6 @@ public class Node {
     }
 
     public JsonObject getMeshViewerObj() {
-        if (!isValid()) {
-            return null;
-        }
         try {
             JsonObject node = new JsonObject();
             node.addProperty("firstseen", DataGen.DATE_MESH.format(new Date(firstseen)));
