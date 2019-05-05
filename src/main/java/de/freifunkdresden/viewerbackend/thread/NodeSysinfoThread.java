@@ -73,6 +73,6 @@ public class NodeSysinfoThread implements Runnable {
         try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), "UTF-8")) {
             sysinfo = new JsonParser().parse(reader).getAsJsonObject();
         }
-        n.fill(new DataParserSysinfo(sysinfo.get("data").getAsJsonObject(), sysinfo.get("version").getAsInt()));
+        n.fill(new DataParserSysinfo(sysinfo));
     }
 }

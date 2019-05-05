@@ -41,9 +41,9 @@ public class DataParserSysinfo extends DataParser {
     private final JsonObject stats;
     private final int version;
 
-    public DataParserSysinfo(JsonObject data, int version) {
-        this.data = data;
-        this.version = version;
+    public DataParserSysinfo(JsonObject sysinfo) {
+        this.data = sysinfo.get("data").getAsJsonObject();
+        this.version = sysinfo.get("version").getAsInt();
         if (data.has("statistic")) {
             stats = data.get("statistic").getAsJsonObject();
         } else {
