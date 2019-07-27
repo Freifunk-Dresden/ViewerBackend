@@ -332,7 +332,7 @@ public class Node {
             StatsSQL.addVersion(getFirmwareVersion());
         }
         VPN vpn = VPN.getVPN(id);
-        if (vpn != null) {
+        if (isOnline() && vpn != null) {
             StatsSQL.addVpnUsage(vpn, linkset.size());
         }
     }
