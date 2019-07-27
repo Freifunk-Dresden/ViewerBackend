@@ -25,6 +25,7 @@ package de.freifunkdresden.viewerbackend.stats;
 
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
+import de.freifunkdresden.viewerbackend.VPN;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -40,6 +41,7 @@ public class StatsSQL {
     private static final Map<GeneralStatType, Double> generalStats = new EnumMap<GeneralStatType, Double>(GeneralStatType.class);
     private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<String, Integer> versions = Collections.synchronizedMap(new LinkedHashMap<>());
+    private static final Map<VPN, Integer> vpnUsage = new EnumMap<VPN, Integer>(VPN.class);
 
     public static void addToStats(Node n) {
         nodes.add(n);
@@ -49,11 +51,15 @@ public class StatsSQL {
     public static void addGeneralStats(GeneralStatType type, double value) {
         generalStats.put(type, value);
     }
-    
+
     public static void addVersion(String version) {
         if (!version.isEmpty()) {
             versions.put(version, versions.getOrDefault(version, 0) + 1);
         }
+    }
+
+    public static void addVpnUsage(VPN vpn, int usage) {
+        vpnUsage.put(vpn, usage);
     }
 
     public static void processStats() {
@@ -64,6 +70,14 @@ public class StatsSQL {
                     .build());
         });
         DataGen.getInflux().write(general);
+        List<Point> vpn = new ArrayList<>();
+        vpnUsage.entrySet().forEach((e) -> {
+            vpn.add(Point.measurement("vpn_usage")
+                    .tag("vpn", String.valueOf(e.getKey().getVpnId()))
+                    .addField("usage", e.getValue())
+                    .build());
+        });
+        DataGen.getInflux().write(vpn);
         List<Point> node_clients = new ArrayList<>();
         List<Point> node_load = new ArrayList<>();
         List<Point> node_memory = new ArrayList<>();

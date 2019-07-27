@@ -331,6 +331,10 @@ public class Node {
         } else if (isDisplayed()) {
             StatsSQL.addVersion(getFirmwareVersion());
         }
+        VPN vpn = VPN.getVPN(id);
+        if (vpn != null) {
+            StatsSQL.addVpnUsage(vpn, linkset.size());
+        }
     }
 
     public static int convertIpToId(String ip) {

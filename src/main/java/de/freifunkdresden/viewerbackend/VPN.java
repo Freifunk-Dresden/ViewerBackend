@@ -1,0 +1,68 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2019 NMerkelt.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package de.freifunkdresden.viewerbackend;
+
+public enum VPN {
+    VPN1(1, 255),
+    VPN2(2, 111),
+    VPN3(3, 2),
+    VPN4(4, 3),
+    VPN5(5, 100),
+    VPN6(6, 51017),
+    VPN7(7, 4),
+    //VPN8,
+    VPN9(9, 5),
+    VPN10(10, 120),
+    VPN11(11, 200),
+    VPN12(12, 256),
+    VPN13(13, 13),
+    VPN14(13, 14),
+    //VPN15,
+    VPN16(16, 201);
+
+    private final int vpnId;
+    private final int nodeId;
+
+    private VPN(int vpnId, int nodeId) {
+        this.vpnId = vpnId;
+        this.nodeId = nodeId;
+    }
+
+    public int getVpnId() {
+        return vpnId;
+    }
+
+    public int getNodeId() {
+        return nodeId;
+    }
+
+    public static VPN getVPN(int nodeId) {
+        for (VPN vpn : VPN.values()) {
+            if (vpn.nodeId == nodeId) {
+                return vpn;
+            }
+        }
+        return null;
+    }
+}
