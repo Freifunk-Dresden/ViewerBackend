@@ -115,6 +115,7 @@ public class Influx {
     }
     
     public void closeConnection() {
+        this.connection.flush();
         this.connection.close();
         this.connection = null;
     }
