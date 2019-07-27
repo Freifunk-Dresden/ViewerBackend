@@ -31,14 +31,14 @@ public enum VPN {
     VPN5(5, 100),
     VPN6(6, 51017),
     VPN7(7, 4),
-    //VPN8,
+    VPN8(8, 102),
     VPN9(9, 5),
     VPN10(10, 120),
     VPN11(11, 200),
     VPN12(12, 256),
     VPN13(13, 13),
     VPN14(14, 14),
-    //VPN15,
+    VPN15(15, 51033),
     VPN16(16, 201);
 
     private final int vpnId;
