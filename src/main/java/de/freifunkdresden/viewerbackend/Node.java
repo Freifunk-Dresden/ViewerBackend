@@ -147,7 +147,7 @@ public class Node {
     }
 
     public boolean isValid() {
-        return valid;
+        return valid && (id < 900 || id >= 1000);
     }
 
     public boolean isDisplayed() {

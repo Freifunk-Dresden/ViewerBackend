@@ -151,7 +151,7 @@ public class DataGen {
         LOG.log(Level.INFO, "Save to database...");
         ExecutorService pool = Executors.newFixedThreadPool(10);
         HOLDER.getNodes().values().stream()
-                .filter((node) -> node.getId() < 900 || node.getId() >= 1000)
+                .filter((node) -> node.isDisplayed())
                 .forEach((node) -> pool.submit(new NodeDatabaseThread(node)));
         pool.shutdown();
         try {
@@ -162,7 +162,7 @@ public class DataGen {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
         LOG.log(Level.INFO, "Save stats to database...");
-        StatsSQL.addGeneralStats(GeneralStatType.NODES, HOLDER.getNodes().size());
+        StatsSQL.addGeneralStats(GeneralStatType.NODES, HOLDER.getNodes().values().stream().filter((n) -> n.isDisplayed()).count());
         StatsSQL.addGeneralStats(GeneralStatType.NODES_ONLINE, HOLDER.getNodes().values().stream().filter((n) -> n.isOnline()).count());
         StatsSQL.addGeneralStats(GeneralStatType.CLIENTS, HOLDER.getNodes().values().stream()
                 .filter((n) -> n.isOnline())
