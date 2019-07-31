@@ -152,7 +152,7 @@ public class Node {
 
     public boolean isDisplayed() {
         //display only nodes lastseen within the last 30 days
-        return isValid() && (lastseen / 1000 > (System.currentTimeMillis() / 1000) - 60 * 60 * 24 * 30);
+        return isValid() && (lastseen > System.currentTimeMillis() - (1000L * 60 * 60 * 24 * 30));
     }
 
     public boolean isShown() {
@@ -188,7 +188,7 @@ public class Node {
     }
 
     public String getFakeMac() {
-        int third = id / 255 % 256;
+        int third = id / 255;
         int fourth = (id % 255) + 1;
         return "ff:dd:00:00:" + String.format("%02x", third) + ":" + String.format("%02x", fourth);
     }
