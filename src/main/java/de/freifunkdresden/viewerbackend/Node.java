@@ -156,7 +156,15 @@ public class Node {
     }
 
     public boolean isShown() {
-        return isNormalNode() && hasValidLocation() && role.equals(NodeType.STANDARD);
+        switch (role) {
+            case STANDARD:
+                return isNormalNode() && hasValidLocation();
+            case MOBILE:
+                return isNormalNode() && hasValidLocation() && isFWVersionHigher(0, 9);
+            case SERVER:
+            default:
+                return false;
+        }
     }
 
     public boolean isOnline() {
@@ -177,6 +185,18 @@ public class Node {
 
     public boolean isAlternativeNode() {
         return id > 51000 && id < 60000;
+    }
+
+    public boolean isFWVersionHigher(int minor, int patch) {
+        String[] fw = firmwareVersion.split(".");
+        if (fw.length == 3) {
+            if (Integer.parseInt(fw[1]) > minor) {
+                return true;
+            } else if (Integer.parseInt(fw[1]) == minor && Integer.parseInt(fw[2]) >= patch) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Collection<Link> getLinks() {
