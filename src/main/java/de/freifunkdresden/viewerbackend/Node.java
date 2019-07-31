@@ -147,7 +147,7 @@ public class Node {
     }
 
     public boolean isValid() {
-        return valid && (id < 900 || id >= 1000);
+        return valid && !isTemporaryNode();
     }
 
     public boolean isDisplayed() {
@@ -156,11 +156,27 @@ public class Node {
     }
 
     public boolean isShown() {
-        return id >= 1000 && hasValidLocation() && role.equals(NodeType.STANDARD);
+        return isNormalNode() && hasValidLocation() && role.equals(NodeType.STANDARD);
     }
 
     public boolean isOnline() {
         return online;
+    }
+
+    public boolean isServerNode() {
+        return id <= 256;
+    }
+
+    public boolean isTemporaryNode() {
+        return id >= 900 && id < 1000;
+    }
+
+    public boolean isNormalNode() {
+        return id > 1000 && id < 51000;
+    }
+
+    public boolean isAlternativeNode() {
+        return id > 51000 && id < 60000;
     }
 
     public Collection<Link> getLinks() {
@@ -326,7 +342,7 @@ public class Node {
         DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, online = ?, autoupdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
                 community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, online, autoupdate, gateway, name, email, id);
         //Statistics
-        if (isOnline() && (id >= 1000 && id < 51000)) {
+        if (isOnline() && isNormalNode()) {
             StatsSQL.addToStats(this);
         } else if (isDisplayed()) {
             StatsSQL.addVersion(getFirmwareVersion());
