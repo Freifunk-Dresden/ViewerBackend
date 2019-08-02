@@ -160,7 +160,7 @@ public class Node {
             case STANDARD:
                 return isNormalNode() && hasValidLocation();
             case MOBILE:
-                return isNormalNode() && hasValidLocation() && isFWVersionHigher(0, 9);
+                return isNormalNode() && hasValidLocation() && isOnline() && isFWVersionHigher(0, 9);
             case SERVER:
             default:
                 return false;
