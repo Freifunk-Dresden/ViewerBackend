@@ -188,7 +188,7 @@ public class Node {
     }
 
     public boolean isFWVersionHigher(int minor, int patch) {
-        String[] fw = firmwareVersion.split(".");
+        String[] fw = firmwareVersion.split("\\.");
         if (fw.length == 3) {
             if (Integer.parseInt(fw[1]) > minor) {
                 return true;
