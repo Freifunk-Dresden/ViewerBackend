@@ -166,8 +166,7 @@ public class DataParserSysinfo extends DataParser {
             JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
             rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach((link) -> {
                 JsonObject l = link.getAsJsonObject();
-                String[] split = l.get("target").getAsString().split("\\.");
-                int targetId = (Integer.parseInt(split[2]) * 255) + (Integer.parseInt(split[3]) - 1);
+                int targetId = Node.convertIpToId(l.get("target").getAsString());
                 LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
                 Node target = DataGen.getDataHolder().getNode(targetId);
                 linkmap.add(new Link(linkType, target, node));
