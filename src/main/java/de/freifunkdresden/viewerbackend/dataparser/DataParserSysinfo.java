@@ -149,7 +149,7 @@ public class DataParserSysinfo extends DataParser {
 
     @Override
     public Float getLoadAvg() throws Exception {
-        return Float.parseFloat(stats.get("cpu_load").getAsString().split(" ")[0]);
+        return Float.parseFloat(stats.get("cpu_load").getAsString().split(" ")[1]);
     }
 
     @Override
