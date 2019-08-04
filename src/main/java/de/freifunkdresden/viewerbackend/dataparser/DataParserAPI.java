@@ -72,4 +72,8 @@ public class DataParserAPI extends DataParser {
         return node.get("status").getAsJsonObject().get("gateway").getAsBoolean();
     }
 
+    @Override
+    public Boolean hasUplink() throws Exception {
+        return node.get("status").getAsJsonObject().get("backbone").getAsBoolean();
+    }
 }

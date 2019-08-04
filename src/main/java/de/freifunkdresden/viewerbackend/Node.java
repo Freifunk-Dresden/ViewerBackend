@@ -49,6 +49,7 @@ public class Node {
     private short clients;
     private float loadAvg;
     private boolean gateway;
+    private boolean uplink;
     private long lastseen = -1;
     private long firstseen = -1;
     private Location location;
@@ -121,6 +122,9 @@ public class Node {
             }
             if (dp.isGateway() != null) {
                 gateway = dp.isGateway();
+            }
+            if (dp.hasUplink() != null) {
+                uplink = dp.hasUplink();
             }
             if (dp.getLastseen() != null) {
                 lastseen = dp.getLastseen();
@@ -287,7 +291,7 @@ public class Node {
             node.add("statistics", statistics);
             JsonObject flags = new JsonObject();
             flags.addProperty("gateway", gateway);
-            flags.addProperty("uplink", gateway); //@TODO:correct with direct connection to internet
+            flags.addProperty("uplink", uplink);
             flags.addProperty("online", online);
             node.add("flags", flags);
             node.addProperty("firstseen", DataGen.DATE_HOP.format(new Date(firstseen)));

@@ -53,7 +53,7 @@ public abstract class DataParser {
     public String getFirmwareVersion() throws Exception {
         return null;
     }
-    
+
     public Long getFirstseen() throws Exception {
         return null;
     }
@@ -61,7 +61,7 @@ public abstract class DataParser {
     public String getGatewayIp() throws Exception {
         return null;
     }
-    
+
     public Long getLastseen() throws Exception {
         return null;
     }
@@ -73,7 +73,7 @@ public abstract class DataParser {
     public Float getLoadAvg() throws Exception {
         return null;
     }
-    
+
     public Location getLocation() throws Exception {
         return null;
     }
@@ -97,15 +97,19 @@ public abstract class DataParser {
     public Float getUptime() throws Exception {
         return null;
     }
-    
+
     public Boolean isOnline() throws Exception {
         return null;
     }
-    
+
     public Boolean isGateway() throws Exception {
         return null;
     }
-    
+
+    public Boolean hasUplink() throws Exception {
+        return null;
+    }
+
     public Integer getCPUCount() throws Exception {
         return null;
     }
