@@ -23,11 +23,9 @@
  */
 package de.freifunkdresden.viewerbackend.dataparser;
 
-import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.sql.ResultSet;
-import java.util.HashSet;
 
 public class DataParserDB extends DataParser {
 
@@ -72,11 +70,6 @@ public class DataParserDB extends DataParser {
     public Long getLastseen() throws Exception {
         return rs.getLong("lastseen") * 1000;
     }
-
-    @Override
-    public HashSet<Link> getLinkSet() throws Exception {
-        return new HashSet<>();
-    }
     
     @Override
     public Location getLocation() throws Exception {
@@ -110,10 +103,5 @@ public class DataParserDB extends DataParser {
     @Override
     public Boolean isGateway() throws Exception {
         return rs.getBoolean("gateway");
-    }
-
-    @Override
-    public Boolean isOnline() throws Exception {
-        return false;
     }
 }
