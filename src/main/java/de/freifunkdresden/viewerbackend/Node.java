@@ -363,8 +363,8 @@ public class Node {
         } else {
             DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, location.getLatitude(), location.getLongitude(), location.getLatitude(), location.getLongitude());
         }
-        DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, online = ?, autoupdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
-                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, online, autoupdate, gateway, name, email, id);
+        DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, autoupdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
+                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoupdate, gateway, name, email, id);
         //Statistics
         if (isOnline() && isNormalNode()) {
             StatsSQL.addToStats(this);
