@@ -105,16 +105,14 @@ public class DataGen {
 
     private static void collectLinks() {
         LOG.log(Level.INFO, "Collect links...");
-        HOLDER.getNodes().values().forEach((node) -> {
-            node.getLinks().forEach((link) -> {
-                Link lnk = HOLDER.getLink(link.getSource().getId(), link.getTarget().getId());
-                if (lnk == null) {
-                    HOLDER.addLink(link);
-                } else {
-                    lnk.setTargetTq(link.getSourceTq());
-                }
-            });
-        });
+        HOLDER.getNodes().values().forEach((node) -> node.getLinks().forEach((link) -> {
+            Link lnk = HOLDER.getLink(link.getSource().getId(), link.getTarget().getId());
+            if (lnk == null) {
+                HOLDER.addLink(link);
+            } else {
+                lnk.setTargetTq(link.getSourceTq());
+            }
+        }));
     }
 
     private static void fillOfflineNodes() throws OfflineNodeProcessingException {
@@ -151,7 +149,7 @@ public class DataGen {
         LOG.log(Level.INFO, "Save to database...");
         ExecutorService pool = Executors.newFixedThreadPool(10);
         HOLDER.getNodes().values().stream()
-                .filter((node) -> node.isDisplayed())
+                .filter(Node::isDisplayed)
                 .forEach((node) -> pool.submit(new NodeDatabaseThread(node)));
         pool.shutdown();
         try {
@@ -162,13 +160,12 @@ public class DataGen {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
         LOG.log(Level.INFO, "Save stats to database...");
-        StatsSQL.addGeneralStats(GeneralStatType.NODES, HOLDER.getNodes().values().stream().filter((n) -> n.isDisplayed()).count());
-        StatsSQL.addGeneralStats(GeneralStatType.NODES_ONLINE, HOLDER.getNodes().values().stream().filter((n) -> n.isOnline()).count());
+        StatsSQL.addGeneralStats(GeneralStatType.NODES, HOLDER.getNodes().values().stream().filter(Node::isDisplayed).count());
+        StatsSQL.addGeneralStats(GeneralStatType.NODES_ONLINE, HOLDER.getNodes().values().stream().filter(Node::isOnline).count());
         StatsSQL.addGeneralStats(GeneralStatType.CLIENTS, HOLDER.getNodes().values().stream()
-                .filter((n) -> n.isOnline())
-                .reduce(BigInteger.ZERO, (result, node) -> {
-                    return result.add(BigInteger.valueOf(node.getClients()));
-                }, BigInteger::add).intValue());
+                .filter(Node::isOnline)
+                .reduce(BigInteger.ZERO, (result, node) -> result.add(BigInteger.valueOf(node.getClients())), BigInteger::add)
+                .intValue());
         StatsSQL.processStats();
     }
 

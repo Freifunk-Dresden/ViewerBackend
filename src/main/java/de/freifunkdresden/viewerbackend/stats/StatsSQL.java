@@ -64,17 +64,17 @@ public class StatsSQL {
 
     public static void processStats() {
         List<Point> general = new ArrayList<>();
-        generalStats.entrySet().forEach((e) -> {
-            general.add(Point.measurement(e.getKey().name().toLowerCase())
-                    .addField("value", e.getValue())
+        generalStats.forEach((key, value) -> {
+            general.add(Point.measurement(key.name().toLowerCase())
+                    .addField("value", value)
                     .build());
         });
         DataGen.getInflux().write(general);
         List<Point> vpn = new ArrayList<>();
-        vpnUsage.entrySet().forEach((e) -> {
+        vpnUsage.forEach((key, value) -> {
             vpn.add(Point.measurement("vpn_usage")
-                    .tag("vpn", String.valueOf(e.getKey().getVpnId()))
-                    .addField("usage", e.getValue())
+                    .tag("vpn", String.valueOf(key.getVpnId()))
+                    .addField("usage", value)
                     .build());
         });
         DataGen.getInflux().write(vpn);

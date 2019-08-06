@@ -45,7 +45,7 @@ public class JsonFileGen {
     private final Map<Node, Integer> nodeIds = new HashMap<>();
 
     public JsonFileGen(Collection<Node> nodes, Collection<Map<Integer, Link>> links) {
-        Iterator<Node> it = nodes.stream().filter((node) -> node.isDisplayed()).iterator();
+        Iterator<Node> it = nodes.stream().filter(Node::isDisplayed).iterator();
         for (int i = 0; it.hasNext(); i++) {
             Node node = it.next();
             hopGlassNodes.add(node.getJsonObject());
