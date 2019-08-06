@@ -62,12 +62,12 @@ public class DataParserDB extends DataParser {
     }
 
     @Override
-    public Long getFirstseen() throws Exception {
+    public Long getFirstSeen() throws Exception {
         return rs.getLong("firstseen") * 1000;
     }
 
     @Override
-    public Long getLastseen() throws Exception {
+    public Long getLastSeen() throws Exception {
         return rs.getLong("lastseen") * 1000;
     }
 

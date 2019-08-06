@@ -54,7 +54,7 @@ public abstract class DataParser {
         return null;
     }
 
-    public Long getFirstseen() throws Exception {
+    public Long getFirstSeen() throws Exception {
         return null;
     }
 
@@ -62,7 +62,7 @@ public abstract class DataParser {
         return null;
     }
 
-    public Long getLastseen() throws Exception {
+    public Long getLastSeen() throws Exception {
         return null;
     }
 
@@ -106,7 +106,7 @@ public abstract class DataParser {
         return null;
     }
 
-    public Boolean hasUplink() throws Exception {
+    public Boolean hasBackbone() throws Exception {
         return null;
     }
 

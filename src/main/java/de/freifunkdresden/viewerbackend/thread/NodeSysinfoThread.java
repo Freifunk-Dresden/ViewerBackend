@@ -71,7 +71,7 @@ public class NodeSysinfoThread implements Runnable {
     }
 
     private static void checkNode(Node n) throws IOException {
-        HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAdress() + "/sysinfo-json.cgi").openConnection();
+        HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAddress() + "/sysinfo-json.cgi").openConnection();
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
         JsonObject sysinfo;

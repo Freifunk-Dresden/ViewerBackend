@@ -58,12 +58,12 @@ public class DataParserAPI extends DataParser {
     }
 
     @Override
-    public Long getFirstseen() throws Exception {
+    public Long getFirstSeen() throws Exception {
         return node.get("status").getAsJsonObject().get("firstseen").getAsLong() * 1000;
     }
 
     @Override
-    public Long getLastseen() throws Exception {
+    public Long getLastSeen() throws Exception {
         return node.get("status").getAsJsonObject().get("lastseen").getAsLong() * 1000;
     }
 
@@ -73,7 +73,7 @@ public class DataParserAPI extends DataParser {
     }
 
     @Override
-    public Boolean hasUplink() throws Exception {
+    public Boolean hasBackbone() throws Exception {
         return node.get("status").getAsJsonObject().get("backbone").getAsBoolean();
     }
 }

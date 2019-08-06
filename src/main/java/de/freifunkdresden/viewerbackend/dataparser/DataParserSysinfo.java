@@ -50,7 +50,7 @@ public class DataParserSysinfo extends DataParser {
     }
 
     @Override
-    public Long getLastseen() throws Exception {
+    public Long getLastSeen() throws Exception {
         return System.currentTimeMillis();
     }
 

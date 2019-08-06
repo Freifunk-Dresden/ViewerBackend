@@ -35,7 +35,7 @@ import java.util.logging.Level;
 public class Node {
 
     private final int id;
-    private final HashSet<Link> linkset = new HashSet<>();
+    private final HashSet<Link> linkSet = new HashSet<>();
     private String name;
     private String community;
     private NodeType role = NodeType.STANDARD;
@@ -49,24 +49,24 @@ public class Node {
     private short clients;
     private float loadAvg;
     private boolean gateway;
-    private boolean uplink;
+    private boolean backbone;
     private long lastseen = -1;
     private long firstseen = -1;
     private Location location;
     private String gatewayIp;
     private boolean valid = false;
-    private boolean autoupdate;
+    private boolean autoUpdate;
     private int nproc = 1;
 
     public Node(int id) {
         this.id = id;
     }
 
-    public String getIpAdress() {
-        return getIpAdress(false);
+    public String getIpAddress() {
+        return getIpAddress(false);
     }
 
-    public String getIpAdress(boolean subnet201) {
+    public String getIpAddress(boolean subnet201) {
         return String.format("10.%s.%s.%s", (subnet201 ? "201" : "200"), (id / 255), ((id % 255) + 1));
     }
 
@@ -109,10 +109,10 @@ public class Node {
                 gatewayIp = dp.getGatewayIp();
             }
             if (dp.getLinkSet() != null) {
-                linkset.addAll(dp.getLinkSet());
+                linkSet.addAll(dp.getLinkSet());
             }
             if (dp.getAutoUpdate() != null) {
-                autoupdate = dp.getAutoUpdate();
+                autoUpdate = dp.getAutoUpdate();
             }
             if (dp.getLocation() != null) {
                 location = dp.getLocation();
@@ -123,14 +123,14 @@ public class Node {
             if (dp.isGateway() != null) {
                 gateway = dp.isGateway();
             }
-            if (dp.hasUplink() != null) {
-                uplink = dp.hasUplink();
+            if (dp.hasBackbone() != null) {
+                backbone = dp.hasBackbone();
             }
-            if (dp.getLastseen() != null) {
-                lastseen = dp.getLastseen();
+            if (dp.getLastSeen() != null) {
+                lastseen = dp.getLastSeen();
             }
-            if (dp.getFirstseen() != null) {
-                firstseen = dp.getFirstseen();
+            if (dp.getFirstSeen() != null) {
+                firstseen = dp.getFirstSeen();
             }
             if (dp.getCPUCount() != null) {
                 nproc = dp.getCPUCount();
@@ -204,7 +204,7 @@ public class Node {
     }
 
     public Collection<Link> getLinks() {
-        return linkset;
+        return linkSet;
     }
 
     public short getClients() {
@@ -243,7 +243,7 @@ public class Node {
             JsonObject nodeinfo = new JsonObject();
             JsonObject network = new JsonObject();
             JsonArray addresses = new JsonArray();
-            addresses.add(getIpAdress());
+            addresses.add(getIpAddress());
             network.add("addresses", addresses);
             nodeinfo.add("network", network);
             nodeinfo.addProperty("hostname", getHostname());
@@ -259,7 +259,7 @@ public class Node {
             nodeinfo.addProperty("node_id", String.valueOf(id));
             JsonObject software = new JsonObject();
             JsonObject autoupdater = new JsonObject();
-            autoupdater.addProperty("enabled", autoupdate);
+            autoupdater.addProperty("enabled", autoUpdate);
             autoupdater.addProperty("branch", "stable");
             software.add("autoupdater", autoupdater);
             if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
@@ -291,7 +291,7 @@ public class Node {
             node.add("statistics", statistics);
             JsonObject flags = new JsonObject();
             flags.addProperty("gateway", gateway);
-            flags.addProperty("uplink", uplink);
+            flags.addProperty("backbone", backbone);
             flags.addProperty("online", online);
             node.add("flags", flags);
             node.addProperty("firstseen", DataGen.DATE_HOP.format(new Date(firstseen)));
@@ -327,7 +327,7 @@ public class Node {
             }
             node.addProperty("node_id", String.valueOf(id));
             JsonArray addresses = new JsonArray();
-            addresses.add(getIpAdress());
+            addresses.add(getIpAddress());
             node.add("addresses", addresses);
             node.addProperty("site_code", community);
             node.addProperty("hostname", getHostname());
@@ -345,10 +345,10 @@ public class Node {
             }
             node.addProperty("contact", email);
             JsonObject autoupdater = new JsonObject();
-            autoupdater.addProperty("enabled", autoupdate);
+            autoupdater.addProperty("enabled", autoUpdate);
             autoupdater.addProperty("branch", "stable");
             node.add("autoupdater", autoupdater);
-            node.addProperty("vpn", gateway); //TODO: Correct value
+            node.addProperty("vpn", backbone);
             node.addProperty("mac", getFakeMac());
             return node;
         } catch (Exception e) {
@@ -363,8 +363,8 @@ public class Node {
         } else {
             DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, location.getLatitude(), location.getLongitude(), location.getLatitude(), location.getLongitude());
         }
-        DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, autoupdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
-                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoupdate, gateway, name, email, id);
+        DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, autoUpdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
+                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate, gateway, name, email, id);
         //Statistics
         if (isOnline() && isNormalNode()) {
             StatsSQL.addToStats(this);
@@ -373,7 +373,7 @@ public class Node {
         }
         VPN vpn = VPN.getVPN(id);
         if (vpn != null) {
-            StatsSQL.addVpnUsage(vpn, linkset.size());
+            StatsSQL.addVpnUsage(vpn, linkSet.size());
         }
     }
 
