@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class DataHolder {
         URLConnection con = new URL("http://api.freifunk-dresden.de/freifunk-niklas-hopglass.json").openConnection();
         InputStreamReader reader;
         try (InputStream stream = con.getInputStream()) {
-            reader = new InputStreamReader(stream, "UTF-8");
+            reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
             JsonArray api = new JsonParser().parse(reader).getAsJsonArray();
             reader.close();
             api.forEach((node) -> {

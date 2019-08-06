@@ -39,6 +39,7 @@ import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
 public class NodeSysinfoThread implements Runnable {
@@ -74,7 +75,7 @@ public class NodeSysinfoThread implements Runnable {
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
         JsonObject sysinfo;
-        try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), "UTF-8")) {
+        try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
             sysinfo = new JsonParser().parse(reader).getAsJsonObject();
         }
         n.fill(getDataParser(sysinfo.get("version").getAsInt(), sysinfo.get("data").getAsJsonObject()));
