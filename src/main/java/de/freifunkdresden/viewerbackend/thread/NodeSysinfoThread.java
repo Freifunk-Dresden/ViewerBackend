@@ -28,6 +28,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV10;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV11;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV13;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV14;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -73,6 +77,20 @@ public class NodeSysinfoThread implements Runnable {
         try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), "UTF-8")) {
             sysinfo = new JsonParser().parse(reader).getAsJsonObject();
         }
-        n.fill(new DataParserSysinfo(sysinfo));
+        n.fill(getDataParser(sysinfo.get("version").getAsInt(), sysinfo.get("data").getAsJsonObject()));
+    }
+
+    private static DataParserSysinfo getDataParser(int version, JsonObject data) {
+        if (version >= 14) {
+            return new DataParserSysinfoV14(data);
+        } else if (version >= 13) {
+            return new DataParserSysinfoV13(data);
+        } else if (version >= 11) {
+            return new DataParserSysinfoV11(data);
+        } else if (version >= 10) {
+            return new DataParserSysinfoV10(data);
+        } else {
+            return new DataParserSysinfo(data);
+        }
     }
 }

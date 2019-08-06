@@ -37,13 +37,11 @@ import java.util.logging.Level;
 
 public class DataParserSysinfo extends DataParser {
 
-    private final JsonObject data;
+    final JsonObject data;
     private final JsonObject stats;
-    private final int version;
 
-    public DataParserSysinfo(JsonObject sysinfo) {
-        this.data = sysinfo.get("data").getAsJsonObject();
-        this.version = sysinfo.get("version").getAsInt();
+    public DataParserSysinfo(JsonObject data) {
+        this.data = data;
         if (data.has("statistic")) {
             stats = data.get("statistic").getAsJsonObject();
         } else {
@@ -56,7 +54,7 @@ public class DataParserSysinfo extends DataParser {
         return System.currentTimeMillis();
     }
 
-    private int getNodeId() {
+    int getNodeId() {
         return data.get("common").getAsJsonObject().get("node").getAsInt();
     }
 
@@ -74,22 +72,12 @@ public class DataParserSysinfo extends DataParser {
 
     @Override
     public NodeType getRole() throws Exception {
-        if (version >= 13) {
-            switch (data.get("system").getAsJsonObject().get("node_type").getAsString().toLowerCase()) {
-                case "node":
-                    return NodeType.STANDARD;
-                case "mobile":
-                    return NodeType.MOBILE;
-                case "server":
-                    return NodeType.SERVER;
-            }
-        }
         return NodeType.STANDARD;
     }
 
     @Override
     public String getModel() throws Exception {
-        return data.get("system").getAsJsonObject().get(version >= 14 ? "model2" : "model").getAsString();
+        return data.get("system").getAsJsonObject().get("model").getAsString();
     }
 
     @Override
@@ -115,7 +103,7 @@ public class DataParserSysinfo extends DataParser {
     public Float getUptime() throws Exception {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
         String[] uptime = jsonUptime.replace("  ", " ").split(" ");
-        if (version < 10 && jsonUptime.contains(":")) {
+        if (jsonUptime.contains(":")) {
             if (uptime[3].replace(",", "").contains(":")) {
                 return parseMinutes(uptime[3].replace(",", "")) * 60f;
             } else {
@@ -162,37 +150,14 @@ public class DataParserSysinfo extends DataParser {
         HashSet<Link> linkmap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        if (version <= 10) {
-            JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
-            rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach((link) -> {
-                JsonObject l = link.getAsJsonObject();
-                int targetId = Node.convertIpToId(l.get("target").getAsString());
-                LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
-                Node target = DataGen.getDataHolder().getNode(targetId);
-                linkmap.add(new Link(linkType, target, node));
-            });
-        }
-        if (bmxd.has("links")) {
-            bmxd.get("links").getAsJsonArray().forEach((link) -> {
-                JsonObject l = link.getAsJsonObject();
-                Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
-                byte tq = Byte.parseByte(l.get("tq").getAsString());
-                if (version == 10) {
-                    for (Link lnk : linkmap) {
-                        if (lnk.getTarget().equals(target)) {
-                            lnk.setSourceTq(tq);
-                            return;
-                        }
-                    }
-                } else if (version >= 11 && version < 14) {
-                    LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
-                    linkmap.add(new Link(linkType, tq, target, node));
-                } else if (version >= 14) {
-                    LinkType linkType = LinkType.getTypeByType(l.get("type").getAsString());
-                    linkmap.add(new Link(linkType, tq, target, node));
-                }
-            });
-        }
+        JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
+        rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach((link) -> {
+            JsonObject l = link.getAsJsonObject();
+            int targetId = Node.convertIpToId(l.get("target").getAsString());
+            LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
+            Node target = DataGen.getDataHolder().getNode(targetId);
+            linkmap.add(new Link(linkType, target, node));
+        });
         return linkmap;
     }
 
@@ -218,15 +183,16 @@ public class DataParserSysinfo extends DataParser {
 
     @Override
     public Boolean getAutoUpdate() throws Exception {
-        return version >= 14 ? data.get("system").getAsJsonObject().get("autoupdate").getAsInt() == 1 : false;
+        return false;
     }
-    
+
     @Override
     public Location getLocation() throws Exception {
         try {
-            double lat = data.get("gps").getAsJsonObject().get("latitude").getAsDouble();
+            JsonObject gps = data.get("gps").getAsJsonObject();
+            double lat = gps.get("latitude").getAsDouble();
             lat = lat == 0 ? Double.NaN : lat;
-            double lon = data.get("gps").getAsJsonObject().get("longitude").getAsDouble();
+            double lon = gps.get("longitude").getAsDouble();
             lon = lon == 0 ? Double.NaN : lon;
             return new Location(lat, lon);
         } catch (NumberFormatException ex) {
