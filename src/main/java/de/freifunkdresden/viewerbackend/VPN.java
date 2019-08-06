@@ -44,7 +44,7 @@ public enum VPN {
     private final int vpnId;
     private final int nodeId;
 
-    private VPN(int vpnId, int nodeId) {
+    VPN(int vpnId, int nodeId) {
         this.vpnId = vpnId;
         this.nodeId = nodeId;
     }

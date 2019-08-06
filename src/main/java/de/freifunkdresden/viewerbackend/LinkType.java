@@ -31,7 +31,7 @@ public enum LinkType {
     private final String hopglass;
     private final String meshviewer;
 
-    private LinkType(String hopglass, String meshviewer) {
+    LinkType(String hopglass, String meshviewer) {
         this.hopglass = hopglass;
         this.meshviewer = meshviewer;
     }
