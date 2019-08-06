@@ -38,10 +38,10 @@ import org.influxdb.dto.Point;
 
 public class StatsSQL {
 
-    private static final Map<GeneralStatType, Double> generalStats = new EnumMap<GeneralStatType, Double>(GeneralStatType.class);
+    private static final Map<GeneralStatType, Double> generalStats = new EnumMap<>(GeneralStatType.class);
     private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<String, Integer> versions = Collections.synchronizedMap(new LinkedHashMap<>());
-    private static final Map<VPN, Integer> vpnUsage = new EnumMap<VPN, Integer>(VPN.class);
+    private static final Map<VPN, Integer> vpnUsage = new EnumMap<>(VPN.class);
 
     public static void addToStats(Node n) {
         nodes.add(n);
