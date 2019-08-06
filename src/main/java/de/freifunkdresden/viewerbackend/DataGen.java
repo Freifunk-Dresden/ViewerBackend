@@ -23,9 +23,8 @@
  */
 package de.freifunkdresden.viewerbackend;
 
-import de.freifunkdresden.viewerbackend.exception.APIProcessingException;
-import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
+import de.freifunkdresden.viewerbackend.exception.APIProcessingException;
 import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
 import de.freifunkdresden.viewerbackend.exception.NodeInfoCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
@@ -34,6 +33,7 @@ import de.freifunkdresden.viewerbackend.logging.FancyConsoleHandler;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
+import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.ResultSet;
