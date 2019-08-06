@@ -27,7 +27,7 @@ public enum LinkType {
     WIRELESS("wireless", "wifi"),
     TUNNEL("tunnel", "vpn"),
     OTHER("other", "other");
-    
+
     private final String hopglass;
     private final String meshviewer;
 
@@ -60,7 +60,7 @@ public enum LinkType {
                 return LinkType.TUNNEL;
         }
     }
-    
+
     public static LinkType getTypeByType(String type) {
         switch (type.toLowerCase()) {
             case "lan":

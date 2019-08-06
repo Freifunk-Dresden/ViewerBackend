@@ -59,7 +59,7 @@ public class DataGen {
     public static MySQL getDB() {
         return DB;
     }
-    
+
     public static Influx getInflux() {
         return INFLUX;
     }

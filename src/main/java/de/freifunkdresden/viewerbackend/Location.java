@@ -30,7 +30,7 @@ import java.util.List;
 public class Location {
 
     private static final List<Location> INVALID_LOCATIONS = Arrays.asList(
-            new Location(51.05405, 13.74364), 
+            new Location(51.05405, 13.74364),
             new Location(51.054741, 13.742642),
             new Location(51.033865, 13.653252)
     );
@@ -54,7 +54,7 @@ public class Location {
     public boolean isValid() {
         return !(INVALID_LOCATIONS.contains(this) || Double.isNaN(latitude) || Double.isNaN(longitude));
     }
-    
+
     public JsonObject toJson() {
         JsonObject location = new JsonObject();
         location.addProperty("latitude", latitude);

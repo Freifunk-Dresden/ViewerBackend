@@ -70,7 +70,7 @@ public class DataParserDB extends DataParser {
     public Long getLastseen() throws Exception {
         return rs.getLong("lastseen") * 1000;
     }
-    
+
     @Override
     public Location getLocation() throws Exception {
         try {

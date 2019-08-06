@@ -38,10 +38,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DataHolder {
-    
+
     private final Map<Integer, Node> nodes = new LinkedHashMap<>();
     private final Map<Integer, Map<Integer, Link>> links = new HashMap<>();
-    
+
     public Node getNode(int id) {
         Node n = nodes.getOrDefault(id, new Node(id));
         if (!nodes.containsKey(id)) {
@@ -49,7 +49,7 @@ public class DataHolder {
         }
         return n;
     }
-    
+
     public Link getLink(int node1, int node2) {
         int min = Math.min(node1, node2);
         int max = Math.max(node1, node2);
@@ -58,7 +58,7 @@ public class DataHolder {
         }
         return links.get(min).get(max);
     }
-    
+
     public void addLink(Link l) {
         int min = Math.min(l.getSource().getId(), l.getTarget().getId());
         int max = Math.max(l.getSource().getId(), l.getTarget().getId());
@@ -75,7 +75,7 @@ public class DataHolder {
     public Map<Integer, Map<Integer, Link>> getLinks() {
         return new HashMap<>(links);
     }
-    
+
     public void processAPI() throws Exception {
         URLConnection con = new URL("http://api.freifunk-dresden.de/freifunk-niklas-hopglass.json").openConnection();
         InputStreamReader reader;

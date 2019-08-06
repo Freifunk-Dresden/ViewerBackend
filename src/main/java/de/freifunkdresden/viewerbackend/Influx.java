@@ -105,15 +105,15 @@ public class Influx {
     public boolean hasConnection() {
         return this.connection != null;
     }
-    
+
     public void write(Point p) {
         this.connection.write(p);
     }
-    
+
     public void write(Collection<Point> points) {
         this.connection.write(BatchPoints.builder().points(points).build());
     }
-    
+
     public void closeConnection() {
         this.connection.flush();
         this.connection.close();
