@@ -367,7 +367,9 @@ public class Node {
         DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community, 
                 role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate, 
                 gateway, name, email);
-        //Statistics
+    }
+
+    public void collectStats() {
         if (isOnline() && isNormalNode()) {
             StatsSQL.addToStats(this);
         } else if (isDisplayed()) {

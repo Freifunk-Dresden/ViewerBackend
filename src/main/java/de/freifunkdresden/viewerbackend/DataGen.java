@@ -159,7 +159,12 @@ public class DataGen {
         } catch (InterruptedException ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private static void saveStats() {
         LOG.log(Level.INFO, "Save stats to database...");
+        HOLDER.getNodes().values().stream().filter(Node::isDisplayed)
+                .forEach(Node::collectStats);
         StatsSQL.addGeneralStats(GeneralStatType.NODES, HOLDER.getNodes().values().stream().filter(Node::isDisplayed).count());
         StatsSQL.addGeneralStats(GeneralStatType.NODES_ONLINE, HOLDER.getNodes().values().stream().filter(Node::isOnline).count());
         StatsSQL.addGeneralStats(GeneralStatType.CLIENTS, HOLDER.getNodes().values().stream()
