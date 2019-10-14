@@ -358,13 +358,15 @@ public class Node {
     }
 
     public void updateDatabase() {
-        if (!hasValidLocation()) {
-            DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ? ON DUPLICATE KEY UPDATE id = id", id);
-        } else {
-            DataGen.getDB().queryUpdate("INSERT INTO nodes SET id = ?, latitude = ?, longitude = ? ON DUPLICATE KEY UPDATE latitude = ?, longitude = ?", id, location.getLatitude(), location.getLongitude(), location.getLatitude(), location.getLongitude());
+        Double lat = null;
+        Double lon = null;
+        if (hasValidLocation()) {
+            lat = location.getLatitude();
+            lon = location.getLongitude();
         }
-        DataGen.getDB().queryUpdate("UPDATE nodes SET community = ?, role = ?, model = ?, firmwareVersion = ?, firmwareBase = ?, firstseen = ?, lastseen = ?, autoUpdate = ?, gateway = ?, name = ?, email = ? WHERE id = ?",
-                community, role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate, gateway, name, email, id);
+        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community, 
+                role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate, 
+                gateway, name, email);
         //Statistics
         if (isOnline() && isNormalNode()) {
             StatsSQL.addToStats(this);
