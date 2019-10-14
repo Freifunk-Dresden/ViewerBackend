@@ -115,8 +115,11 @@ public class Influx {
     }
 
     public void closeConnection() {
-        this.connection.flush();
-        this.connection.close();
-        this.connection = null;
+        try {
+            this.connection.close();
+            this.connection = null;
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, "", e);
+        }
     }
 }
