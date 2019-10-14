@@ -53,6 +53,7 @@ public class DataGen {
     public static SimpleDateFormat DATE_HOP = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
     private static final DataHolder HOLDER = new DataHolder();
+    private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
     private static MySQL DB;
     private static Influx INFLUX;
 
@@ -72,9 +73,11 @@ public class DataGen {
             collectAPIData();
             collectNodeInfo();
             fillOfflineNodes();
+            startDbSave();
             collectLinks();
             genJson();
-            saveToDatabase();
+            saveStats();
+            endDbSave();
             INFLUX.closeConnection();
             LOG.log(Level.INFO, "Done!");
         } catch (APIProcessingException | JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
@@ -145,16 +148,19 @@ public class DataGen {
         }
     }
 
-    private static void saveToDatabase() {
-        LOG.log(Level.INFO, "Save to database...");
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+    private static void startDbSave() {
+        LOG.log(Level.INFO, "Start Save to database");
         HOLDER.getNodes().values().stream()
                 .filter(Node::isOnline)
                 .filter(Node::isDisplayed)
-                .forEach((node) -> pool.submit(new NodeDatabaseThread(node)));
-        pool.shutdown();
+                .forEach((node) -> POOL.submit(new NodeDatabaseThread(node)));
+        POOL.shutdown();
+    }
+
+    private static void endDbSave() {
+        LOG.log(Level.INFO, "End Save to database...");
         try {
-            if (!pool.awaitTermination(3, TimeUnit.MINUTES)) {
+            if (!POOL.awaitTermination(3, TimeUnit.MINUTES)) {
                 LOG.log(Level.SEVERE, "3 min limit!");
                 POOL.shutdownNow();
             }
