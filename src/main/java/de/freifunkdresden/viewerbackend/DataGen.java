@@ -149,6 +149,7 @@ public class DataGen {
         LOG.log(Level.INFO, "Save to database...");
         ExecutorService pool = Executors.newFixedThreadPool(10);
         HOLDER.getNodes().values().stream()
+                .filter(Node::isOnline)
                 .filter(Node::isDisplayed)
                 .forEach((node) -> pool.submit(new NodeDatabaseThread(node)));
         pool.shutdown();
