@@ -78,7 +78,7 @@ public class DataGen {
             INFLUX.closeConnection();
             LOG.log(Level.INFO, "Done!");
         } catch (APIProcessingException | JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
-            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -170,11 +170,12 @@ public class DataGen {
     }
 
     private static void setupLogging() {
-        for (Handler h : LOG.getHandlers()) {
-            LOG.removeHandler(h);
+        Logger parent = Logger.getLogger("");
+        for (Handler h : parent.getHandlers()) {
+            parent.removeHandler(h);
         }
 
-        LOG.addHandler(new FancyConsoleHandler());
+        parent.addHandler(new FancyConsoleHandler());
     }
 
     private static void setupDatabase() {

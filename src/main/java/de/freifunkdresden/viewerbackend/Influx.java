@@ -76,7 +76,7 @@ public class Influx {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             return false;
         } finally {
             try {
@@ -84,7 +84,7 @@ public class Influx {
                     fr.close();
                 }
             } catch (IOException ex) {
-                Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
                 return false;
             }
         }
