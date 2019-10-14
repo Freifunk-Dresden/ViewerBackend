@@ -76,4 +76,24 @@ public class DataParserAPI extends DataParser {
     public Boolean hasBackbone() throws Exception {
         return node.get("status").getAsJsonObject().get("backbone").getAsBoolean();
     }
+
+    @Override
+    public String getName() throws Exception {
+        return node.get("name").getAsString();
+    }
+
+    @Override
+    public String getModel() throws Exception {
+        return node.get("model").getAsString();
+    }
+
+    @Override
+    public String getFirmwareVersion() throws Exception {
+        return node.get("firmware").getAsString();
+    }
+
+    @Override
+    public Boolean getAutoUpdate() throws Exception {
+        return node.get("status").getAsJsonObject().get("autoupdate").getAsBoolean();
+    }
 }
