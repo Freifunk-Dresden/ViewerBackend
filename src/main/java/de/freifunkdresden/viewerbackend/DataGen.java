@@ -155,6 +155,7 @@ public class DataGen {
         try {
             if (!pool.awaitTermination(3, TimeUnit.MINUTES)) {
                 LOG.log(Level.SEVERE, "3 min limit!");
+                POOL.shutdownNow();
             }
         } catch (InterruptedException ex) {
             Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
