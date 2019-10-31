@@ -76,7 +76,7 @@ public class NodeSysinfoThread implements Runnable {
         con.setReadTimeout(15000);
         JsonObject sysinfo;
         try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
-            sysinfo = new JsonParser().parse(reader).getAsJsonObject();
+            sysinfo = JsonParser.parseReader(reader).getAsJsonObject();
         }
         n.fill(getDataParser(sysinfo.get("version").getAsInt(), sysinfo.get("data").getAsJsonObject()));
     }
