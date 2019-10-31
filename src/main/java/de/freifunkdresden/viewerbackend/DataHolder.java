@@ -81,7 +81,7 @@ public class DataHolder {
         InputStreamReader reader;
         try (InputStream stream = con.getInputStream()) {
             reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
-            JsonArray api = new JsonParser().parse(reader).getAsJsonArray();
+            JsonArray api = JsonParser.parseReader(reader).getAsJsonArray();
             reader.close();
             api.forEach((node) -> {
                 JsonObject n = node.getAsJsonObject();
