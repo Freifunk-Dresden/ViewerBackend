@@ -73,7 +73,7 @@ public class StatsSQL {
         List<Point> vpn = new ArrayList<>();
         vpnUsage.forEach((key, value) -> {
             vpn.add(Point.measurement("vpn_usage")
-                    .tag("vpn", String.valueOf(key.getVpnId()))
+                    .tag("vpn", key.getVpnId())
                     .addField("usage", value)
                     .build());
         });

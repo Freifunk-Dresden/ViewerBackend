@@ -24,32 +24,34 @@
 package de.freifunkdresden.viewerbackend;
 
 public enum VPN {
-    VPN1(1, 255),
-    VPN2(2, 111),
-    VPN3(3, 2),
-    VPN4(4, 3),
-    VPN5(5, 100),
-    VPN6(6, 51017),
-    VPN7(7, 4),
-    VPN8(8, 102),
-    VPN9(9, 5),
-    VPN10(10, 120),
-    VPN11(11, 200),
-    VPN12(12, 256),
-    VPN13(13, 13),
-    VPN14(14, 14),
-    VPN15(15, 51033),
-    VPN16(16, 201);
+    VPN1("1", 255),
+    VPN2("2", 111),
+    VPN3("3", 2),
+    VPN5("5", 100),
+    VPN6("6", 51017),
+    VPN7("7", 4),
+    VPN9("9", 5),
+    VPN10("10", 120),
+    VPN11("11", 200),
+    VPN12("12", 256),
+    VPN13("13", 13),
+    VPN14("14", 14),
+    VPN15("15", 51033),
+    VPN16("16", 201),
+    VPNZH("ZH", 51064),
+    VPNOFF("OFF", 51051),
+    NS1("NS1", 3),
+    NS2("NS2", 15);
 
-    private final int vpnId;
+    private final String vpnId;
     private final int nodeId;
 
-    VPN(int vpnId, int nodeId) {
+    VPN(String vpnId, int nodeId) {
         this.vpnId = vpnId;
         this.nodeId = nodeId;
     }
 
-    public int getVpnId() {
+    public String getVpnId() {
         return vpnId;
     }
 
