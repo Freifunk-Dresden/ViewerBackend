@@ -37,8 +37,6 @@ import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -49,8 +47,6 @@ import java.util.stream.Collectors;
 
 public class DataGen {
 
-    public static SimpleDateFormat DATE_MESH = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-    public static SimpleDateFormat DATE_HOP = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
     private static final DataHolder HOLDER = new DataHolder();
     private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
@@ -67,7 +63,6 @@ public class DataGen {
 
     public static void main(String[] args) {
         try {
-            DATE_HOP.setTimeZone(TimeZone.getTimeZone("UTC"));
             setupLogging();
             setupDatabase();
             collectAPIData();

@@ -26,16 +26,20 @@ package de.freifunkdresden.viewerbackend.json;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Node;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class JsonFileGen {
 
+    private final DateFormat dateMesh = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private final DateFormat dateHop = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private final Gson gson = new Gson();
     private final JsonArray hopGlassNodes = new JsonArray();
     private final JsonArray graphNodes = new JsonArray();
@@ -45,11 +49,12 @@ public class JsonFileGen {
     private final Map<Node, Integer> nodeIds = new HashMap<>();
 
     public JsonFileGen(Collection<Node> nodes, Collection<Map<Integer, Link>> links) {
+        dateHop.setTimeZone(TimeZone.getTimeZone("UTC"));
         Iterator<Node> it = nodes.stream().filter(Node::isDisplayed).iterator();
         for (int i = 0; it.hasNext(); i++) {
             Node node = it.next();
-            hopGlassNodes.add(node.getJsonObject());
-            meshViewerNodes.add(node.getMeshViewerObj());
+            hopGlassNodes.add(node.getJsonObject(dateHop));
+            meshViewerNodes.add(node.getMeshViewerObj(dateMesh));
             JsonObject jsonNode = new JsonObject();
             jsonNode.addProperty("node_id", String.valueOf(node.getId()));
             jsonNode.addProperty("id", String.valueOf(node.getId()));
@@ -97,10 +102,10 @@ public class JsonFileGen {
     public void genNodes() throws IOException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("nodes", hopGlassNodes);
-        jsonObject.addProperty("timestamp", DataGen.DATE_HOP.format(new Date()));
+        jsonObject.addProperty("timestamp", dateHop.format(new Date()));
         jsonObject.addProperty("version", 2);
         File file = new File("nodes.json");
-        try (FileWriter writer = new FileWriter(file)) {
+        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             writer.write(gson.toJson(jsonObject));
             writer.flush();
         }
@@ -117,7 +122,7 @@ public class JsonFileGen {
         batadv.add("links", graphLinks);
         jsonObject.add("batadv", batadv);
         File file = new File("graph.json");
-        try (FileWriter writer = new FileWriter(file)) {
+        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             writer.write(gson.toJson(jsonObject));
             writer.flush();
         }
@@ -125,11 +130,11 @@ public class JsonFileGen {
 
     public void genMeshViewer() throws IOException {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("timestamp", DataGen.DATE_MESH.format(new Date()));
+        jsonObject.addProperty("timestamp", dateMesh.format(new Date()));
         jsonObject.add("nodes", meshViewerNodes);
         jsonObject.add("links", meshViewerLinks);
         File file = new File("meshviewer.json");
-        try (FileWriter writer = new FileWriter(file)) {
+        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             writer.write(gson.toJson(jsonObject));
             writer.flush();
         }

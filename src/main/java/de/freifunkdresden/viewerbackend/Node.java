@@ -27,6 +27,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.dataparser.DataParser;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
+import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -237,7 +238,7 @@ public class Node {
         return location != null && location.isValid();
     }
 
-    public JsonObject getJsonObject() {
+    public JsonObject getJsonObject(DateFormat df) {
         try {
             JsonObject node = new JsonObject();
             JsonObject nodeinfo = new JsonObject();
@@ -294,8 +295,8 @@ public class Node {
             flags.addProperty("backbone", backbone);
             flags.addProperty("online", online);
             node.add("flags", flags);
-            node.addProperty("firstseen", DataGen.DATE_HOP.format(new Date(firstseen)));
-            node.addProperty("lastseen", DataGen.DATE_HOP.format(new Date(lastseen)));
+            node.addProperty("firstseen", df.format(new Date(firstseen)));
+            node.addProperty("lastseen", df.format(new Date(lastseen)));
             return node;
         } catch (Exception e) {
             DataGen.getLogger().log(Level.SEVERE, "Fehler bei Node " + id, e);
@@ -303,11 +304,11 @@ public class Node {
         return null;
     }
 
-    public JsonObject getMeshViewerObj() {
+    public JsonObject getMeshViewerObj(DateFormat df) {
         try {
             JsonObject node = new JsonObject();
-            node.addProperty("firstseen", DataGen.DATE_MESH.format(new Date(firstseen)));
-            node.addProperty("lastseen", DataGen.DATE_MESH.format(new Date(lastseen)));
+            node.addProperty("firstseen", df.format(new Date(firstseen)));
+            node.addProperty("lastseen", df.format(new Date(lastseen)));
             node.addProperty("is_gateway", gateway);
             node.addProperty("is_online", online);
             node.addProperty("clients", clients);
@@ -318,7 +319,7 @@ public class Node {
                 node.addProperty("loadavg", loadAvg);
                 node.addProperty("memory_usage", memoryUsage);
                 Date date = new Date(System.currentTimeMillis() - (long) (uptime * 1000));
-                node.addProperty("uptime", DataGen.DATE_MESH.format(date));
+                node.addProperty("uptime", df.format(date));
                 node.addProperty("nproc", nproc);
             }
             if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {

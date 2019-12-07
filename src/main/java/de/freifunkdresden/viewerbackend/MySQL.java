@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -63,7 +64,7 @@ public class MySQL {
         }
         BufferedReader fr = null;
         try {
-            fr = new BufferedReader(new FileReader(f));
+            fr = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8));
             String line;
             while ((line = fr.readLine()) != null) {
                 if (line.startsWith("host=")) {
