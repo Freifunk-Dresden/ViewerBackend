@@ -77,7 +77,7 @@ public class DataHolder {
     }
 
     public void processAPI() throws Exception {
-        URLConnection con = new URL("http://api.freifunk-dresden.de/freifunk-niklas-hopglass.json").openConnection();
+        URLConnection con = new URL("https://api.freifunk-dresden.de/freifunk-niklas-hopglass.json").openConnection();
         InputStreamReader reader;
         try (InputStream stream = con.getInputStream()) {
             reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
