@@ -26,12 +26,14 @@ package de.freifunkdresden.viewerbackend.thread;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV10;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV11;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV13;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV14;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -41,6 +43,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class NodeSysinfoThread implements Runnable {
 
@@ -66,6 +69,9 @@ public class NodeSysinfoThread implements Runnable {
             } catch (IOException | NullPointerException ex) {
                 node.setOnline(false);
                 DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
+            } catch (JsonSyntaxException ex) {
+                node.setOnline(false);
+                DataGen.getLogger().log(Level.SEVERE, "Node {0} has malformed json", String.valueOf(node.getId()));
             }
         }
     }
@@ -74,10 +80,16 @@ public class NodeSysinfoThread implements Runnable {
         HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAddress() + "/sysinfo-json.cgi").openConnection();
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
-        JsonObject sysinfo;
+        String json;
         try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
-            sysinfo = JsonParser.parseReader(reader).getAsJsonObject();
+            json = new BufferedReader(reader).lines().collect(Collectors.joining());
         }
+        //Fix HTML injected in JSON
+        int begin = json.indexOf("<!DOCTYPE html>");
+        if (begin != -1) {
+            json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*<\\/html>)", "{}");
+        }
+        JsonObject sysinfo = JsonParser.parseString(json).getAsJsonObject();
         n.fill(getDataParser(sysinfo.get("version").getAsInt(), sysinfo.get("data").getAsJsonObject()));
     }
 
