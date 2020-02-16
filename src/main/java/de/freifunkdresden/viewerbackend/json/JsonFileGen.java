@@ -70,8 +70,8 @@ public class JsonFileGen {
                         JsonObject jsonLink;
                         //Meshviewer
                         jsonLink = new JsonObject();
-                        jsonLink.addProperty("source", String.valueOf(link.getSource().getId()));
-                        jsonLink.addProperty("target", String.valueOf(link.getTarget().getId()));
+                        jsonLink.addProperty("source", link.getSource().getFakeId());
+                        jsonLink.addProperty("target", link.getTarget().getFakeId());
                         jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
                         jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
                         jsonLink.addProperty("type", link.getType().getMeshviewer());

@@ -234,6 +234,12 @@ public class Node {
         return "ff:dd:00:00:" + String.format("%02x", third) + ":" + String.format("%02x", fourth);
     }
 
+    public String getFakeId() {
+        int third = id / 255;
+        int fourth = (id % 255) + 1;
+        return "ffdd0000" + String.format("%02x", third) + String.format("%02x", fourth);
+    }
+
     public boolean hasValidLocation() {
         return location != null && location.isValid();
     }
@@ -326,7 +332,7 @@ public class Node {
                 node.addProperty("gateway", String.valueOf(convertIpToId(gatewayIp)));
                 node.addProperty("gateway_nexthop", String.valueOf(convertIpToId(gatewayIp))); //TODO: Correct value
             }
-            node.addProperty("node_id", String.valueOf(id));
+            node.addProperty("node_id", getFakeId());
             JsonArray addresses = new JsonArray();
             addresses.add(getIpAddress());
             node.add("addresses", addresses);
