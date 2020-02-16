@@ -71,15 +71,13 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>3.1.12.2</version>
-                <!--
                 <dependencies>
                     <dependency>
                         <groupId>com.github.spotbugs</groupId>
                         <artifactId>spotbugs</artifactId>
-                        <version>4.0.0-beta4</version>
+                        <version>4.0.0-RC3</version>
                     </dependency>
                 </dependencies>
-                -->
             </plugin>
         </plugins>
     </build>
