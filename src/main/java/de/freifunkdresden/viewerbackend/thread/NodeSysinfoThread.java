@@ -89,11 +89,12 @@ public class NodeSysinfoThread implements Runnable {
         if (begin != -1) {
             json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*<\\/html>)", "{}");
         }
-        JsonObject sysinfo = JsonParser.parseString(json).getAsJsonObject();
-        n.fill(getDataParser(sysinfo.get("version").getAsInt(), sysinfo.get("data").getAsJsonObject()));
+        n.fill(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
     }
 
-    private static DataParserSysinfo getDataParser(int version, JsonObject data) {
+    private static DataParserSysinfo getDataParser(JsonObject sysinfo) {
+        int version = sysinfo.get("version").getAsInt();
+        JsonObject data = sysinfo.get("data").getAsJsonObject();
         if (version >= 14) {
             return new DataParserSysinfoV14(data);
         } else if (version >= 13) {
