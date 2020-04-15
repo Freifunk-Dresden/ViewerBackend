@@ -89,8 +89,10 @@ public class DataParserSysinfo extends DataParser {
     }
 
     @Override
-    public String getGatewayIp() throws Exception {
-        return data.get("bmxd").getAsJsonObject().get("gateways").getAsJsonObject().get("selected").getAsString();
+    public Node getGateway() throws Exception {
+        String ip = data.get("bmxd").getAsJsonObject().get("gateways").getAsJsonObject().get("selected").getAsString();
+        int id = Node.convertIpToId(ip);
+        return DataGen.getDataHolder().getNode(id);
     }
 
     @Override

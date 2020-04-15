@@ -49,12 +49,12 @@ public class Node {
     private double memoryUsage;
     private short clients;
     private float loadAvg;
-    private boolean gateway;
+    private boolean isGateway;
     private boolean backbone;
     private long lastseen = -1;
     private long firstseen = -1;
     private Location location;
-    private String gatewayIp;
+    private Node gateway;
     private boolean valid = false;
     private boolean autoUpdate;
     private int nproc = 1;
@@ -106,8 +106,8 @@ public class Node {
             if (dp.getLoadAvg() != null) {
                 loadAvg = dp.getLoadAvg();
             }
-            if (dp.getGatewayIp() != null) {
-                gatewayIp = dp.getGatewayIp();
+            if (dp.getGateway() != null) {
+                gateway = dp.getGateway();
             }
             if (dp.getLinkSet() != null) {
                 linkSet.addAll(dp.getLinkSet());
@@ -122,7 +122,7 @@ public class Node {
                 online = dp.isOnline();
             }
             if (dp.isGateway() != null) {
-                gateway = dp.isGateway();
+                isGateway = dp.isGateway();
             }
             if (dp.hasBackbone() != null) {
                 backbone = dp.hasBackbone();
@@ -295,12 +295,12 @@ public class Node {
                 statistics.addProperty("memory_usage", memoryUsage);
                 statistics.addProperty("loadavg", loadAvg);
             }
-            if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
-                statistics.addProperty("gateway", gatewayIp);
+            if (!isGateway && gateway != null) {
+                statistics.addProperty("gateway", gateway.getIpAddress());
             }
             node.add("statistics", statistics);
             JsonObject flags = new JsonObject();
-            flags.addProperty("gateway", gateway);
+            flags.addProperty("gateway", isGateway);
             flags.addProperty("backbone", backbone);
             flags.addProperty("online", online);
             node.add("flags", flags);
@@ -318,7 +318,7 @@ public class Node {
             JsonObject node = new JsonObject();
             node.addProperty("firstseen", df.format(new Date(firstseen)));
             node.addProperty("lastseen", df.format(new Date(lastseen)));
-            node.addProperty("is_gateway", gateway);
+            node.addProperty("is_gateway", isGateway);
             node.addProperty("is_online", online);
             node.addProperty("clients", clients);
             node.addProperty("clients_wifi24", clients);
@@ -331,9 +331,9 @@ public class Node {
                 node.addProperty("uptime", df.format(date));
                 node.addProperty("nproc", nproc);
             }
-            if (!gateway && gatewayIp != null && !gatewayIp.isEmpty()) {
-                node.addProperty("gateway", String.valueOf(convertIpToId(gatewayIp)));
-                node.addProperty("gateway_nexthop", String.valueOf(convertIpToId(gatewayIp))); //TODO: Correct value
+            if (!isGateway && gateway != null) {
+                node.addProperty("gateway", gateway.getFakeId());
+                node.addProperty("gateway_nexthop", gateway.getFakeId()); //TODO: Correct value
             }
             node.addProperty("node_id", getFakeId());
             JsonArray addresses = new JsonArray();
@@ -376,7 +376,7 @@ public class Node {
         }
         DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community.getName(), 
                 role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate, 
-                gateway, name, email);
+                isGateway, name, email);
     }
 
     public void collectStats() {

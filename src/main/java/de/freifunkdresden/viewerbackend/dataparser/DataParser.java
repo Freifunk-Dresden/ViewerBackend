@@ -26,6 +26,7 @@ package de.freifunkdresden.viewerbackend.dataparser;
 import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Location;
+import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.util.HashSet;
 
@@ -59,7 +60,7 @@ public abstract class DataParser {
         return null;
     }
 
-    public String getGatewayIp() throws Exception {
+    public Node getGateway() throws Exception {
         return null;
     }
 
