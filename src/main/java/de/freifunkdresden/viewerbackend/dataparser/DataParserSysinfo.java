@@ -24,6 +24,7 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.LinkType;
@@ -59,15 +60,8 @@ public class DataParserSysinfo extends DataParser {
     }
 
     @Override
-    public String getCommunity() throws Exception {
-        String com = data.get("common").getAsJsonObject().get("city").getAsString();
-        if (com.isEmpty()) {
-            return "Dresden";
-        }
-        if (com.equals("Meissen")) {
-            return "Meißen";
-        }
-        return com;
+    public Community getCommunity() throws Exception {
+        return Community.getCommunity(data.get("common").getAsJsonObject().get("city").getAsString());
     }
 
     @Override

@@ -38,7 +38,7 @@ public class Node {
     private final int id;
     private final HashSet<Link> linkSet = new HashSet<>();
     private String name;
-    private String community;
+    private Community community = Community.DRESDEN;
     private NodeType role = NodeType.STANDARD;
     private String model;
     private String firmwareVersion;
@@ -245,6 +245,9 @@ public class Node {
     }
 
     public JsonObject getJsonObject(DateFormat df) {
+        if (this.community == Community.DEFAULT) {
+            DataGen.getLogger().log(Level.WARNING, String.format("Node %d has invalid community (Kontakt: %s)", id, name));
+        }
         try {
             JsonObject node = new JsonObject();
             JsonObject nodeinfo = new JsonObject();
@@ -255,7 +258,7 @@ public class Node {
             nodeinfo.add("network", network);
             nodeinfo.addProperty("hostname", getHostname());
             JsonObject system = new JsonObject();
-            system.addProperty("site_code", community);
+            system.addProperty("site_code", community.getName());
             system.addProperty("role", role.name().toLowerCase());
             nodeinfo.add("system", system);
             JsonObject hardware = new JsonObject();
@@ -336,7 +339,7 @@ public class Node {
             JsonArray addresses = new JsonArray();
             addresses.add(getIpAddress());
             node.add("addresses", addresses);
-            node.addProperty("site_code", community);
+            node.addProperty("site_code", community.getName());
             node.addProperty("hostname", getHostname());
             if (isShown()) {
                 node.add("location", location.toJson());
@@ -371,7 +374,7 @@ public class Node {
             lat = location.getLatitude();
             lon = location.getLongitude();
         }
-        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community, 
+        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community.getName(), 
                 role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate, 
                 gateway, name, email);
     }

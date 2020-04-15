@@ -23,6 +23,7 @@
  */
 package de.freifunkdresden.viewerbackend.dataparser;
 
+import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.sql.ResultSet;
@@ -42,8 +43,8 @@ public class DataParserDB extends DataParser {
     }
 
     @Override
-    public String getCommunity() throws Exception {
-        return rs.getString("community");
+    public Community getCommunity() throws Exception {
+        return Community.getCommunity(rs.getString("community"));
     }
 
     @Override

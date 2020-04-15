@@ -23,6 +23,7 @@
  */
 package de.freifunkdresden.viewerbackend.dataparser;
 
+import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
@@ -38,7 +39,7 @@ public abstract class DataParser {
         return null;
     }
 
-    public String getCommunity() throws Exception {
+    public Community getCommunity() throws Exception {
         return null;
     }
 
