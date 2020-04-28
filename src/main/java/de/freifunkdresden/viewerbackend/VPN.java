@@ -36,6 +36,7 @@ public enum VPN {
     VPN14("14", 14),
     VPN15("15", 51033),
     VPN16("16", 201),
+    VPN17("17", 51007),
     VPNZH("ZH", 51064),
     VPNOFF("OFF", 51051),
     NS1("NS1", 3),
