@@ -224,6 +224,10 @@ public class Node {
         return firmwareVersion;
     }
 
+    public Community getCommunity() {
+        return community;
+    }
+
     public String getHostname() {
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
     }
@@ -384,6 +388,7 @@ public class Node {
             StatsSQL.addToStats(this);
         } else if (isDisplayed()) {
             StatsSQL.addVersion(getFirmwareVersion());
+            StatsSQL.addCommunity(getCommunity());
         }
         VPN vpn = VPN.getVPN(id);
         if (vpn != null) {

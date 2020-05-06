@@ -23,6 +23,7 @@
  */
 package de.freifunkdresden.viewerbackend.stats;
 
+import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.VPN;
@@ -40,12 +41,14 @@ public class StatsSQL {
 
     private static final Map<GeneralStatType, Double> generalStats = new EnumMap<>(GeneralStatType.class);
     private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
-    private static final Map<String, Integer> versions = Collections.synchronizedMap(new LinkedHashMap<>());
+    private static final Map<String, Integer> versions = new LinkedHashMap<>();
+    private static final Map<String, Integer> communities = new LinkedHashMap<>();
     private static final Map<VPN, Integer> vpnUsage = new EnumMap<>(VPN.class);
 
     public static void addToStats(Node n) {
         nodes.add(n);
         addVersion(n.getFirmwareVersion());
+        addCommunity(n.getCommunity());
     }
 
     public static void addGeneralStats(GeneralStatType type, double value) {
@@ -54,7 +57,16 @@ public class StatsSQL {
 
     public static void addVersion(String version) {
         if (!version.isEmpty()) {
-            versions.put(version, versions.getOrDefault(version, 0) + 1);
+            synchronized (versions) {
+                versions.put(version, versions.getOrDefault(version, 0) + 1);
+            }
+        }
+    }
+
+    public static void addCommunity(Community c) {
+        synchronized (communities) {
+            String c_name = c.getName();
+            communities.put(c_name, communities.getOrDefault(c_name, 0) + 1);
         }
     }
 
@@ -106,5 +118,13 @@ public class StatsSQL {
                     .build());
         });
         DataGen.getInflux().write(nodes_versions);
+        List<Point> nodes_communities = new ArrayList<>();
+        communities.forEach((c, v) -> {
+            nodes_communities.add(Point.measurement("nodes_communities")
+                    .tag("community", c)
+                    .addField("value", v)
+                    .build());
+        });
+        DataGen.getInflux().write(nodes_communities);
     }
 }
