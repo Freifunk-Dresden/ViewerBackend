@@ -33,6 +33,8 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV10;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV11;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV13;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV14;
+import de.freifunkdresden.viewerbackend.exception.EmptyJsonException;
+import de.freifunkdresden.viewerbackend.exception.MalformedSysinfoException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -72,11 +74,17 @@ public class NodeSysinfoThread implements Runnable {
             } catch (JsonSyntaxException ex) {
                 node.setOnline(false);
                 DataGen.getLogger().log(Level.SEVERE, "Node {0} has malformed json", String.valueOf(node.getId()));
+            } catch (EmptyJsonException ex) {
+                node.setOnline(false);
+                DataGen.getLogger().log(Level.SEVERE, "Node {0} has empty json", String.valueOf(node.getId()));
+            } catch (MalformedSysinfoException ex) {
+                node.setOnline(false);
+                DataGen.getLogger().log(Level.SEVERE, "Node {0} has malformed sysinfo", String.valueOf(node.getId()));
             }
         }
     }
 
-    private static void checkNode(Node n) throws IOException {
+    private static void checkNode(Node n) throws IOException, EmptyJsonException, MalformedSysinfoException {
         HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAddress() + "/sysinfo-json.cgi").openConnection();
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
@@ -92,7 +100,13 @@ public class NodeSysinfoThread implements Runnable {
         n.fill(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
     }
 
-    private static DataParserSysinfo getDataParser(JsonObject sysinfo) {
+    private static DataParserSysinfo getDataParser(JsonObject sysinfo) throws EmptyJsonException, MalformedSysinfoException {
+        if (sysinfo.size() == 0) {
+            throw new EmptyJsonException();
+        }
+        if (!sysinfo.has("version") || !sysinfo.has("data")) {
+            throw new MalformedSysinfoException();
+        }
         int version = sysinfo.get("version").getAsInt();
         JsonObject data = sysinfo.get("data").getAsJsonObject();
         if (version >= 14) {
