@@ -114,10 +114,9 @@ public class MySQL {
     }
 
     public void queryUpdate(String query, Object... args) {
-        Connection connLoc = conn;
         PreparedStatement st = null;
         try {
-            st = connLoc.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            st = conn.prepareStatement(query);
             int i = 1;
             for (Object o : args) {
                 st.setObject(i, o);
