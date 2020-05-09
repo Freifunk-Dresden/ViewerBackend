@@ -97,7 +97,7 @@ public class MySQL {
 
     private boolean openConnection() {
         try {
-            this.conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
+            this.conn = DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database, username, password);
             return true;
         } catch (SQLException e) {
             LOG.log(Level.SEVERE, null, e);
