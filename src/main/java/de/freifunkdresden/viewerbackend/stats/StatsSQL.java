@@ -44,11 +44,15 @@ public class StatsSQL {
     private static final Map<String, Integer> versions = new LinkedHashMap<>();
     private static final Map<String, Integer> communities = new LinkedHashMap<>();
     private static final Map<VPN, Integer> vpnUsage = new EnumMap<>(VPN.class);
+    private static final Map<Node, Integer> gatewayUsage = new LinkedHashMap<>();
+    private static final Map<Node, Integer> gatewayClients = new LinkedHashMap<>();
 
     public static void addToStats(Node n) {
         nodes.add(n);
         addVersion(n.getFirmwareVersion());
         addCommunity(n.getCommunity());
+        addGatewayUsage(n.getGateway());
+        addGatewayUsageClients(n.getGateway(), n.getClients());
     }
 
     public static void addGeneralStats(GeneralStatType type, double value) {
@@ -72,6 +76,24 @@ public class StatsSQL {
 
     public static void addVpnUsage(VPN vpn, int usage) {
         vpnUsage.put(vpn, usage);
+    }
+
+    public static void addGatewayUsage(Node gw) {
+        if (gw.getId() < 0) {
+            return;
+        }
+        synchronized (gatewayUsage) {
+            gatewayUsage.put(gw, gatewayUsage.getOrDefault(gw, 0) + 1);
+        }
+    }
+
+    public static void addGatewayUsageClients(Node gw, int cl) {
+        if (gw.getId() < 0) {
+            return;
+        }
+        synchronized (gatewayClients) {
+            gatewayClients.put(gw, gatewayClients.getOrDefault(gw, 0) + cl);
+        }
     }
 
     public static void processStats() {
@@ -126,5 +148,23 @@ public class StatsSQL {
                     .build());
         });
         DataGen.getInflux().write(nodes_communities);
+        // gateway usage
+        List<Point> nodes_gateway = new ArrayList<>();
+        gatewayUsage.forEach((gw, v) -> {
+            nodes_gateway.add(Point.measurement("nodes_gateway")
+                    .tag("gateway", String.valueOf(gw.getId()))
+                    .addField("value", v)
+                    .build());
+        });
+        DataGen.getInflux().write(nodes_gateway);
+        // gateway usage clients
+        List<Point> nodes_gateway_clients = new ArrayList<>();
+        gatewayClients.forEach((gw, v) -> {
+            nodes_gateway_clients.add(Point.measurement("nodes_gateway_clients")
+                    .tag("gateway", String.valueOf(gw.getId()))
+                    .addField("value", v)
+                    .build());
+        });
+        DataGen.getInflux().write(nodes_gateway_clients);
     }
 }

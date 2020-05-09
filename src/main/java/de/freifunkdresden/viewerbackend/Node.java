@@ -228,6 +228,10 @@ public class Node {
         return community;
     }
 
+    public Node getGateway() {
+        return gateway;
+    }
+
     public String getHostname() {
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
     }
