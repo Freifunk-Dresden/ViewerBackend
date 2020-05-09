@@ -74,6 +74,7 @@ public class DataGen {
             saveStats();
             endDbSave();
             INFLUX.closeConnection();
+            DB.closeConnection();
             LOG.log(Level.INFO, "Done!");
         } catch (APIProcessingException | JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
             LOG.log(Level.SEVERE, null, ex);
