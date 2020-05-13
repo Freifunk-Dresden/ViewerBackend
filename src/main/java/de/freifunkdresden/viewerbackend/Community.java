@@ -69,6 +69,8 @@ public enum Community {
                 return OBERLAUSITZ;
             case "Pirna":
                 return PIRNA;
+            case "Radebeul":
+                return RADEBEUL;
             case "Tharandt":
                 return THARANDT;
             case "Waldheim":
