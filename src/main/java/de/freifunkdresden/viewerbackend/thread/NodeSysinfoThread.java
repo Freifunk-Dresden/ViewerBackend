@@ -63,23 +63,16 @@ public class NodeSysinfoThread implements Runnable {
             try {
                 checkNode(node);
                 return;
-            } catch (NoRouteToHostException | ConnectException | SocketTimeoutException ex) {
+            } catch (NoRouteToHostException ex) {
                 node.setOnline(false);
-                if (i + 1 == RETRY_COUNT && !(ex instanceof NoRouteToHostException || ex.getMessage().startsWith("No route to host"))) {
+            } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException | ConnectException | SocketTimeoutException ex) {
+                node.setOnline(false);
+                if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
                     DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{String.valueOf(node.getId()), ex.getMessage()});
                 }
             } catch (IOException | NullPointerException ex) {
                 node.setOnline(false);
                 DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
-            } catch (JsonSyntaxException ex) {
-                node.setOnline(false);
-                DataGen.getLogger().log(Level.SEVERE, "Node {0} has malformed json", String.valueOf(node.getId()));
-            } catch (EmptyJsonException ex) {
-                node.setOnline(false);
-                DataGen.getLogger().log(Level.SEVERE, "Node {0} has empty json", String.valueOf(node.getId()));
-            } catch (MalformedSysinfoException ex) {
-                node.setOnline(false);
-                DataGen.getLogger().log(Level.SEVERE, "Node {0} has malformed sysinfo", String.valueOf(node.getId()));
             }
         }
     }
