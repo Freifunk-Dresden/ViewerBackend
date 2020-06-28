@@ -28,10 +28,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Node;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -47,8 +47,10 @@ public class JsonFileGen {
     private final JsonArray meshViewerNodes = new JsonArray();
     private final JsonArray meshViewerLinks = new JsonArray();
     private final Map<Node, Integer> nodeIds = new HashMap<>();
+    private final Path path;
 
-    public JsonFileGen(Collection<Node> nodes, Collection<Map<Integer, Link>> links) {
+    public JsonFileGen(Path path, Collection<Node> nodes, Collection<Map<Integer, Link>> links) {
+        this.path = path;
         dateHop.setTimeZone(TimeZone.getTimeZone("UTC"));
         Iterator<Node> it = nodes.stream().filter(Node::isDisplayed).iterator();
         for (int i = 0; it.hasNext(); i++) {
@@ -104,11 +106,8 @@ public class JsonFileGen {
         jsonObject.add("nodes", hopGlassNodes);
         jsonObject.addProperty("timestamp", dateHop.format(new Date()));
         jsonObject.addProperty("version", 2);
-        File file = new File("nodes.json");
-        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
-            writer.write(gson.toJson(jsonObject));
-            writer.flush();
-        }
+        Path fp = path.resolve("nodes.json");
+        Files.writeString(fp, gson.toJson(jsonObject), StandardCharsets.UTF_8);
     }
 
     public void genGraph() throws IOException {
@@ -121,11 +120,8 @@ public class JsonFileGen {
         batadv.add("nodes", graphNodes);
         batadv.add("links", graphLinks);
         jsonObject.add("batadv", batadv);
-        File file = new File("graph.json");
-        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
-            writer.write(gson.toJson(jsonObject));
-            writer.flush();
-        }
+        Path fp = path.resolve("graph.json");
+        Files.writeString(fp, gson.toJson(jsonObject), StandardCharsets.UTF_8);
     }
 
     public void genMeshViewer() throws IOException {
@@ -133,10 +129,7 @@ public class JsonFileGen {
         jsonObject.addProperty("timestamp", dateMesh.format(new Date()));
         jsonObject.add("nodes", meshViewerNodes);
         jsonObject.add("links", meshViewerLinks);
-        File file = new File("meshviewer.json");
-        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
-            writer.write(gson.toJson(jsonObject));
-            writer.flush();
-        }
+        Path fp = path.resolve("meshviewer.json");
+        Files.writeString(fp, gson.toJson(jsonObject), StandardCharsets.UTF_8);
     }
 }

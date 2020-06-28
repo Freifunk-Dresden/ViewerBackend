@@ -35,6 +35,9 @@ import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
 import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -143,7 +146,11 @@ public class DataGen {
     private static void genJson() throws JsonGenerationException {
         try {
             LOGGER.log(Level.INFO, "Generate JSON files...");
-            JsonFileGen jfg = new JsonFileGen(HOLDER.getNodes().values(), HOLDER.getLinks().values());
+            Path dir = Paths.get(CONFIG.getValue("json_path"));
+            if (Files.notExists(dir)) {
+                Files.createDirectory(dir);
+            }
+            JsonFileGen jfg = new JsonFileGen(dir, HOLDER.getNodes().values(), HOLDER.getLinks().values());
             jfg.genNodes();
             jfg.genGraph();
             jfg.genMeshViewer();
