@@ -27,7 +27,6 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV10;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV11;
@@ -44,13 +43,16 @@ import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NodeSysinfoThread implements Runnable {
 
     private static final int RETRY_COUNT = 3;
-
+    private static final Logger LOGGER = LogManager.getLogger(NodeSysinfoThread.class);
+    
     private final Node node;
 
     public NodeSysinfoThread(Node node) {
@@ -68,11 +70,11 @@ public class NodeSysinfoThread implements Runnable {
             } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException | ConnectException | SocketTimeoutException ex) {
                 node.setOnline(false);
                 if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
-                    DataGen.getLogger().log(Level.WARNING, "Node {0}: {1}", new Object[]{String.valueOf(node.getId()), ex.getMessage()});
+                    LOGGER.log(Level.WARN, "Node {0}: {1}", new Object[]{String.valueOf(node.getId()), ex.getMessage()});
                 }
             } catch (IOException | NullPointerException ex) {
                 node.setOnline(false);
-                DataGen.getLogger().log(Level.SEVERE, "Node " + node.getId(), ex);
+                LOGGER.log(Level.ERROR, "Node " + node.getId(), ex);
             }
         }
     }

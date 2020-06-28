@@ -29,7 +29,6 @@ import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
 import de.freifunkdresden.viewerbackend.exception.NodeInfoCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
 import de.freifunkdresden.viewerbackend.json.JsonFileGen;
-import de.freifunkdresden.viewerbackend.logging.FancyConsoleHandler;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
@@ -40,14 +39,14 @@ import java.sql.ResultSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DataGen {
 
-    private static final Logger LOG = Logger.getLogger(DataGen.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(DataGen.class);
     private static final DataHolder HOLDER = new DataHolder();
     private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
     private static MySQL DB;
@@ -63,7 +62,6 @@ public class DataGen {
 
     public static void main(String[] args) {
         try {
-            setupLogging();
             setupDatabase();
             collectAPIData();
             collectNodeInfo();
@@ -75,15 +73,15 @@ public class DataGen {
             endDbSave();
             INFLUX.closeConnection();
             DB.closeConnection();
-            LOG.log(Level.INFO, "Done!");
+            LOGGER.log(Level.INFO, "Done!");
         } catch (APIProcessingException | JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.ERROR, "", ex);
         }
     }
 
     private static void collectAPIData() throws APIProcessingException {
         try {
-            LOG.log(Level.INFO, "Processing API...");
+            LOGGER.log(Level.INFO, "Processing API...");
             HOLDER.processAPI();
         } catch (Exception ex) {
             throw new APIProcessingException(ex);
@@ -95,7 +93,7 @@ public class DataGen {
             ExecutorService pool = Executors.newFixedThreadPool(10);
             HOLDER.getNodes().values().forEach((n) -> pool.submit(new NodeSysinfoThread(n)));
             pool.shutdown();
-            LOG.log(Level.INFO, "Waiting threads to finish...");
+            LOGGER.log(Level.INFO, "Waiting threads to finish...");
             pool.awaitTermination(2, TimeUnit.MINUTES);
         } catch (InterruptedException ex) {
             throw new NodeInfoCollectionException(ex);
@@ -103,7 +101,7 @@ public class DataGen {
     }
 
     private static void collectLinks() {
-        LOG.log(Level.INFO, "Collect links...");
+        LOGGER.log(Level.INFO, "Collect links...");
         HOLDER.getNodes().values().forEach((node) -> node.getLinks().forEach((link) -> {
             Link lnk = HOLDER.getLink(link.getSource().getId(), link.getTarget().getId());
             if (lnk == null) {
@@ -115,7 +113,7 @@ public class DataGen {
     }
 
     private static void fillOfflineNodes() throws OfflineNodeProcessingException {
-        LOG.log(Level.INFO, "Fill offline nodes from database...");
+        LOGGER.log(Level.INFO, "Fill offline nodes from database...");
         String ids = HOLDER.getNodes().values().stream()
                 .filter((n) -> !n.isOnline())
                 .map((n) -> String.valueOf(n.getId()))
@@ -134,7 +132,7 @@ public class DataGen {
 
     private static void genJson() throws JsonGenerationException {
         try {
-            LOG.log(Level.INFO, "Generate JSON files...");
+            LOGGER.log(Level.INFO, "Generate JSON files...");
             JsonFileGen jfg = new JsonFileGen(HOLDER.getNodes().values(), HOLDER.getLinks().values());
             jfg.genNodes();
             jfg.genGraph();
@@ -145,7 +143,7 @@ public class DataGen {
     }
 
     private static void startDbSave() {
-        LOG.log(Level.INFO, "Start Save to database");
+        LOGGER.log(Level.INFO, "Start Save to database");
         HOLDER.getNodes().values().stream()
                 .filter(Node::isOnline)
                 .filter(Node::isDisplayed)
@@ -154,19 +152,19 @@ public class DataGen {
     }
 
     private static void endDbSave() {
-        LOG.log(Level.INFO, "End Save to database...");
+        LOGGER.log(Level.INFO, "End Save to database...");
         try {
             if (!POOL.awaitTermination(3, TimeUnit.MINUTES)) {
-                LOG.log(Level.SEVERE, "3 min limit!");
+                LOGGER.log(Level.ERROR, "3 min limit!");
                 POOL.shutdownNow();
             }
         } catch (InterruptedException ex) {
-            Logger.getLogger(DataGen.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.ERROR, "", ex);
         }
     }
 
     private static void saveStats() {
-        LOG.log(Level.INFO, "Save stats to database...");
+        LOGGER.log(Level.INFO, "Save stats to database...");
         HOLDER.getNodes().values().stream().filter(Node::isDisplayed)
                 .forEach(Node::collectStats);
         StatsSQL.addGeneralStats(GeneralStatType.NODES, HOLDER.getNodes().values().stream().filter(Node::isDisplayed).count());
@@ -178,17 +176,8 @@ public class DataGen {
         StatsSQL.processStats();
     }
 
-    private static void setupLogging() {
-        Logger parent = Logger.getLogger("");
-        for (Handler h : parent.getHandlers()) {
-            parent.removeHandler(h);
-        }
-
-        parent.addHandler(new FancyConsoleHandler());
-    }
-
     private static void setupDatabase() {
-        LOG.log(Level.INFO, "Getting connection to DB...");
+        LOGGER.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
         if (DB.hasConnection()) {
             DB.queryUpdate("CREATE TABLE IF NOT EXISTS `nodes` ( "
@@ -217,10 +206,6 @@ public class DataGen {
             throw new RuntimeException("No Database Connection!");
         }
         INFLUX = new Influx();
-    }
-
-    public static Logger getLogger() {
-        return LOG;
     }
 
     public static DataHolder getDataHolder() {

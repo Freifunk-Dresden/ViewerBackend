@@ -29,8 +29,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -38,7 +39,7 @@ import org.influxdb.dto.Point;
 
 public class Influx {
 
-    private static final Logger LOG = DataGen.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Influx.class);
 
     private InfluxDB connection;
     private String url;
@@ -98,7 +99,7 @@ public class Influx {
             this.connection.setDatabase(database);
             return true;
         } catch (IllegalArgumentException e) {
-            LOG.log(Level.SEVERE, null, e);
+            LOGGER.log(Level.ERROR, "", e);
             return false;
         }
     }
@@ -120,7 +121,7 @@ public class Influx {
             this.connection.close();
             this.connection = null;
         } catch (Throwable e) {
-            LOG.log(Level.SEVERE, "", e);
+            LOGGER.log(Level.ERROR, "", e);
         }
     }
 }

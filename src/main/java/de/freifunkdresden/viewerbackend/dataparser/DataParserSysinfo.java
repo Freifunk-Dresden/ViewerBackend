@@ -34,9 +34,13 @@ import de.freifunkdresden.viewerbackend.NodeType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
-import java.util.logging.Level;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DataParserSysinfo extends DataParser {
+
+    private static final Logger LOGGER = LogManager.getLogger(DataParserSysinfo.class);
 
     final JsonObject data;
     private final JsonObject stats;
@@ -162,7 +166,7 @@ public class DataParserSysinfo extends DataParser {
         try {
             return URLDecoder.decode(data.get("contact").getAsJsonObject().get("name").getAsString(), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            DataGen.getLogger().log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.ERROR, "", ex);
             return data.get("contact").getAsJsonObject().get("name").getAsString();
         }
     }
@@ -172,7 +176,7 @@ public class DataParserSysinfo extends DataParser {
         try {
             return URLDecoder.decode(data.get("contact").getAsJsonObject().get("email").getAsString(), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            DataGen.getLogger().log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.ERROR, "", ex);
             return data.get("contact").getAsJsonObject().get("email").getAsString();
         }
     }

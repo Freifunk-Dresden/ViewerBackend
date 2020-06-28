@@ -31,9 +31,13 @@ import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.logging.Level;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Node {
+
+    private static final Logger LOGGER = LogManager.getLogger(Node.class);
 
     private final int id;
     private final HashSet<Link> linkSet = new HashSet<>();
@@ -139,7 +143,7 @@ public class Node {
             valid = true;
         } catch (Exception e) {
             valid = false;
-            DataGen.getLogger().log(Level.SEVERE, "Node " + getId(), e);
+            LOGGER.log(Level.ERROR, "Node " + getId(), e);
         }
     }
 
@@ -254,7 +258,7 @@ public class Node {
 
     public JsonObject getJsonObject(DateFormat df) {
         if (this.community == Community.DEFAULT) {
-            DataGen.getLogger().log(Level.WARNING, String.format("Node %d has invalid community (Kontakt: %s)", id, name));
+            LOGGER.log(Level.WARN, String.format("Node %d has invalid community (Kontakt: %s)", id, name));
         }
         try {
             JsonObject node = new JsonObject();
@@ -316,7 +320,7 @@ public class Node {
             node.addProperty("lastseen", df.format(new Date(lastseen)));
             return node;
         } catch (Exception e) {
-            DataGen.getLogger().log(Level.SEVERE, "Fehler bei Node " + id, e);
+            LOGGER.log(Level.ERROR, "Fehler bei Node " + id, e);
         }
         return null;
     }
@@ -370,7 +374,7 @@ public class Node {
             node.addProperty("mac", getFakeMac());
             return node;
         } catch (Exception e) {
-            DataGen.getLogger().log(Level.SEVERE, "Fehler bei Node " + id, e);
+            LOGGER.log(Level.ERROR, "Fehler bei Node " + id, e);
         }
         return null;
     }

@@ -34,13 +34,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MySQL {
 
+    private static final Logger LOGGER = LogManager.getLogger(MySQL.class);
+
     private Connection conn;
-    private static final Logger LOG = DataGen.getLogger();
     private String host;
     private short port;
     private String username;
@@ -100,7 +102,7 @@ public class MySQL {
             this.conn = DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database, username, password);
             return true;
         } catch (SQLException e) {
-            LOG.log(Level.SEVERE, null, e);
+            LOGGER.log(Level.ERROR, "", e);
             return false;
         }
     }
@@ -124,7 +126,7 @@ public class MySQL {
             }
             st.executeUpdate();
         } catch (SQLException e) {
-            LOG.log(Level.SEVERE, "Failed to send update: {0} - {1}", new Object[]{query, e.getLocalizedMessage()});
+            LOGGER.log(Level.ERROR, "Failed to send update: {0} - {1}", new Object[]{query, e.getLocalizedMessage()});
         }
         closeRessources(st);
     }
@@ -135,7 +137,7 @@ public class MySQL {
             st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             return new PreparedUpdate(st);
         } catch (SQLException e) {
-            LOG.log(Level.SEVERE, "Failed to send update: " + query, e);
+            LOGGER.log(Level.ERROR, "Failed to send update: " + query, e);
         }
         return null;
     }
@@ -150,7 +152,7 @@ public class MySQL {
             }
             return querySelect(st);
         } catch (SQLException ex) {
-            LOG.log(Level.SEVERE, "Error trying to build Prepared Statement", ex);
+            LOGGER.log(Level.ERROR, "Error trying to build Prepared Statement", ex);
         }
         return null;
     }
@@ -160,7 +162,7 @@ public class MySQL {
         try {
             rs = st.executeQuery();
         } catch (SQLException e) {
-            LOG.log(Level.SEVERE, "Failed to send SELECT query: " + st.toString(), e);
+            LOGGER.log(Level.ERROR, "Failed to send SELECT query: " + st.toString(), e);
             return null;
         }
         return rs;
@@ -203,7 +205,7 @@ public class MySQL {
                 }
                 stmt.executeUpdate();
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOGGER.log(Level.ERROR, "", ex);
             }
             return this;
         }
