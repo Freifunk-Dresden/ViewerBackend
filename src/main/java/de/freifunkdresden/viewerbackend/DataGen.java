@@ -49,6 +49,7 @@ public class DataGen {
     private static final Logger LOGGER = LogManager.getLogger(DataGen.class);
     private static final DataHolder HOLDER = new DataHolder();
     private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
+    private static final Config CONFIG = new Config();
     private static MySQL DB;
     private static Influx INFLUX;
 
@@ -60,8 +61,17 @@ public class DataGen {
         return INFLUX;
     }
 
+    public static DataHolder getDataHolder() {
+        return HOLDER;
+    }
+
+    public static Config getConfig() {
+        return CONFIG;
+    }
+
     public static void main(String[] args) {
         try {
+            loadConfig();
             setupDatabase();
             collectAPIData();
             collectNodeInfo();
@@ -176,6 +186,14 @@ public class DataGen {
         StatsSQL.processStats();
     }
 
+    private static void loadConfig() {
+        if (CONFIG.loadConfig()) {
+            LOGGER.log(Level.INFO, "Config loaded");
+        } else {
+            LOGGER.log(Level.ERROR, "Config not loaded!");
+        }
+    }
+
     private static void setupDatabase() {
         LOGGER.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
@@ -206,9 +224,5 @@ public class DataGen {
             throw new RuntimeException("No Database Connection!");
         }
         INFLUX = new Influx();
-    }
-
-    public static DataHolder getDataHolder() {
-        return HOLDER;
     }
 }

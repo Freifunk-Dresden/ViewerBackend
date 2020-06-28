@@ -23,11 +23,6 @@
  */
 package de.freifunkdresden.viewerbackend;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -41,56 +36,22 @@ public class Influx {
 
     private static final Logger LOGGER = LogManager.getLogger(Influx.class);
 
+    private final String url;
+    private final String username;
+    private final String password;
+    private final String database;
+
     private InfluxDB connection;
-    private String url;
-    private String username;
-    private String password;
-    private String database;
 
     public Influx() {
-        if (this.loadConfig()) {
-            if (!this.openConnection()) {
-                LOG.log(Level.SEVERE, "Connection to database failed!");
-            }
-        } else {
-            LOG.log(Level.SEVERE, "Configuration file couldn't be read!");
-        }
-    }
+        url = DataGen.getConfig().getValue("influx_url");
+        username = DataGen.getConfig().getValue("influx_username");
+        password = DataGen.getConfig().getValue("influx_password");
+        database = DataGen.getConfig().getValue("influx_database");
 
-    private boolean loadConfig() {
-        File f = new File("influx.ini");
-        if (!f.exists() || !f.canRead()) {
-            return false;
+        if (!this.openConnection()) {
+            LOGGER.log(Level.ERROR, "Connection to database failed!");
         }
-        BufferedReader fr = null;
-        try {
-            fr = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8));
-            String line;
-            while ((line = fr.readLine()) != null) {
-                if (line.startsWith("url=")) {
-                    url = line.replace("url=", "");
-                } else if (line.startsWith("username=")) {
-                    username = line.replace("username=", "");
-                } else if (line.startsWith("password=")) {
-                    password = line.replace("password=", "");
-                } else if (line.startsWith("database=")) {
-                    database = line.replace("database=", "");
-                }
-            }
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            return false;
-        } finally {
-            try {
-                if (fr != null) {
-                    fr.close();
-                }
-            } catch (IOException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-                return false;
-            }
-        }
-        return true;
     }
 
     private boolean openConnection() {

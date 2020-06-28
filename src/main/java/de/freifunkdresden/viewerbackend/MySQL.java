@@ -23,11 +23,6 @@
  */
 package de.freifunkdresden.viewerbackend;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.FileReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -42,59 +37,24 @@ public class MySQL {
 
     private static final Logger LOGGER = LogManager.getLogger(MySQL.class);
 
+    private final String host;
+    private final short port;
+    private final String username;
+    private final String password;
+    private final String database;
+
     private Connection conn;
-    private String host;
-    private short port;
-    private String username;
-    private String password;
-    private String database;
 
     public MySQL() {
-        if (this.loadConfig()) {
-            if (!this.openConnection()) {
-                LOG.log(Level.SEVERE, "No connection to database!");
-            }
-        } else {
-            LOG.log(Level.SEVERE, "Configurationfile couldn't be read!");
-        }
-    }
+        host = DataGen.getConfig().getValue("mysql_host");
+        port = Short.parseShort(DataGen.getConfig().getValue("mysql_port"));
+        username = DataGen.getConfig().getValue("mysql_username");
+        password = DataGen.getConfig().getValue("mysql_password");
+        database = DataGen.getConfig().getValue("mysql_database");
 
-    private boolean loadConfig() {
-        File f = new File("conf.ini");
-        if (!f.exists() || !f.canRead()) {
-            return false;
+        if (!this.openConnection()) {
+            LOGGER.log(Level.ERROR, "No connection to database!");
         }
-        BufferedReader fr = null;
-        try {
-            fr = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8));
-            String line;
-            while ((line = fr.readLine()) != null) {
-                if (line.startsWith("host=")) {
-                    host = line.replace("host=", "");
-                } else if (line.startsWith("port=")) {
-                    port = Short.parseShort(line.replace("port=", ""));
-                } else if (line.startsWith("username=")) {
-                    username = line.replace("username=", "");
-                } else if (line.startsWith("password=")) {
-                    password = line.replace("password=", "");
-                } else if (line.startsWith("database=")) {
-                    database = line.replace("database=", "");
-                }
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        } finally {
-            try {
-                if (fr != null) {
-                    fr.close();
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
-                return false;
-            }
-        }
-        return true;
     }
 
     private boolean openConnection() {
