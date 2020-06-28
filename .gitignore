@@ -1,7 +1,6 @@
 /target/
 /nbproject/
-/conf.ini
-/influx.ini
+/config.ini
 /graph.json
 /meshviewer.json
 /nodes.json
