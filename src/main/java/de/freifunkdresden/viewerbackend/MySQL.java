@@ -86,7 +86,7 @@ public class MySQL {
             }
             st.executeUpdate();
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Failed to send update: {0} - {1}", new Object[]{query, e.getLocalizedMessage()});
+            LOGGER.log(Level.ERROR, "Failed to send update: {} - {}", query, e.getLocalizedMessage());
         }
         closeRessources(st);
     }

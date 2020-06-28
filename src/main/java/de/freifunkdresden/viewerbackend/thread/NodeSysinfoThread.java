@@ -70,11 +70,11 @@ public class NodeSysinfoThread implements Runnable {
             } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException | ConnectException | SocketTimeoutException ex) {
                 node.setOnline(false);
                 if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
-                    LOGGER.log(Level.WARN, "Node {0}: {1}", new Object[]{String.valueOf(node.getId()), ex.getMessage()});
+                    LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
                 }
             } catch (IOException | NullPointerException ex) {
                 node.setOnline(false);
-                LOGGER.log(Level.ERROR, "Node " + node.getId(), ex);
+                LOGGER.log(Level.ERROR, "Node {}", ex, node.getId());
             }
         }
     }

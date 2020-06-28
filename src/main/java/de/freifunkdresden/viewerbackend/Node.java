@@ -143,7 +143,7 @@ public class Node {
             valid = true;
         } catch (Exception e) {
             valid = false;
-            LOGGER.log(Level.ERROR, "Node " + getId(), e);
+            LOGGER.log(Level.ERROR, "Node {}", e, getId());
         }
     }
 
@@ -258,7 +258,7 @@ public class Node {
 
     public JsonObject getJsonObject(DateFormat df) {
         if (this.community == Community.DEFAULT) {
-            LOGGER.log(Level.WARN, String.format("Node %d has invalid community (Kontakt: %s)", id, name));
+            LOGGER.log(Level.WARN, "Node {} has invalid community (Kontakt: {})", id, name);
         }
         try {
             JsonObject node = new JsonObject();
@@ -320,7 +320,7 @@ public class Node {
             node.addProperty("lastseen", df.format(new Date(lastseen)));
             return node;
         } catch (Exception e) {
-            LOGGER.log(Level.ERROR, "Fehler bei Node " + id, e);
+            LOGGER.log(Level.ERROR, "Fehler bei Node {}", e, id);
         }
         return null;
     }
@@ -374,7 +374,7 @@ public class Node {
             node.addProperty("mac", getFakeMac());
             return node;
         } catch (Exception e) {
-            LOGGER.log(Level.ERROR, "Fehler bei Node " + id, e);
+            LOGGER.log(Level.ERROR, "Fehler bei Node {}", e, id);
         }
         return null;
     }
@@ -386,8 +386,8 @@ public class Node {
             lat = location.getLatitude();
             lon = location.getLongitude();
         }
-        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community.getName(), 
-                role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate, 
+        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community.getName(),
+                role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate,
                 isGateway, name, email);
     }
 
