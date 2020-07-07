@@ -88,7 +88,7 @@ public class StatsSQL {
     }
 
     public static void addGatewayUsageClients(Node gw, int cl) {
-        if (gw.getId() < 0) {
+        if (gw == null || gw.getId() < 0) {
             return;
         }
         synchronized (gatewayClients) {
