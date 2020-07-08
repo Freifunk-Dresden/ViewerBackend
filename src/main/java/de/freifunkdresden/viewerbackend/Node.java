@@ -176,6 +176,17 @@ public class Node {
         }
     }
 
+    public boolean canHasClients() {
+        switch (role) {
+            case STANDARD:
+            case MOBILE:
+                return true;
+            case SERVER:
+            default:
+                return false;
+        }
+    }
+
     public boolean isOnline() {
         return online;
     }
@@ -392,11 +403,15 @@ public class Node {
     }
 
     public void collectStats() {
-        if (isOnline() && isNormalNode()) {
+        if (!isDisplayed()) return;
+        StatsSQL.addVersion(getFirmwareVersion());
+        StatsSQL.addCommunity(getCommunity());
+        if (isNormalNode()) {
+            StatsSQL.addGatewayUsage(getGateway());
+            StatsSQL.addGatewayUsageClients(getGateway(), getClients());
+        }
+        if (isOnline()) {
             StatsSQL.addToStats(this);
-        } else if (isDisplayed()) {
-            StatsSQL.addVersion(getFirmwareVersion());
-            StatsSQL.addCommunity(getCommunity());
         }
         VPN vpn = VPN.getVPN(id);
         if (vpn != null) {

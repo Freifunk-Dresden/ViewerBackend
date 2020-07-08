@@ -29,7 +29,6 @@ import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.VPN;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,24 +38,24 @@ import org.influxdb.dto.Point;
 
 public class StatsSQL {
 
-    private static final Map<GeneralStatType, Double> generalStats = new EnumMap<>(GeneralStatType.class);
+    private static final List<Point> general = new ArrayList<>();
+    private static final List<Point> vpnUsage = new ArrayList<>();
     private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<String, Integer> versions = new LinkedHashMap<>();
     private static final Map<String, Integer> communities = new LinkedHashMap<>();
-    private static final Map<VPN, Integer> vpnUsage = new EnumMap<>(VPN.class);
     private static final Map<Node, Integer> gatewayUsage = new LinkedHashMap<>();
     private static final Map<Node, Integer> gatewayClients = new LinkedHashMap<>();
 
     public static void addToStats(Node n) {
         nodes.add(n);
-        addVersion(n.getFirmwareVersion());
-        addCommunity(n.getCommunity());
-        addGatewayUsage(n.getGateway());
-        addGatewayUsageClients(n.getGateway(), n.getClients());
     }
 
     public static void addGeneralStats(GeneralStatType type, double value) {
-        generalStats.put(type, value);
+        synchronized (general) {
+            general.add(Point.measurement(type.name().toLowerCase())
+                        .addField("value", value)
+                        .build());
+        }
     }
 
     public static void addVersion(String version) {
@@ -75,7 +74,12 @@ public class StatsSQL {
     }
 
     public static void addVpnUsage(VPN vpn, int usage) {
-        vpnUsage.put(vpn, usage);
+        synchronized (vpnUsage) {
+            vpnUsage.add(Point.measurement("vpn_usage")
+                    .tag("vpn", vpn.getVpnId())
+                    .addField("usage", usage)
+                    .build());
+        }
     }
 
     public static void addGatewayUsage(Node gw) {
@@ -97,29 +101,18 @@ public class StatsSQL {
     }
 
     public static void processStats() {
-        List<Point> general = new ArrayList<>();
-        generalStats.forEach((key, value) -> {
-            general.add(Point.measurement(key.name().toLowerCase())
-                    .addField("value", value)
-                    .build());
-        });
         DataGen.getInflux().write(general);
-        List<Point> vpn = new ArrayList<>();
-        vpnUsage.forEach((key, value) -> {
-            vpn.add(Point.measurement("vpn_usage")
-                    .tag("vpn", key.getVpnId())
-                    .addField("usage", value)
-                    .build());
-        });
-        DataGen.getInflux().write(vpn);
+        DataGen.getInflux().write(vpnUsage);
         List<Point> node_clients = new ArrayList<>();
         List<Point> node_load = new ArrayList<>();
         List<Point> node_memory = new ArrayList<>();
         nodes.forEach((e) -> {
-            node_clients.add(Point.measurement("node_clients")
-                    .tag("node", String.valueOf(e.getId()))
-                    .addField("value", e.getClients())
-                    .build());
+            if (e.canHasClients()) {
+                node_clients.add(Point.measurement("node_clients")
+                        .tag("node", String.valueOf(e.getId()))
+                        .addField("value", e.getClients())
+                        .build());
+            }
             node_load.add(Point.measurement("node_load")
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getLoadAvg())
