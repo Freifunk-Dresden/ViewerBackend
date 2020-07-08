@@ -1,6 +1,5 @@
 /target/
 /nbproject/
 /config.ini
-/graph.json
-/meshviewer.json
-/nodes.json
+/data
+/logs
