@@ -23,6 +23,7 @@
  */
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.exception.DatabaseConnectionException;
 import java.util.Collection;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -48,20 +49,14 @@ public class Influx {
         username = DataGen.getConfig().getValue("influx_username");
         password = DataGen.getConfig().getValue("influx_password");
         database = DataGen.getConfig().getValue("influx_database");
-
-        if (!this.openConnection()) {
-            LOGGER.log(Level.ERROR, "Connection to database failed!");
-        }
     }
 
-    private boolean openConnection() {
+    public void openConnection() throws DatabaseConnectionException {
         try {
             this.connection = InfluxDBFactory.connect(url, username, password);
             this.connection.setDatabase(database);
-            return true;
         } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.ERROR, "", e);
-            return false;
+            throw new DatabaseConnectionException("Connection to database failed!", e);
         }
     }
 

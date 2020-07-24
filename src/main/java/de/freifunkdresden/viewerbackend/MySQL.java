@@ -23,6 +23,7 @@
  */
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.exception.DatabaseConnectionException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -51,19 +52,13 @@ public class MySQL {
         username = DataGen.getConfig().getValue("mysql_username");
         password = DataGen.getConfig().getValue("mysql_password");
         database = DataGen.getConfig().getValue("mysql_database");
-
-        if (!this.openConnection()) {
-            LOGGER.log(Level.ERROR, "No connection to database!");
-        }
     }
 
-    private boolean openConnection() {
+    public void openConnection() throws DatabaseConnectionException {
         try {
             this.conn = DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database, username, password);
-            return true;
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "", e);
-            return false;
+            throw new DatabaseConnectionException("No connection to database", e);
         }
     }
 

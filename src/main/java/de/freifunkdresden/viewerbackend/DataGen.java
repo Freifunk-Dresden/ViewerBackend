@@ -193,32 +193,30 @@ public class DataGen {
     private static void setupDatabase() {
         LOGGER.log(Level.INFO, "Getting connection to DB...");
         DB = new MySQL();
-        if (DB.hasConnection()) {
-            DB.queryUpdate("CREATE TABLE IF NOT EXISTS `nodes` ( "
-                    + " `id` INT(11) NOT NULL, "
-                    + "	`community` VARCHAR(50) NULL DEFAULT NULL, "
-                    + "	`role` TEXT NULL, "
-                    + "	`model` TEXT NULL, "
-                    + "	`firmwareVersion` VARCHAR(10) NULL DEFAULT NULL, "
-                    + "	`firmwareBase` TEXT NULL, "
-                    + "	`firstseen` INT(11) NULL DEFAULT NULL, "
-                    + "	`lastseen` INT(11) NULL DEFAULT NULL, "
-                    + "	`gatewayIp` TEXT NULL, "
-                    + "	`latitude` DOUBLE NULL DEFAULT NULL, "
-                    + "	`longitude` DOUBLE NULL DEFAULT NULL, "
-                    + "	`uptime` DOUBLE NULL DEFAULT NULL, "
-                    + "	`memory_usage` DOUBLE NULL DEFAULT NULL, "
-                    + "	`loadavg` DOUBLE NULL DEFAULT NULL, "
-                    + "	`clients` INT(4) NULL DEFAULT NULL, "
-                    + "	`gateway` INT(1) NULL DEFAULT NULL, "
-                    + "	`online` INT(1) NULL DEFAULT NULL, "
-                    + "	`name` TEXT NULL, "
-                    + "	`email` TEXT NULL, "
-                    + "	PRIMARY KEY (`id`) "
-                    + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
-        } else {
-            throw new RuntimeException("No Database Connection!");
-        }
+        DB.openConnection();
+        DB.queryUpdate("CREATE TABLE IF NOT EXISTS `nodes` ( "
+                + " `id` INT(11) NOT NULL, "
+                + "	`community` VARCHAR(50) NULL DEFAULT NULL, "
+                + "	`role` TEXT NULL, "
+                + "	`model` TEXT NULL, "
+                + "	`firmwareVersion` VARCHAR(10) NULL DEFAULT NULL, "
+                + "	`firmwareBase` TEXT NULL, "
+                + "	`firstseen` INT(11) NULL DEFAULT NULL, "
+                + "	`lastseen` INT(11) NULL DEFAULT NULL, "
+                + "	`gatewayIp` TEXT NULL, "
+                + "	`latitude` DOUBLE NULL DEFAULT NULL, "
+                + "	`longitude` DOUBLE NULL DEFAULT NULL, "
+                + "	`uptime` DOUBLE NULL DEFAULT NULL, "
+                + "	`memory_usage` DOUBLE NULL DEFAULT NULL, "
+                + "	`loadavg` DOUBLE NULL DEFAULT NULL, "
+                + "	`clients` INT(4) NULL DEFAULT NULL, "
+                + "	`gateway` INT(1) NULL DEFAULT NULL, "
+                + "	`online` INT(1) NULL DEFAULT NULL, "
+                + "	`name` TEXT NULL, "
+                + "	`email` TEXT NULL, "
+                + "	PRIMARY KEY (`id`) "
+                + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
         INFLUX = new Influx();
+        INFLUX.openConnection();
     }
 }
