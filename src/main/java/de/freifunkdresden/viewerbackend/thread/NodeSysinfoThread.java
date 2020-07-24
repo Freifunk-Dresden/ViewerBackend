@@ -85,7 +85,9 @@ public class NodeSysinfoThread implements Runnable {
         con.setReadTimeout(15000);
         String json;
         try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
-            json = new BufferedReader(reader).lines().collect(Collectors.joining());
+            try (BufferedReader bufferedReader = new BufferedReader(reader)) {
+                json = bufferedReader.lines().collect(Collectors.joining());
+            }
         }
         //Fix HTML injected in JSON
         int begin = json.indexOf("<!DOCTYPE html>");

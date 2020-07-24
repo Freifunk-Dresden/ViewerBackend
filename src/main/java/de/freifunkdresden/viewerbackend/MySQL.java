@@ -71,9 +71,7 @@ public class MySQL {
     }
 
     public void queryUpdate(String query, Object... args) {
-        PreparedStatement st = null;
-        try {
-            st = conn.prepareStatement(query);
+        try (PreparedStatement st = conn.prepareStatement(query)) {
             int i = 1;
             for (Object o : args) {
                 st.setObject(i, o);
@@ -83,23 +81,19 @@ public class MySQL {
         } catch (SQLException e) {
             LOGGER.log(Level.ERROR, "Failed to send update: {} - {}", query, e.getLocalizedMessage());
         }
-        closeRessources(st);
     }
 
     public PreparedUpdate queryPrepUpdate(String query) {
-        PreparedStatement st;
-        try {
-            st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+        try (PreparedStatement st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             return new PreparedUpdate(st);
         } catch (SQLException e) {
             LOGGER.log(Level.ERROR, "Failed to send update: " + query, e);
+            return null;
         }
-        return null;
     }
 
     public ResultSet querySelect(String query, Object... args) {
-        try {
-            PreparedStatement st = conn.prepareStatement(query);
+        try (PreparedStatement st = conn.prepareStatement(query)) {
             int i = 1;
             for (Object o : args) {
                 st.setObject(i, o);
@@ -108,27 +102,16 @@ public class MySQL {
             return querySelect(st);
         } catch (SQLException ex) {
             LOGGER.log(Level.ERROR, "Error trying to build Prepared Statement", ex);
+            return null;
         }
-        return null;
     }
 
     private ResultSet querySelect(PreparedStatement st) {
-        ResultSet rs;
         try {
-            rs = st.executeQuery();
+            return st.executeQuery();
         } catch (SQLException e) {
             LOGGER.log(Level.ERROR, "Failed to send SELECT query: " + st.toString(), e);
             return null;
-        }
-        return rs;
-    }
-
-    private void closeRessources(PreparedStatement st) {
-        if (st != null) {
-            try {
-                st.close();
-            } catch (SQLException e) {
-            }
         }
     }
 
@@ -143,7 +126,7 @@ public class MySQL {
         }
     }
 
-    public class PreparedUpdate {
+    public static class PreparedUpdate {
 
         private final PreparedStatement stmt;
 
@@ -166,7 +149,12 @@ public class MySQL {
         }
 
         public void done() {
-            closeRessources(stmt);
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 }
