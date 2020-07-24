@@ -21,18 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package de.freifunkdresden.viewerbackend;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -74,19 +64,5 @@ public class DataHolder {
 
     public Map<Integer, Map<Integer, Link>> getLinks() {
         return new HashMap<>(links);
-    }
-
-    public void processAPI() throws Exception {
-        URLConnection con = new URL(DataGen.getConfig().getValue("api_url")).openConnection();
-        InputStreamReader reader;
-        try (InputStream stream = con.getInputStream()) {
-            reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
-            JsonArray api = JsonParser.parseReader(reader).getAsJsonArray();
-            reader.close();
-            api.forEach((node) -> {
-                JsonObject n = node.getAsJsonObject();
-                getNode(n.get("id").getAsInt()).fill(new DataParserAPI(n));
-            });
-        }
     }
 }

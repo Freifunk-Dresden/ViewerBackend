@@ -24,7 +24,7 @@
 package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
-import de.freifunkdresden.viewerbackend.exception.APIProcessingException;
+import de.freifunkdresden.viewerbackend.datasource.FreifunkApi;
 import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
 import de.freifunkdresden.viewerbackend.exception.NodeInfoCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
@@ -76,7 +76,7 @@ public class DataGen {
         try {
             CONFIG.loadConfig();
             setupDatabase();
-            collectAPIData();
+            processFreifunkApi();
             collectNodeInfo();
             fillOfflineNodes();
             startDbSave();
@@ -87,18 +87,15 @@ public class DataGen {
             INFLUX.closeConnection();
             DB.closeConnection();
             LOGGER.log(Level.INFO, "Done!");
-        } catch (APIProcessingException | JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
+        } catch (JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
             LOGGER.log(Level.ERROR, "", ex);
         }
     }
 
-    private static void collectAPIData() throws APIProcessingException {
-        try {
-            LOGGER.log(Level.INFO, "Processing API...");
-            HOLDER.processAPI();
-        } catch (Exception ex) {
-            throw new APIProcessingException(ex);
-        }
+    private static void processFreifunkApi() {
+        LOGGER.log(Level.INFO, "Processing API...");
+        FreifunkApi.downloadApiFile();
+        FreifunkApi.processApi();
     }
 
     private static void collectNodeInfo() throws NodeInfoCollectionException {
