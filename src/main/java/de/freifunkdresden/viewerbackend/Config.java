@@ -23,6 +23,7 @@
  */
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.exception.ConfigurationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,19 +31,15 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class Config {
 
-    private static final Logger LOGGER = LogManager.getLogger(Config.class);
     private final Map<String, String> configValues = new HashMap<>();
 
-    public boolean loadConfig() {
+    public void loadConfig() throws ConfigurationException {
         Path path = Paths.get("config.ini");
         if (!Files.exists(path) || !Files.isReadable(path)) {
-            return false;
+            throw new ConfigurationException("Config files don't exist");
         }
         try {
             List<String> lines = Files.readAllLines(path);
@@ -55,10 +52,8 @@ public class Config {
                 configValues.put(split[0], split[1]);
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.ERROR, "", ex);
-            return false;
+            throw new ConfigurationException("Config file couldn't be loaded", ex);
         }
-        return true;
     }
 
     public String getValue(String key) {

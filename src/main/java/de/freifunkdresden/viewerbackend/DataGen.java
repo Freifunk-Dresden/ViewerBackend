@@ -74,7 +74,7 @@ public class DataGen {
 
     public static void main(String[] args) {
         try {
-            loadConfig();
+            CONFIG.loadConfig();
             setupDatabase();
             collectAPIData();
             collectNodeInfo();
@@ -191,14 +191,6 @@ public class DataGen {
                 .reduce(BigInteger.ZERO, (result, node) -> result.add(BigInteger.valueOf(node.getClients())), BigInteger::add)
                 .intValue());
         StatsSQL.processStats();
-    }
-
-    private static void loadConfig() {
-        if (CONFIG.loadConfig()) {
-            LOGGER.log(Level.INFO, "Config loaded");
-        } else {
-            LOGGER.log(Level.ERROR, "Config not loaded!");
-        }
     }
 
     private static void setupDatabase() {
