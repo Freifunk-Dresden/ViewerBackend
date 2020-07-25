@@ -38,7 +38,7 @@ public class DataParserSysinfoV10 extends DataParserSysinfo {
     @Override
     public Float getUptime() throws Exception {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
-        String[] uptime = jsonUptime.replace("  ", " ").split(" ");
+        String[] uptime = jsonUptime.split("\\s+");
         return Float.parseFloat(uptime[0]);
     }
 

@@ -102,12 +102,13 @@ public class DataParserSysinfo extends DataParser {
     @Override
     public Float getUptime() throws Exception {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
-        String[] uptime = jsonUptime.replace("  ", " ").split(" ");
+        String[] uptime = jsonUptime.split("\\s+");
         if (jsonUptime.contains(":")) {
-            if (uptime[3].replace(",", "").contains(":")) {
-                return parseMinutes(uptime[3].replace(",", "")) * 60f;
+            String array3 = uptime[3].replace(",", "");
+            if (array3.contains(":")) {
+                return parseMinutes(array3) * 60f;
             } else {
-                short days = Short.parseShort(uptime[3].replace(",", ""));
+                short days = Short.parseShort(array3);
                 int min;
                 String minutes = uptime[5].replace(",", "");
                 String time = uptime[6].replace(",", "");
