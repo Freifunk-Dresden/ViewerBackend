@@ -52,7 +52,7 @@ public class NodeSysinfoThread implements Runnable {
 
     private static final int RETRY_COUNT = 3;
     private static final Logger LOGGER = LogManager.getLogger(NodeSysinfoThread.class);
-    
+
     private final Node node;
 
     public NodeSysinfoThread(Node node) {
@@ -74,7 +74,7 @@ public class NodeSysinfoThread implements Runnable {
                 }
             } catch (IOException | NullPointerException ex) {
                 node.setOnline(false);
-                LOGGER.log(Level.ERROR, "Node {}", ex, node.getId());
+                LOGGER.log(Level.ERROR, "Node " + node.getId() + ": ", ex);
             }
         }
     }
