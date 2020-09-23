@@ -4,3 +4,5 @@
 /data
 /logs
 /cache
+.idea/
+nbactions.xml
