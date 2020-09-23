@@ -64,41 +64,39 @@ public class JsonFileGen {
             graphNodes.add(jsonNode);
             nodeIds.put(node, i);
         }
-        links.forEach((map) -> {
-            map.values().stream()
-                    .filter((link) -> link.getSource().isDisplayed() && link.getTarget().isDisplayed())
-                    .filter((link) -> link.getSource().isOnline() && link.getTarget().isOnline())
-                    .forEach((link) -> {
-                        JsonObject jsonLink;
-                        //Meshviewer
+        links.forEach(map -> map.values().stream()
+                .filter(link -> link.getSource().isDisplayed() && link.getTarget().isDisplayed())
+                .filter(link -> link.getSource().isOnline() && link.getTarget().isOnline())
+                .forEach(link -> {
+                    JsonObject jsonLink;
+                    //Meshviewer
+                    jsonLink = new JsonObject();
+                    jsonLink.addProperty("source", link.getSource().getFakeId());
+                    jsonLink.addProperty("target", link.getTarget().getFakeId());
+                    jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
+                    jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
+                    jsonLink.addProperty("type", link.getType().getMeshviewer());
+                    jsonLink.addProperty("source_addr", link.getSource().getFakeMac());
+                    jsonLink.addProperty("target_addr", link.getTarget().getFakeMac());
+                    meshViewerLinks.add(jsonLink);
+                    //Hopglass
+                    Integer source = nodeIds.get(link.getSource());
+                    Integer target = nodeIds.get(link.getTarget());
+                    jsonLink = new JsonObject();
+                    jsonLink.addProperty("source", source);
+                    jsonLink.addProperty("target", target);
+                    jsonLink.addProperty("tq", Link.convertToHop(link.getSourceTq()));
+                    jsonLink.addProperty("type", link.getType().getHopglass());
+                    graphLinks.add(jsonLink);
+                    if (link.getTargetTq() != -1) {
                         jsonLink = new JsonObject();
-                        jsonLink.addProperty("source", link.getSource().getFakeId());
-                        jsonLink.addProperty("target", link.getTarget().getFakeId());
-                        jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
-                        jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
-                        jsonLink.addProperty("type", link.getType().getMeshviewer());
-                        jsonLink.addProperty("source_addr", link.getSource().getFakeMac());
-                        jsonLink.addProperty("target_addr", link.getTarget().getFakeMac());
-                        meshViewerLinks.add(jsonLink);
-                        //Hopglass
-                        Integer source = nodeIds.get(link.getSource());
-                        Integer target = nodeIds.get(link.getTarget());
-                        jsonLink = new JsonObject();
-                        jsonLink.addProperty("source", source);
-                        jsonLink.addProperty("target", target);
-                        jsonLink.addProperty("tq", Link.convertToHop(link.getSourceTq()));
+                        jsonLink.addProperty("source", target);
+                        jsonLink.addProperty("target", source);
+                        jsonLink.addProperty("tq", Link.convertToHop(link.getTargetTq()));
                         jsonLink.addProperty("type", link.getType().getHopglass());
                         graphLinks.add(jsonLink);
-                        if (link.getTargetTq() != -1) {
-                            jsonLink = new JsonObject();
-                            jsonLink.addProperty("source", target);
-                            jsonLink.addProperty("target", source);
-                            jsonLink.addProperty("tq", Link.convertToHop(link.getTargetTq()));
-                            jsonLink.addProperty("type", link.getType().getHopglass());
-                            graphLinks.add(jsonLink);
-                        }
-                    });
-        });
+                    }
+                }));
     }
 
     public void genNodes() throws IOException {

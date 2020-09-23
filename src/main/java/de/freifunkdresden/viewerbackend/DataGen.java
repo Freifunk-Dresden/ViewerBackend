@@ -101,7 +101,7 @@ public class DataGen {
     private static void collectNodeInfo() throws NodeInfoCollectionException {
         try {
             ExecutorService pool = Executors.newFixedThreadPool(10);
-            HOLDER.getNodes().values().forEach((n) -> pool.submit(new NodeSysinfoThread(n)));
+            HOLDER.getNodes().values().forEach(n -> pool.submit(new NodeSysinfoThread(n)));
             pool.shutdown();
             LOGGER.log(Level.INFO, "Waiting threads to finish...");
             pool.awaitTermination(2, TimeUnit.MINUTES);
@@ -112,7 +112,7 @@ public class DataGen {
 
     private static void collectLinks() {
         LOGGER.log(Level.INFO, "Collect links...");
-        HOLDER.getNodes().values().forEach((node) -> node.getLinks().forEach((link) -> {
+        HOLDER.getNodes().values().forEach(node -> node.getLinks().forEach(link -> {
             Link lnk = HOLDER.getLink(link.getSource().getId(), link.getTarget().getId());
             if (lnk == null) {
                 HOLDER.addLink(link);
@@ -125,8 +125,8 @@ public class DataGen {
     private static void fillOfflineNodes() throws OfflineNodeProcessingException {
         LOGGER.log(Level.INFO, "Fill offline nodes from database...");
         String ids = HOLDER.getNodes().values().stream()
-                .filter((n) -> !n.isOnline())
-                .map((n) -> String.valueOf(n.getId()))
+                .filter(n -> !n.isOnline())
+                .map(n -> String.valueOf(n.getId()))
                 .collect(Collectors.joining(","));
         if (ids.isEmpty()) {
             return;
@@ -161,7 +161,7 @@ public class DataGen {
         HOLDER.getNodes().values().stream()
                 .filter(Node::isOnline)
                 .filter(Node::isDisplayed)
-                .forEach((node) -> POOL.submit(new NodeDatabaseThread(node)));
+                .forEach(node -> POOL.submit(new NodeDatabaseThread(node)));
         POOL.shutdown();
     }
 

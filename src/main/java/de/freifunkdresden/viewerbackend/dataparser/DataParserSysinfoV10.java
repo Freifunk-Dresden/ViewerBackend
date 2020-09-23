@@ -46,7 +46,7 @@ public class DataParserSysinfoV10 extends DataParserSysinfo {
     public HashSet<Link> getLinkSet() throws Exception {
         HashSet<Link> linkmap = super.getLinkSet();
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach((link) -> {
+        bmxd.get("links").getAsJsonArray().forEach(link -> {
             JsonObject l = link.getAsJsonObject();
             Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
             byte tq = Byte.parseByte(l.get("tq").getAsString());

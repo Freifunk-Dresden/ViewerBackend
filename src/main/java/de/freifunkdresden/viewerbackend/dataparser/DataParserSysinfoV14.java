@@ -46,7 +46,7 @@ public class DataParserSysinfoV14 extends DataParserSysinfoV13 {
         HashSet<Link> linkmap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach((link) -> {
+        bmxd.get("links").getAsJsonArray().forEach(link -> {
             JsonObject l = link.getAsJsonObject();
             Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
             byte tq = Byte.parseByte(l.get("tq").getAsString());
