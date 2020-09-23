@@ -39,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -136,7 +137,7 @@ public class DataGen {
             while (rs.next()) {
                 HOLDER.getNode(rs.getInt("id")).fill(new DataParserDB(rs));
             }
-        } catch (Throwable ex) {
+        } catch (SQLException ex) {
             throw new OfflineNodeProcessingException(ex);
         }
     }

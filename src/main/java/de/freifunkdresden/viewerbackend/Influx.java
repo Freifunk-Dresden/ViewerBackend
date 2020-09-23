@@ -25,17 +25,12 @@ package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.exception.DatabaseConnectionException;
 import java.util.Collection;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 
 public class Influx {
-
-    private static final Logger LOGGER = LogManager.getLogger(Influx.class);
 
     private final String url;
     private final String username;
@@ -73,11 +68,7 @@ public class Influx {
     }
 
     public void closeConnection() {
-        try {
-            this.connection.close();
-            this.connection = null;
-        } catch (Throwable e) {
-            LOGGER.log(Level.ERROR, "", e);
-        }
+        this.connection.close();
+        this.connection = null;
     }
 }
