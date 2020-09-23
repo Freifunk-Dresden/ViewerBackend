@@ -310,6 +310,9 @@ public class Node {
             if (isShown()) {
                 nodeinfo.add("location", location.toJson());
             }
+            JsonArray pages = new JsonArray();
+            pages.add(String.format("http://%s.freifunk-dresden.de", id));
+            nodeinfo.add("pages", pages);
             node.add("nodeinfo", nodeinfo);
             JsonObject statistics = new JsonObject();
             statistics.addProperty("clients", clients);
