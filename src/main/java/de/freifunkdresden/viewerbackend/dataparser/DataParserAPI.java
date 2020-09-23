@@ -26,7 +26,7 @@ package de.freifunkdresden.viewerbackend.dataparser;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Location;
 
-public class DataParserAPI extends DataParser {
+public class DataParserAPI implements DataParser {
 
     private final JsonObject node;
 

@@ -28,7 +28,7 @@ import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.sql.ResultSet;
 
-public class DataParserDB extends DataParser {
+public class DataParserDB implements DataParser {
 
     private final ResultSet rs;
 

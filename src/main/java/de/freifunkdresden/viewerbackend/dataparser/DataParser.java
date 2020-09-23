@@ -30,89 +30,89 @@ import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.util.HashSet;
 
-public abstract class DataParser {
+public interface DataParser {
 
-    public Boolean getAutoUpdate() throws Exception {
+    default Boolean getAutoUpdate() throws Exception {
         return null;
     }
 
-    public Short getClients() throws Exception {
+    default Short getClients() throws Exception {
         return null;
     }
 
-    public Community getCommunity() throws Exception {
+    default Community getCommunity() throws Exception {
         return null;
     }
 
-    public String getEMail() throws Exception {
+    default String getEMail() throws Exception {
         return null;
     }
 
-    public String getFirmwareBase() throws Exception {
+    default String getFirmwareBase() throws Exception {
         return null;
     }
 
-    public String getFirmwareVersion() throws Exception {
+    default String getFirmwareVersion() throws Exception {
         return null;
     }
 
-    public Long getFirstSeen() throws Exception {
+    default Long getFirstSeen() throws Exception {
         return null;
     }
 
-    public Node getGateway() throws Exception {
+    default Node getGateway() throws Exception {
         return null;
     }
 
-    public Long getLastSeen() throws Exception {
+    default Long getLastSeen() throws Exception {
         return null;
     }
 
-    public HashSet<Link> getLinkSet() throws Exception {
+    default HashSet<Link> getLinkSet() throws Exception {
         return null;
     }
 
-    public Float getLoadAvg() throws Exception {
+    default Float getLoadAvg() throws Exception {
         return null;
     }
 
-    public Location getLocation() throws Exception {
+    default Location getLocation() throws Exception {
         return null;
     }
 
-    public Double getMemoryUsage() throws Exception {
+    default Double getMemoryUsage() throws Exception {
         return null;
     }
 
-    public String getModel() throws Exception {
+    default String getModel() throws Exception {
         return null;
     }
 
-    public String getName() throws Exception {
+    default String getName() throws Exception {
         return null;
     }
 
-    public NodeType getRole() throws Exception {
+    default NodeType getRole() throws Exception {
         return null;
     }
 
-    public Float getUptime() throws Exception {
+    default Float getUptime() throws Exception {
         return null;
     }
 
-    public Boolean isOnline() throws Exception {
+    default Boolean isOnline() throws Exception {
         return null;
     }
 
-    public Boolean isGateway() throws Exception {
+    default Boolean isGateway() throws Exception {
         return null;
     }
 
-    public Boolean hasBackbone() throws Exception {
+    default Boolean hasBackbone() throws Exception {
         return null;
     }
 
-    public Integer getCPUCount() throws Exception {
+    default Integer getCPUCount() throws Exception {
         return null;
     }
 }

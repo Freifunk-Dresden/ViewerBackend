@@ -38,7 +38,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DataParserSysinfo extends DataParser {
+public class DataParserSysinfo implements DataParser {
 
     private static final Logger LOGGER = LogManager.getLogger(DataParserSysinfo.class);
 
