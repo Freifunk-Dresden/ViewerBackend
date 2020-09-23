@@ -86,10 +86,10 @@ public class DataParserSysinfo extends DataParser {
     @Override
     public String getFirmwareBase() throws Exception {
         JsonObject firmware = data.get("firmware").getAsJsonObject();
-        String DISTRIB_ID = firmware.get("DISTRIB_ID").getAsString();
-        String DISTRIB_RELEASE = firmware.get("DISTRIB_RELEASE").getAsString();
-        String DISTRIB_REVISION = firmware.get("DISTRIB_REVISION").getAsString();
-        return DISTRIB_ID + " " + DISTRIB_RELEASE + " " + DISTRIB_REVISION;
+        String distribId = firmware.get("DISTRIB_ID").getAsString();
+        String distribRelease = firmware.get("DISTRIB_RELEASE").getAsString();
+        String distribRev = firmware.get("DISTRIB_REVISION").getAsString();
+        return distribId + " " + distribRelease + " " + distribRev;
     }
 
     @Override

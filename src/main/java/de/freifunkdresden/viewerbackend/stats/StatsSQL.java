@@ -71,8 +71,8 @@ public class StatsSQL {
 
     public static void addCommunity(Community c) {
         synchronized (communities) {
-            String c_name = c.getName();
-            communities.put(c_name, communities.getOrDefault(c_name, 0) + 1);
+            String cName = c.getName();
+            communities.put(cName, communities.getOrDefault(cName, 0) + 1);
         }
     }
 
@@ -106,61 +106,53 @@ public class StatsSQL {
     public static void processStats() {
         DataGen.getInflux().write(general);
         DataGen.getInflux().write(vpnUsage);
-        List<Point> node_clients = new ArrayList<>();
-        List<Point> node_load = new ArrayList<>();
-        List<Point> node_memory = new ArrayList<>();
-        nodes.forEach((e) -> {
+        List<Point> nodeClients = new ArrayList<>();
+        List<Point> nodeLoad = new ArrayList<>();
+        List<Point> nodeMemory = new ArrayList<>();
+        nodes.forEach(e -> {
             if (e.canHasClients()) {
-                node_clients.add(Point.measurement("node_clients")
+                nodeClients.add(Point.measurement("node_clients")
                         .tag("node", String.valueOf(e.getId()))
                         .addField("value", e.getClients())
                         .build());
             }
-            node_load.add(Point.measurement("node_load")
+            nodeLoad.add(Point.measurement("node_load")
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getLoadAvg())
                     .build());
-            node_memory.add(Point.measurement("node_memory")
+            nodeMemory.add(Point.measurement("node_memory")
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getMemoryUsage())
                     .build());
         });
-        DataGen.getInflux().write(node_clients);
-        DataGen.getInflux().write(node_load);
-        DataGen.getInflux().write(node_memory);
-        List<Point> nodes_versions = new ArrayList<>();
-        versions.forEach((v, c) -> {
-            nodes_versions.add(Point.measurement("nodes_versions")
-                    .tag("version", v)
-                    .addField("value", c)
-                    .build());
-        });
-        DataGen.getInflux().write(nodes_versions);
-        List<Point> nodes_communities = new ArrayList<>();
-        communities.forEach((c, v) -> {
-            nodes_communities.add(Point.measurement("nodes_communities")
-                    .tag("community", c)
-                    .addField("value", v)
-                    .build());
-        });
-        DataGen.getInflux().write(nodes_communities);
+        DataGen.getInflux().write(nodeClients);
+        DataGen.getInflux().write(nodeLoad);
+        DataGen.getInflux().write(nodeMemory);
+        List<Point> nodesVersions = new ArrayList<>();
+        versions.forEach((v, c) -> nodesVersions.add(Point.measurement("nodes_versions")
+                .tag("version", v)
+                .addField("value", c)
+                .build()));
+        DataGen.getInflux().write(nodesVersions);
+        List<Point> nodesCommunities = new ArrayList<>();
+        communities.forEach((c, v) -> nodesCommunities.add(Point.measurement("nodes_communities")
+                .tag("community", c)
+                .addField("value", v)
+                .build()));
+        DataGen.getInflux().write(nodesCommunities);
         // gateway usage
-        List<Point> nodes_gateway = new ArrayList<>();
-        gatewayUsage.forEach((gw, v) -> {
-            nodes_gateway.add(Point.measurement("nodes_gateway")
-                    .tag("gateway", String.valueOf(gw.getId()))
-                    .addField("value", v)
-                    .build());
-        });
-        DataGen.getInflux().write(nodes_gateway);
+        List<Point> nodesGateway = new ArrayList<>();
+        gatewayUsage.forEach((gw, v) -> nodesGateway.add(Point.measurement("nodes_gateway")
+                .tag("gateway", String.valueOf(gw.getId()))
+                .addField("value", v)
+                .build()));
+        DataGen.getInflux().write(nodesGateway);
         // gateway usage clients
-        List<Point> nodes_gateway_clients = new ArrayList<>();
-        gatewayClients.forEach((gw, v) -> {
-            nodes_gateway_clients.add(Point.measurement("nodes_gateway_clients")
-                    .tag("gateway", String.valueOf(gw.getId()))
-                    .addField("value", v)
-                    .build());
-        });
-        DataGen.getInflux().write(nodes_gateway_clients);
+        List<Point> nodesGatewayClients = new ArrayList<>();
+        gatewayClients.forEach((gw, v) -> nodesGatewayClients.add(Point.measurement("nodes_gateway_clients")
+                .tag("gateway", String.valueOf(gw.getId()))
+                .addField("value", v)
+                .build()));
+        DataGen.getInflux().write(nodesGatewayClients);
     }
 }
