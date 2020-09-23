@@ -87,7 +87,7 @@ public class MySQL {
         try (PreparedStatement st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             return new PreparedUpdate(st);
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Failed to send update: " + query, e);
+            LOGGER.log(Level.ERROR, String.format("Failed to send update: %s", query), e);
             return null;
         }
     }
@@ -110,7 +110,7 @@ public class MySQL {
         try {
             return st.executeQuery();
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Failed to send SELECT query: " + st.toString(), e);
+            LOGGER.log(Level.ERROR, String.format("Failed to send SELECT query: %s", st.toString()), e);
             return null;
         }
     }

@@ -74,7 +74,7 @@ public class NodeSysinfoThread implements Runnable {
                 }
             } catch (IOException | NullPointerException ex) {
                 node.setOnline(false);
-                LOGGER.log(Level.ERROR, "Node " + node.getId() + ": ", ex);
+                LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), ex);
             }
         }
     }

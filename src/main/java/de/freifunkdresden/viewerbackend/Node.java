@@ -143,7 +143,7 @@ public class Node {
             valid = true;
         } catch (Exception e) {
             valid = false;
-            LOGGER.log(Level.ERROR, "Node {}", e, getId());
+            LOGGER.log(Level.ERROR, String.format("Node %s", getId()), e);
         }
     }
 
@@ -331,7 +331,7 @@ public class Node {
             node.addProperty("lastseen", df.format(new Date(lastseen)));
             return node;
         } catch (Exception e) {
-            LOGGER.log(Level.ERROR, "Fehler bei Node {}", e, id);
+            LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", id), e);
         }
         return null;
     }
@@ -385,7 +385,7 @@ public class Node {
             node.addProperty("mac", getFakeMac());
             return node;
         } catch (Exception e) {
-            LOGGER.log(Level.ERROR, "Fehler bei Node {}", e, id);
+            LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", id), e);
         }
         return null;
     }
