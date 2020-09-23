@@ -45,6 +45,9 @@ import org.apache.logging.log4j.Logger;
 
 public class FreifunkApi {
 
+    private FreifunkApi() {
+    }
+
     private static final Logger LOGGER = LogManager.getLogger(FreifunkApi.class);
 
     public static void downloadApiFile() {

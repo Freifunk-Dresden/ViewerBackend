@@ -38,6 +38,9 @@ import org.influxdb.dto.Point;
 
 public class StatsSQL {
 
+    private StatsSQL() {
+    }
+
     private static final List<Point> general = new ArrayList<>();
     private static final List<Point> vpnUsage = new ArrayList<>();
     private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
