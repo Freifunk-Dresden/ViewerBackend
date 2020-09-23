@@ -51,7 +51,7 @@ public class Influx {
         database = DataGen.getConfig().getValue("influx_database");
     }
 
-    public void openConnection() throws DatabaseConnectionException {
+    public void openConnection() {
         try {
             this.connection = InfluxDBFactory.connect(url, username, password);
             this.connection.setDatabase(database);

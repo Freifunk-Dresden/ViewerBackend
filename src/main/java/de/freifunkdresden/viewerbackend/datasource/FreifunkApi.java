@@ -71,7 +71,7 @@ public class FreifunkApi {
         }
     }
 
-    public static void processApi() throws ApiProcessingException {
+    public static void processApi() {
         try {
             String cachePath = DataGen.getConfig().getValue("cache_path");
             Path cache = Paths.get(cachePath).resolve("api.json");

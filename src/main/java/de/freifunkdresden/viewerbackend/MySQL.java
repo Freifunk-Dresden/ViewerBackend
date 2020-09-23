@@ -54,7 +54,7 @@ public class MySQL {
         database = DataGen.getConfig().getValue("mysql_database");
     }
 
-    public void openConnection() throws DatabaseConnectionException {
+    public void openConnection() {
         try {
             this.conn = DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database, username, password);
         } catch (SQLException e) {

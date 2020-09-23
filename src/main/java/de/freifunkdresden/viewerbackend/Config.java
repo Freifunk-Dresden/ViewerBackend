@@ -36,7 +36,7 @@ public class Config {
 
     private final Map<String, String> configValues = new HashMap<>();
 
-    public void loadConfig() throws ConfigurationException {
+    public void loadConfig() {
         Path path = Paths.get("config.ini");
         if (!Files.exists(path) || !Files.isReadable(path)) {
             throw new ConfigurationException("Config files don't exist");
