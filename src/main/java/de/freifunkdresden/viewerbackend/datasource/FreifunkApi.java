@@ -63,7 +63,6 @@ public class FreifunkApi {
             URLConnection con = new URL(apiUrl).openConnection();
             try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
                 JsonArray api = JsonParser.parseReader(reader).getAsJsonArray();
-                reader.close();
                 Files.writeString(c, gson.toJson(api), StandardCharsets.UTF_8);
             }
         } catch (JsonSyntaxException | IOException e) {

@@ -106,6 +106,7 @@ public class DataGen {
             LOGGER.log(Level.INFO, "Waiting threads to finish...");
             pool.awaitTermination(2, TimeUnit.MINUTES);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             throw new NodeInfoCollectionException(ex);
         }
     }
@@ -173,6 +174,7 @@ public class DataGen {
                 POOL.shutdownNow();
             }
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             LOGGER.log(Level.ERROR, "", ex);
         }
     }
