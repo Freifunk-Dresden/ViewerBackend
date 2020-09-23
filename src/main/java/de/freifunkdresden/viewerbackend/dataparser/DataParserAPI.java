@@ -29,14 +29,16 @@ import de.freifunkdresden.viewerbackend.Location;
 public class DataParserAPI implements DataParser {
 
     private final JsonObject node;
+    private final JsonObject status;
 
     public DataParserAPI(JsonObject node) {
         this.node = node;
+        this.status = node.get("status").getAsJsonObject();
     }
 
     @Override
     public Short getClients() throws Exception {
-        return node.get("status").getAsJsonObject().get("clients").getAsShort();
+        return status.get("clients").getAsShort();
     }
 
     @Override
@@ -54,27 +56,27 @@ public class DataParserAPI implements DataParser {
 
     @Override
     public Boolean isOnline() throws Exception {
-        return node.get("status").getAsJsonObject().get("online").getAsBoolean();
+        return status.get("online").getAsBoolean();
     }
 
     @Override
     public Long getFirstSeen() throws Exception {
-        return node.get("status").getAsJsonObject().get("firstseen").getAsLong() * 1000;
+        return status.get("firstseen").getAsLong() * 1000;
     }
 
     @Override
     public Long getLastSeen() throws Exception {
-        return node.get("status").getAsJsonObject().get("lastseen").getAsLong() * 1000;
+        return status.get("lastseen").getAsLong() * 1000;
     }
 
     @Override
     public Boolean isGateway() throws Exception {
-        return node.get("status").getAsJsonObject().get("gateway").getAsBoolean();
+        return status.get("gateway").getAsBoolean();
     }
 
     @Override
     public Boolean hasBackbone() throws Exception {
-        return node.get("status").getAsJsonObject().get("backbone").getAsBoolean();
+        return status.get("backbone").getAsBoolean();
     }
 
     @Override
@@ -94,6 +96,6 @@ public class DataParserAPI implements DataParser {
 
     @Override
     public Boolean getAutoUpdate() throws Exception {
-        return node.get("status").getAsJsonObject().get("autoupdate").getAsBoolean();
+        return status.get("autoupdate").getAsBoolean();
     }
 }

@@ -56,8 +56,8 @@ public class StatsSQL {
     public static void addGeneralStats(GeneralStatType type, double value) {
         synchronized (general) {
             general.add(Point.measurement(type.name().toLowerCase())
-                        .addField("value", value)
-                        .build());
+                    .addField("value", value)
+                    .build());
         }
     }
 

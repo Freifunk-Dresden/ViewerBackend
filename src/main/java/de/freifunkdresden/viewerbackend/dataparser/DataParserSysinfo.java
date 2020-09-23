@@ -164,21 +164,23 @@ public class DataParserSysinfo implements DataParser {
 
     @Override
     public String getName() throws Exception {
+        String name = data.get("contact").getAsJsonObject().get("name").getAsString();
         try {
-            return URLDecoder.decode(data.get("contact").getAsJsonObject().get("name").getAsString(), "UTF-8");
+            return URLDecoder.decode(name, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             LOGGER.log(Level.ERROR, "", ex);
-            return data.get("contact").getAsJsonObject().get("name").getAsString();
+            return name;
         }
     }
 
     @Override
     public String getEMail() throws Exception {
+        String email = data.get("contact").getAsJsonObject().get("email").getAsString();
         try {
-            return URLDecoder.decode(data.get("contact").getAsJsonObject().get("email").getAsString(), "UTF-8");
+            return URLDecoder.decode(email, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             LOGGER.log(Level.ERROR, "", ex);
-            return data.get("contact").getAsJsonObject().get("email").getAsString();
+            return email;
         }
     }
 
