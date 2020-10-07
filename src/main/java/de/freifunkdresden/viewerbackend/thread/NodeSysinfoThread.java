@@ -23,15 +23,16 @@
  */
 package de.freifunkdresden.viewerbackend.thread;
 
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import de.freifunkdresden.viewerbackend.Node;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV10;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV11;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV13;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV14;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV15;
 import de.freifunkdresden.viewerbackend.exception.EmptyJsonException;
 import de.freifunkdresden.viewerbackend.exception.MalformedSysinfoException;
 import java.io.BufferedReader;
@@ -106,7 +107,9 @@ public class NodeSysinfoThread implements Runnable {
         }
         int version = sysinfo.get("version").getAsInt();
         JsonObject data = sysinfo.get("data").getAsJsonObject();
-        if (version >= 14) {
+        if (version >= 15) {
+            return new DataParserSysinfoV15(data);
+        } else if (version >= 14) {
             return new DataParserSysinfoV14(data);
         } else if (version >= 13) {
             return new DataParserSysinfoV13(data);
