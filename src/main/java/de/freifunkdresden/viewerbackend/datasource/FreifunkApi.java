@@ -78,7 +78,7 @@ public class FreifunkApi {
             JsonArray api = JsonParser.parseString(json).getAsJsonArray();
             api.forEach(node -> {
                 JsonObject n = node.getAsJsonObject();
-                DataGen.getDataHolder().getNode(n.get("id").getAsInt()).fill(new DataParserAPI(n));
+                DataGen.getDataHolder().getNode(n.get("id").getAsInt()).setDpApi(new DataParserAPI(n));
             });
         } catch (JsonSyntaxException | IOException e) {
             throw new ApiProcessingException(e);

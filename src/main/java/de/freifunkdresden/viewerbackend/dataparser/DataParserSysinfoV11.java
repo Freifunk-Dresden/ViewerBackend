@@ -37,7 +37,7 @@ public class DataParserSysinfoV11 extends DataParserSysinfoV10 {
     }
 
     @Override
-    public HashSet<Link> getLinkSet() throws Exception {
+    public HashSet<Link> getLinkSet() {
         HashSet<Link> linkmap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();

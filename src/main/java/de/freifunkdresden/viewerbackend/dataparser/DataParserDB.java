@@ -27,8 +27,9 @@ import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class DataParserDB implements DataParser {
+public class DataParserDB {
 
     private final ResultSet rs;
 
@@ -36,44 +37,36 @@ public class DataParserDB implements DataParser {
         this.rs = rs;
     }
 
-    @Override
-    public Boolean getAutoUpdate() throws Exception {
-        boolean autoupdate = rs.getBoolean("autoupdate");
-        return rs.wasNull() ? null : autoupdate;
+    public boolean getAutoUpdate() throws SQLException {
+        boolean autoUpdate = rs.getBoolean("autoupdate");
+        return !rs.wasNull() && autoUpdate;
     }
 
-    @Override
-    public Community getCommunity() throws Exception {
+    public Community getCommunity() throws SQLException {
         return Community.getCommunity(rs.getString("community"));
     }
 
-    @Override
-    public String getEMail() throws Exception {
+    public String getEMail() throws SQLException {
         return rs.getString("email");
     }
 
-    @Override
-    public String getFirmwareBase() throws Exception {
+    public String getFirmwareBase() throws SQLException {
         return rs.getString("firmwareBase");
     }
 
-    @Override
-    public String getFirmwareVersion() throws Exception {
+    public String getFirmwareVersion() throws SQLException {
         return rs.getString("firmwareVersion");
     }
 
-    @Override
-    public Long getFirstSeen() throws Exception {
+    public long getFirstSeen() throws SQLException {
         return rs.getLong("firstseen") * 1000;
     }
 
-    @Override
-    public Long getLastSeen() throws Exception {
+    public long getLastSeen() throws SQLException {
         return rs.getLong("lastseen") * 1000;
     }
 
-    @Override
-    public Location getLocation() throws Exception {
+    public Location getLocation() throws SQLException {
         try {
             double latitude = rs.getDouble("latitude");
             latitude = rs.wasNull() ? Double.NaN : latitude;
@@ -85,24 +78,16 @@ public class DataParserDB implements DataParser {
         }
     }
 
-    @Override
-    public String getModel() throws Exception {
+    public String getModel() throws SQLException {
         return rs.getString("model");
     }
 
-    @Override
-    public String getName() throws Exception {
+    public String getName() throws SQLException {
         return rs.getString("name");
     }
 
-    @Override
-    public NodeType getRole() throws Exception {
+    public NodeType getRole() throws SQLException {
         String r = rs.getString("role");
         return r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
-    }
-
-    @Override
-    public Boolean isGateway() throws Exception {
-        return rs.getBoolean("gateway");
     }
 }

@@ -67,14 +67,11 @@ public class NodeSysinfoThread implements Runnable {
                 checkNode(node);
                 return;
             } catch (NoRouteToHostException ex) {
-                node.setOnline(false);
             } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException | ConnectException | SocketTimeoutException ex) {
-                node.setOnline(false);
                 if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
                     LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
                 }
             } catch (IOException | NullPointerException ex) {
-                node.setOnline(false);
                 LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), ex);
             }
         }
@@ -95,7 +92,7 @@ public class NodeSysinfoThread implements Runnable {
         if (begin != -1) {
             json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*<\\/html>)", "{}");
         }
-        n.fill(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
+        n.setDpSysinfo(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
     }
 
     private static DataParserSysinfo getDataParser(JsonObject sysinfo) throws EmptyJsonException, MalformedSysinfoException {

@@ -26,7 +26,7 @@ package de.freifunkdresden.viewerbackend.dataparser;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Location;
 
-public class DataParserAPI implements DataParser {
+public class DataParserAPI {
 
     private final JsonObject node;
     private final JsonObject status;
@@ -36,13 +36,11 @@ public class DataParserAPI implements DataParser {
         this.status = node.get("status").getAsJsonObject();
     }
 
-    @Override
-    public Short getClients() throws Exception {
+    public short getClients() {
         return status.get("clients").getAsShort();
     }
 
-    @Override
-    public Location getLocation() throws Exception {
+    public Location getLocation() {
         try {
             double lat = node.get("position").getAsJsonObject().get("lat").getAsDouble();
             lat = lat == 0 ? Double.NaN : lat;
@@ -54,48 +52,35 @@ public class DataParserAPI implements DataParser {
         }
     }
 
-    @Override
-    public Boolean isOnline() throws Exception {
-        return status.get("online").getAsBoolean();
-    }
-
-    @Override
-    public Long getFirstSeen() throws Exception {
+    public long getFirstSeen() {
         return status.get("firstseen").getAsLong() * 1000;
     }
 
-    @Override
-    public Long getLastSeen() throws Exception {
+    public long getLastSeen() {
         return status.get("lastseen").getAsLong() * 1000;
     }
 
-    @Override
-    public Boolean isGateway() throws Exception {
+    public boolean isGateway() {
         return status.get("gateway").getAsBoolean();
     }
 
-    @Override
-    public Boolean hasBackbone() throws Exception {
+    public boolean hasBackbone() {
         return status.get("backbone").getAsBoolean();
     }
 
-    @Override
-    public String getName() throws Exception {
+    public String getName() {
         return node.get("name").getAsString();
     }
 
-    @Override
-    public String getModel() throws Exception {
+    public String getModel() {
         return node.get("model").getAsString();
     }
 
-    @Override
-    public String getFirmwareVersion() throws Exception {
+    public String getFirmwareVersion() {
         return node.get("firmware").getAsString();
     }
 
-    @Override
-    public Boolean getAutoUpdate() throws Exception {
+    public boolean getAutoUpdate() {
         return status.get("autoupdate").getAsBoolean();
     }
 }

@@ -37,12 +37,12 @@ public class DataParserSysinfoV14 extends DataParserSysinfoV13 {
     }
 
     @Override
-    public String getModel() throws Exception {
+    public String getModel() {
         return data.get("system").getAsJsonObject().get("model2").getAsString();
     }
 
     @Override
-    public HashSet<Link> getLinkSet() throws Exception {
+    public HashSet<Link> getLinkSet() {
         HashSet<Link> linkmap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
@@ -57,7 +57,7 @@ public class DataParserSysinfoV14 extends DataParserSysinfoV13 {
     }
 
     @Override
-    public Boolean getAutoUpdate() throws Exception {
+    public boolean getAutoUpdate() {
         return data.get("system").getAsJsonObject().get("autoupdate").getAsInt() == 1;
     }
 }

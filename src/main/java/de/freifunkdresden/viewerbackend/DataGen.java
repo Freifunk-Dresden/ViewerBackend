@@ -127,7 +127,6 @@ public class DataGen {
     private static void fillOfflineNodes() throws OfflineNodeProcessingException {
         LOGGER.log(Level.INFO, "Fill offline nodes from database...");
         String ids = HOLDER.getNodes().values().stream()
-                .filter(n -> !n.isOnline())
                 .map(n -> String.valueOf(n.getId()))
                 .collect(Collectors.joining(","));
         if (ids.isEmpty()) {
@@ -135,7 +134,7 @@ public class DataGen {
         }
         try (ResultSet rs = mysqlDb.querySelect("SELECT * FROM nodes WHERE id IN (" + ids + ")")) {
             while (rs.next()) {
-                HOLDER.getNode(rs.getInt("id")).fill(new DataParserDB(rs));
+                HOLDER.getNode(rs.getInt("id")).setDpDatabase(new DataParserDB(rs));
             }
         } catch (SQLException ex) {
             throw new OfflineNodeProcessingException(ex);

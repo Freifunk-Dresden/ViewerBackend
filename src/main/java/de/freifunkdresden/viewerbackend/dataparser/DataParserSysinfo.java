@@ -31,19 +31,20 @@ import de.freifunkdresden.viewerbackend.LinkType;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.NodeType;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DataParserSysinfo implements DataParser {
+public class DataParserSysinfo {
 
     private static final Logger LOGGER = LogManager.getLogger(DataParserSysinfo.class);
 
     final JsonObject data;
     private final JsonObject stats;
+    private final long lastSeen = System.currentTimeMillis();
 
     public DataParserSysinfo(JsonObject data) {
         this.data = data;
@@ -54,37 +55,31 @@ public class DataParserSysinfo implements DataParser {
         }
     }
 
-    @Override
-    public Long getLastSeen() throws Exception {
-        return System.currentTimeMillis();
+    public long getLastSeen() {
+        return lastSeen;
     }
 
     int getNodeId() {
         return data.get("common").getAsJsonObject().get("node").getAsInt();
     }
 
-    @Override
-    public Community getCommunity() throws Exception {
+    public Community getCommunity() {
         return Community.getCommunity(data.get("common").getAsJsonObject().get("city").getAsString());
     }
 
-    @Override
-    public NodeType getRole() throws Exception {
+    public NodeType getRole() {
         return NodeType.STANDARD;
     }
 
-    @Override
-    public String getModel() throws Exception {
+    public String getModel() {
         return data.get("system").getAsJsonObject().get("model").getAsString();
     }
 
-    @Override
-    public String getFirmwareVersion() throws Exception {
+    public String getFirmwareVersion() {
         return data.get("firmware").getAsJsonObject().get("version").getAsString();
     }
 
-    @Override
-    public String getFirmwareBase() throws Exception {
+    public String getFirmwareBase() {
         JsonObject firmware = data.get("firmware").getAsJsonObject();
         String distribId = firmware.get("DISTRIB_ID").getAsString();
         String distribRelease = firmware.get("DISTRIB_RELEASE").getAsString();
@@ -92,15 +87,13 @@ public class DataParserSysinfo implements DataParser {
         return distribId + " " + distribRelease + " " + distribRev;
     }
 
-    @Override
-    public Node getGateway() throws Exception {
+    public Node getGateway() {
         String ip = data.get("bmxd").getAsJsonObject().get("gateways").getAsJsonObject().get("selected").getAsString();
         int id = Node.convertIpToId(ip);
         return DataGen.getDataHolder().getNode(id);
     }
 
-    @Override
-    public Float getUptime() throws Exception {
+    public float getUptime() {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
         String[] uptime = jsonUptime.split("\\s+");
         if (jsonUptime.contains(":")) {
@@ -125,29 +118,21 @@ public class DataParserSysinfo implements DataParser {
         }
     }
 
-    @Override
-    public Double getMemoryUsage() throws Exception {
-        if (stats.has("meminfo_MemTotal") && stats.has("meminfo_MemFree")) {
-            double memTotal = Integer.parseInt(stats.get("meminfo_MemTotal").getAsString().split(" ")[0]);
-            double memFree = Integer.parseInt(stats.get("meminfo_MemFree").getAsString().split(" ")[0]);
-            return (memTotal - memFree) / memTotal;
-        } else {
-            return null;
-        }
+    public double getMemoryUsage() {
+        double memTotal = Integer.parseInt(stats.get("meminfo_MemTotal").getAsString().split(" ")[0]);
+        double memFree = Integer.parseInt(stats.get("meminfo_MemFree").getAsString().split(" ")[0]);
+        return (memTotal - memFree) / memTotal;
     }
 
-    @Override
-    public Float getLoadAvg() throws Exception {
+    public float getLoadAvg() {
         return Float.parseFloat(stats.get("cpu_load").getAsString().split(" ")[1]);
     }
 
-    @Override
-    public Short getClients() throws Exception {
+    public short getClients() {
         return stats.get("accepted_user_count").getAsShort();
     }
 
-    @Override
-    public HashSet<Link> getLinkSet() throws Exception {
+    public HashSet<Link> getLinkSet() {
         HashSet<Link> linkmap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
@@ -162,35 +147,21 @@ public class DataParserSysinfo implements DataParser {
         return linkmap;
     }
 
-    @Override
-    public String getName() throws Exception {
+    public String getName() {
         String name = data.get("contact").getAsJsonObject().get("name").getAsString();
-        try {
-            return URLDecoder.decode(name, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.ERROR, "", ex);
-            return name;
-        }
+        return URLDecoder.decode(name, StandardCharsets.UTF_8);
     }
 
-    @Override
-    public String getEMail() throws Exception {
+    public String getEMail() {
         String email = data.get("contact").getAsJsonObject().get("email").getAsString();
-        try {
-            return URLDecoder.decode(email, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.ERROR, "", ex);
-            return email;
-        }
+        return URLDecoder.decode(email, StandardCharsets.UTF_8);
     }
 
-    @Override
-    public Boolean getAutoUpdate() throws Exception {
+    public boolean getAutoUpdate() {
         return false;
     }
 
-    @Override
-    public Location getLocation() throws Exception {
+    public Location getLocation() {
         try {
             JsonObject gps = data.get("gps").getAsJsonObject();
             double lat = gps.get("latitude").getAsDouble();
@@ -203,22 +174,16 @@ public class DataParserSysinfo implements DataParser {
         }
     }
 
+    public int getCPUCount() {
+        JsonObject system = data.get("system").getAsJsonObject();
+        return system.has("cpucount") ? system.get("cpucount").getAsInt() : 0;
+    }
+
     private static int parseMinutes(String time) {
         if (time.contains(":")) {
             return Integer.parseInt(time.split(":")[0]) * 60 + Integer.parseInt(time.split(":")[1]);
         } else {
             return Integer.parseInt(time);
         }
-    }
-
-    @Override
-    public Boolean isOnline() throws Exception {
-        return true;
-    }
-
-    @Override
-    public Integer getCPUCount() throws Exception {
-        JsonObject system = data.get("system").getAsJsonObject();
-        return system.has("cpucount") ? system.get("cpucount").getAsInt() : null;
     }
 }

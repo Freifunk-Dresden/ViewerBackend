@@ -33,7 +33,7 @@ public class DataParserSysinfoV13 extends DataParserSysinfoV11 {
     }
 
     @Override
-    public NodeType getRole() throws Exception {
+    public NodeType getRole() {
         switch (data.get("system").getAsJsonObject().get("node_type").getAsString().toLowerCase()) {
             default:
             case "node":

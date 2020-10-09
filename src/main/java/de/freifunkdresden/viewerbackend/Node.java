@@ -23,14 +23,15 @@
  */
 package de.freifunkdresden.viewerbackend;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import de.freifunkdresden.viewerbackend.dataparser.DataParser;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
-import java.text.DateFormat;
+
+import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.Collections;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,28 +41,9 @@ public class Node {
     private static final Logger LOGGER = LogManager.getLogger(Node.class);
 
     private final int id;
-    private final HashSet<Link> linkSet = new HashSet<>();
-    private String name;
-    private Community community = Community.DRESDEN;
-    private NodeType role = NodeType.STANDARD;
-    private String model;
-    private String firmwareVersion;
-    private String firmwareBase;
-    private String email;
-    private boolean online = false;
-    private float uptime;
-    private double memoryUsage;
-    private short clients;
-    private float loadAvg;
-    private boolean isGateway;
-    private boolean backbone;
-    private long lastseen = -1;
-    private long firstseen = -1;
-    private Location location;
-    private Node gateway;
-    private boolean valid = false;
-    private boolean autoUpdate;
-    private int nproc = 1;
+    private DataParserAPI dpApi;
+    private DataParserDB dpDatabase;
+    private DataParserSysinfo dpSysinfo;
 
     public Node(int id) {
         this.id = id;
@@ -75,97 +57,33 @@ public class Node {
         return String.format("10.%s.%s.%s", (subnet201 ? "201" : "200"), (id / 255), ((id % 255) + 1));
     }
 
-    public void fill(DataParser dp) {
-        try {
-            if (dp.getName() != null) {
-                name = dp.getName();
-            }
-            if (dp.getCommunity() != null) {
-                community = dp.getCommunity();
-            }
-            if (dp.getRole() != null) {
-                role = dp.getRole();
-            }
-            if (dp.getModel() != null) {
-                model = dp.getModel();
-            }
-            if (dp.getFirmwareVersion() != null) {
-                firmwareVersion = dp.getFirmwareVersion();
-            }
-            if (dp.getFirmwareBase() != null) {
-                firmwareBase = dp.getFirmwareBase();
-            }
-            if (dp.getEMail() != null) {
-                email = dp.getEMail();
-            }
-            if (dp.getUptime() != null) {
-                uptime = dp.getUptime();
-            }
-            if (dp.getMemoryUsage() != null) {
-                memoryUsage = dp.getMemoryUsage();
-            }
-            if (dp.getClients() != null) {
-                clients = dp.getClients();
-            }
-            if (dp.getLoadAvg() != null) {
-                loadAvg = dp.getLoadAvg();
-            }
-            if (dp.getGateway() != null) {
-                gateway = dp.getGateway();
-            }
-            if (dp.getLinkSet() != null) {
-                linkSet.addAll(dp.getLinkSet());
-            }
-            if (dp.getAutoUpdate() != null) {
-                autoUpdate = dp.getAutoUpdate();
-            }
-            if (dp.getLocation() != null) {
-                location = dp.getLocation();
-            }
-            if (dp.isOnline() != null) {
-                online = dp.isOnline();
-            }
-            if (dp.isGateway() != null) {
-                isGateway = dp.isGateway();
-            }
-            if (dp.hasBackbone() != null) {
-                backbone = dp.hasBackbone();
-            }
-            if (dp.getLastSeen() != null) {
-                lastseen = dp.getLastSeen();
-            }
-            if (dp.getFirstSeen() != null) {
-                firstseen = dp.getFirstSeen();
-            }
-            if (dp.getCPUCount() != null) {
-                nproc = dp.getCPUCount();
-            }
-            valid = true;
-        } catch (Exception e) {
-            valid = false;
-            LOGGER.log(Level.ERROR, String.format("Node %s", getId()), e);
-        }
+    public void setDpApi(DataParserAPI dp) {
+        this.dpApi = dp;
+    }
+
+    public void setDpDatabase(DataParserDB dp) {
+        this.dpDatabase = dp;
+    }
+
+    public void setDpSysinfo(DataParserSysinfo dp) {
+        this.dpSysinfo = dp;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setOnline(boolean online) {
-        this.online = online;
-    }
-
     public boolean isValid() {
-        return valid && !isTemporaryNode();
+        return !isTemporaryNode();
     }
 
     public boolean isDisplayed() {
-        //display only nodes lastseen within the last 30 days
-        return isValid() && (lastseen > System.currentTimeMillis() - (1000L * 60 * 60 * 24 * 30));
+        //display only nodes last seen within the last 30 days
+        return isValid() && (getLastSeen() > System.currentTimeMillis() - (1000L * 60 * 60 * 24 * 30));
     }
 
     public boolean isShown() {
-        switch (role) {
+        switch (getRole()) {
             case STANDARD:
                 return isNormalNode() && hasValidLocation();
             case MOBILE:
@@ -177,7 +95,7 @@ public class Node {
     }
 
     public boolean canHasClients() {
-        switch (role) {
+        switch (getRole()) {
             case STANDARD:
             case MOBILE:
                 return true;
@@ -188,7 +106,38 @@ public class Node {
     }
 
     public boolean isOnline() {
-        return online;
+        return dpSysinfo != null;
+    }
+
+    public boolean isGateway() {
+        if (dpApi != null) {
+            return dpApi.isGateway();
+        }
+        return false;
+    }
+
+    public boolean hasBackbone() {
+        if (dpApi != null) {
+            return dpApi.hasBackbone();
+        }
+        return false;
+    }
+
+    public boolean isAutoUpdateEnabled() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getAutoUpdate();
+        }
+        if (dpApi != null) {
+            return dpApi.getAutoUpdate();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getAutoUpdate();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return false;
     }
 
     public boolean isServerNode() {
@@ -208,7 +157,7 @@ public class Node {
     }
 
     public boolean isFWVersionHigher(int minor, int patch) {
-        String[] fw = firmwareVersion.split("\\.");
+        String[] fw = getFirmwareVersion().split("\\.");
         if (fw.length == 3) {
             if (Integer.parseInt(fw[1]) > minor) {
                 return true;
@@ -220,34 +169,211 @@ public class Node {
     }
 
     public Collection<Link> getLinks() {
-        return linkSet;
+        if (dpSysinfo != null) {
+            return dpSysinfo.getLinkSet();
+        }
+        return Collections.emptySet();
     }
 
     public short getClients() {
-        return clients;
+        if (dpSysinfo != null) {
+            return dpSysinfo.getClients();
+        }
+        return 0;
     }
 
     public double getMemoryUsage() {
-        return memoryUsage;
+        if (dpSysinfo != null) {
+            return dpSysinfo.getMemoryUsage();
+        }
+        return 0;
     }
 
     public float getLoadAvg() {
-        return loadAvg;
+        if (dpSysinfo != null) {
+            return dpSysinfo.getLoadAvg();
+        }
+        return 0;
+    }
+
+    public float getUptime() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getUptime();
+        }
+        return 0;
+    }
+
+    public int getNproc() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getCPUCount();
+        }
+        return 0;
     }
 
     public String getFirmwareVersion() {
-        return firmwareVersion;
+        if (dpSysinfo != null) {
+            return dpSysinfo.getFirmwareVersion();
+        }
+        if (dpApi != null) {
+            return dpApi.getFirmwareVersion();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getFirmwareVersion();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return null;
+    }
+
+    public String getFirmwareBase() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getFirmwareBase();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getFirmwareBase();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return null;
     }
 
     public Community getCommunity() {
-        return community;
+        if (dpSysinfo != null) {
+            return dpSysinfo.getCommunity();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getCommunity();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return Community.DEFAULT;
     }
 
     public Node getGateway() {
-        return gateway;
+        if (dpSysinfo != null) {
+            return dpSysinfo.getGateway();
+        }
+        return null;
+    }
+
+    public NodeType getRole() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getRole();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getRole();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return NodeType.STANDARD;
+    }
+
+    public String getName() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getName();
+        }
+        if (dpApi != null) {
+            return dpApi.getName();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getName();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return null;
+    }
+
+    public String getEmail() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getEMail();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getEMail();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return null;
+    }
+
+    public String getModel() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getModel();
+        }
+        if (dpApi != null) {
+            return dpApi.getModel();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getModel();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return null;
+    }
+
+    public Location getLocation() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getLocation();
+        }
+        if (dpApi != null) {
+            return dpApi.getLocation();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getLocation();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return null;
+    }
+
+    public long getLastSeen() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getLastSeen();
+        }
+        if (dpApi != null) {
+            return dpApi.getLastSeen();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getLastSeen();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return 0;
+    }
+
+    public long getFirstSeen() {
+        if (dpApi != null) {
+            return dpApi.getFirstSeen();
+        }
+        if (dpDatabase != null) {
+            try {
+                return dpDatabase.getFirstSeen();
+            } catch (SQLException e) {
+                LOGGER.log(Level.ERROR, "Database read failed", e);
+            }
+        }
+        return 0;
     }
 
     public String getHostname() {
+        String name = getName();
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
     }
 
@@ -264,145 +390,21 @@ public class Node {
     }
 
     public boolean hasValidLocation() {
-        return location != null && location.isValid();
-    }
-
-    public JsonObject getJsonObject(DateFormat df) {
-        if (this.community == Community.DEFAULT) {
-            LOGGER.log(Level.WARN, "Node {} has invalid community (Kontakt: {})", id, name);
-        }
-        try {
-            JsonObject node = new JsonObject();
-            JsonObject nodeinfo = new JsonObject();
-            JsonObject network = new JsonObject();
-            JsonArray addresses = new JsonArray();
-            addresses.add(getIpAddress());
-            network.add("addresses", addresses);
-            nodeinfo.add("network", network);
-            nodeinfo.addProperty("hostname", getHostname());
-            JsonObject system = new JsonObject();
-            system.addProperty("site_code", community.getName());
-            system.addProperty("role", role.name().toLowerCase());
-            nodeinfo.add("system", system);
-            JsonObject hardware = new JsonObject();
-            if (model != null && !model.isEmpty()) {
-                hardware.addProperty("model", model);
-            }
-            nodeinfo.add("hardware", hardware);
-            nodeinfo.addProperty("node_id", String.valueOf(id));
-            JsonObject software = new JsonObject();
-            JsonObject autoupdater = new JsonObject();
-            autoupdater.addProperty("enabled", autoUpdate);
-            autoupdater.addProperty("branch", "stable");
-            software.add("autoupdater", autoupdater);
-            if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
-                JsonObject firmware = new JsonObject();
-                firmware.addProperty("release", firmwareVersion);
-                firmware.addProperty("base", firmwareBase);
-                software.add("firmware", firmware);
-            }
-            nodeinfo.add("software", software);
-            JsonObject owner = new JsonObject();
-            if (email != null && !email.isEmpty()) {
-                owner.addProperty("contact", email);
-            }
-            nodeinfo.add("owner", owner);
-            if (isShown()) {
-                nodeinfo.add("location", location.toJson());
-            }
-            JsonArray pages = new JsonArray();
-            pages.add(String.format("http://%s.freifunk-dresden.de", id));
-            nodeinfo.add("pages", pages);
-            node.add("nodeinfo", nodeinfo);
-            JsonObject statistics = new JsonObject();
-            statistics.addProperty("clients", clients);
-            if (online) {
-                statistics.addProperty("uptime", uptime);
-                statistics.addProperty("memory_usage", memoryUsage);
-                statistics.addProperty("loadavg", loadAvg);
-            }
-            if (!isGateway && gateway != null) {
-                statistics.addProperty("gateway", gateway.getIpAddress());
-            }
-            node.add("statistics", statistics);
-            JsonObject flags = new JsonObject();
-            flags.addProperty("gateway", isGateway);
-            flags.addProperty("backbone", backbone);
-            flags.addProperty("online", online);
-            node.add("flags", flags);
-            node.addProperty("firstseen", df.format(new Date(firstseen)));
-            node.addProperty("lastseen", df.format(new Date(lastseen)));
-            return node;
-        } catch (Exception e) {
-            LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", id), e);
-        }
-        return null;
-    }
-
-    public JsonObject getMeshViewerObj(DateFormat df) {
-        try {
-            JsonObject node = new JsonObject();
-            node.addProperty("firstseen", df.format(new Date(firstseen)));
-            node.addProperty("lastseen", df.format(new Date(lastseen)));
-            node.addProperty("is_gateway", isGateway);
-            node.addProperty("is_online", online);
-            node.addProperty("clients", clients);
-            node.addProperty("clients_wifi24", clients);
-            node.addProperty("clients_wifi5", 0);
-            node.addProperty("clients_other", 0);
-            if (online) {
-                node.addProperty("loadavg", loadAvg);
-                node.addProperty("memory_usage", memoryUsage);
-                Date date = new Date(System.currentTimeMillis() - (long) (uptime * 1000));
-                node.addProperty("uptime", df.format(date));
-                node.addProperty("nproc", nproc);
-            }
-            if (!isGateway && gateway != null) {
-                node.addProperty("gateway", gateway.getFakeId());
-                node.addProperty("gateway_nexthop", gateway.getFakeId()); //TODO: Correct value
-            }
-            node.addProperty("node_id", getFakeId());
-            JsonArray addresses = new JsonArray();
-            addresses.add(getIpAddress());
-            node.add("addresses", addresses);
-            node.addProperty("site_code", community.getName());
-            node.addProperty("hostname", getHostname());
-            if (isShown()) {
-                node.add("location", location.toJson());
-            }
-            if (firmwareVersion != null && !firmwareVersion.isEmpty()) {
-                JsonObject firmware = new JsonObject();
-                firmware.addProperty("release", firmwareVersion);
-                firmware.addProperty("base", firmwareBase);
-                node.add("firmware", firmware);
-            }
-            if (model != null && !model.isEmpty()) {
-                node.addProperty("model", model);
-            }
-            node.addProperty("contact", email);
-            JsonObject autoupdater = new JsonObject();
-            autoupdater.addProperty("enabled", autoUpdate);
-            autoupdater.addProperty("branch", "stable");
-            node.add("autoupdater", autoupdater);
-            node.addProperty("vpn", backbone);
-            node.addProperty("mac", getFakeMac());
-            return node;
-        } catch (Exception e) {
-            LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", id), e);
-        }
-        return null;
+        Location l = getLocation();
+        return l != null && l.isValid();
     }
 
     public void updateDatabase() {
+        Location l = getLocation();
         Double lat = null;
         Double lon = null;
         if (hasValidLocation()) {
-            lat = location.getLatitude();
-            lon = location.getLongitude();
+            lat = l.getLatitude();
+            lon = l.getLongitude();
         }
-        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon, community.getName(),
-                role.name(), model, firmwareVersion, firmwareBase, firstseen / 1000, lastseen / 1000, autoUpdate,
-                isGateway, name, email);
+        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon,
+                getCommunity().getName(), getRole().name(), getModel(), getFirmwareVersion(), getFirmwareBase(),
+                getFirstSeen() / 1000, getLastSeen() / 1000, isAutoUpdateEnabled(), isGateway(), getName(), getEmail());
     }
 
     public void collectStats() {
@@ -418,7 +420,7 @@ public class Node {
         }
         VPN vpn = VPN.getVPN(id);
         if (vpn != null) {
-            StatsSQL.addVpnUsage(vpn, linkSet.size());
+            StatsSQL.addVpnUsage(vpn, getLinks().size());
         }
     }
 

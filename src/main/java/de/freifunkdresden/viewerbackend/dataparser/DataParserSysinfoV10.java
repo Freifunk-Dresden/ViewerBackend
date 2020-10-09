@@ -36,14 +36,14 @@ public class DataParserSysinfoV10 extends DataParserSysinfo {
     }
 
     @Override
-    public Float getUptime() throws Exception {
+    public float getUptime() {
         String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
         String[] uptime = jsonUptime.split("\\s+");
         return Float.parseFloat(uptime[0]);
     }
 
     @Override
-    public HashSet<Link> getLinkSet() throws Exception {
+    public HashSet<Link> getLinkSet() {
         HashSet<Link> linkmap = super.getLinkSet();
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         bmxd.get("links").getAsJsonArray().forEach(link -> {
