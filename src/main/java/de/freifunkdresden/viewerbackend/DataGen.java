@@ -134,7 +134,9 @@ public class DataGen {
         }
         try (ResultSet rs = mysqlDb.querySelect("SELECT * FROM nodes WHERE id IN (" + ids + ")")) {
             while (rs.next()) {
-                HOLDER.getNode(rs.getInt("id")).setDpDatabase(new DataParserDB(rs));
+                DataParserDB dataParserDB = new DataParserDB();
+                dataParserDB.parse(rs);
+                HOLDER.getNode(rs.getInt("id")).setDpDatabase(dataParserDB);
             }
         } catch (SQLException ex) {
             throw new OfflineNodeProcessingException(ex);

@@ -27,18 +27,10 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
-
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class Node {
-
-    private static final Logger LOGGER = LogManager.getLogger(Node.class);
 
     private final int id;
     private DataParserAPI dpApi;
@@ -131,11 +123,7 @@ public class Node {
             return dpApi.getAutoUpdate();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getAutoUpdate();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getAutoUpdate();
         }
         return false;
     }
@@ -218,11 +206,7 @@ public class Node {
             return dpApi.getFirmwareVersion();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getFirmwareVersion();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getFirmwareVersion();
         }
         return null;
     }
@@ -232,11 +216,7 @@ public class Node {
             return dpSysinfo.getFirmwareBase();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getFirmwareBase();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getFirmwareBase();
         }
         return null;
     }
@@ -246,11 +226,7 @@ public class Node {
             return dpSysinfo.getCommunity();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getCommunity();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getCommunity();
         }
         return Community.DEFAULT;
     }
@@ -267,11 +243,7 @@ public class Node {
             return dpSysinfo.getRole();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getRole();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getRole();
         }
         return NodeType.STANDARD;
     }
@@ -284,11 +256,7 @@ public class Node {
             return dpApi.getName();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getName();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getName();
         }
         return null;
     }
@@ -298,11 +266,7 @@ public class Node {
             return dpSysinfo.getEMail();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getEMail();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getEMail();
         }
         return null;
     }
@@ -315,11 +279,7 @@ public class Node {
             return dpApi.getModel();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getModel();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getModel();
         }
         return null;
     }
@@ -332,11 +292,7 @@ public class Node {
             return dpApi.getLocation();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getLocation();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getLocation();
         }
         return null;
     }
@@ -349,11 +305,7 @@ public class Node {
             return dpApi.getLastSeen();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getLastSeen();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getLastSeen();
         }
         return 0;
     }
@@ -363,11 +315,7 @@ public class Node {
             return dpApi.getFirstSeen();
         }
         if (dpDatabase != null) {
-            try {
-                return dpDatabase.getFirstSeen();
-            } catch (SQLException e) {
-                LOGGER.log(Level.ERROR, "Database read failed", e);
-            }
+            return dpDatabase.getFirstSeen();
         }
         return 0;
     }

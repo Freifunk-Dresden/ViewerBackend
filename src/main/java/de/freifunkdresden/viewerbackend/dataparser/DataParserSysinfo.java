@@ -45,6 +45,7 @@ public class DataParserSysinfo {
     final JsonObject data;
     private final JsonObject stats;
     private final long lastSeen = System.currentTimeMillis();
+    private final Community community;
 
     public DataParserSysinfo(JsonObject data) {
         this.data = data;
@@ -52,6 +53,12 @@ public class DataParserSysinfo {
             stats = data.get("statistic").getAsJsonObject();
         } else {
             stats = data.get("statistics").getAsJsonObject();
+        }
+
+        String c = data.get("common").getAsJsonObject().get("city").getAsString();
+        community = Community.getCommunity(c);
+        if (community == Community.DEFAULT) {
+            LOGGER.log(Level.WARN, "Node {} has invalid community `{}` (Name: {})", getNodeId(), c, getName());
         }
     }
 
@@ -64,7 +71,7 @@ public class DataParserSysinfo {
     }
 
     public Community getCommunity() {
-        return Community.getCommunity(data.get("common").getAsJsonObject().get("city").getAsString());
+        return community;
     }
 
     public NodeType getRole() {

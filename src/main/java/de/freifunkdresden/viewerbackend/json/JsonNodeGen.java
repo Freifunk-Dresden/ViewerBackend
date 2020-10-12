@@ -2,7 +2,6 @@ package de.freifunkdresden.viewerbackend.json;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.Node;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -16,9 +15,6 @@ public class JsonNodeGen {
     private static final Logger LOGGER = LogManager.getLogger(Node.class);
 
     public static JsonObject getJsonObject(Node n, DateFormat df) {
-        if (n.getCommunity() == Community.DEFAULT) {
-            LOGGER.log(Level.WARN, "Node {} has invalid community (Kontakt: {})", n.getId(), n.getName());
-        }
         try {
             JsonObject node = new JsonObject();
             JsonObject nodeinfo = new JsonObject();

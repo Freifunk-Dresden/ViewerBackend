@@ -28,66 +28,134 @@ import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DataParserDB {
 
-    private final ResultSet rs;
+    private static final Logger LOGGER = LogManager.getLogger(DataParserDB.class);
 
-    public DataParserDB(ResultSet rs) {
-        this.rs = rs;
+    private boolean autoUpdate;
+    private Community community = Community.DEFAULT;
+    private String eMail;
+    private String firmwareBase;
+    private String firmwareVersion;
+    private long firstSeen;
+    private long lastSeen;
+    private Location location;
+    private String model;
+    private String name;
+    private NodeType role = NodeType.STANDARD;
+
+    public DataParserDB() {
     }
 
-    public boolean getAutoUpdate() throws SQLException {
-        boolean autoUpdate = rs.getBoolean("autoupdate");
-        return !rs.wasNull() && autoUpdate;
-    }
-
-    public Community getCommunity() throws SQLException {
-        return Community.getCommunity(rs.getString("community"));
-    }
-
-    public String getEMail() throws SQLException {
-        return rs.getString("email");
-    }
-
-    public String getFirmwareBase() throws SQLException {
-        return rs.getString("firmwareBase");
-    }
-
-    public String getFirmwareVersion() throws SQLException {
-        return rs.getString("firmwareVersion");
-    }
-
-    public long getFirstSeen() throws SQLException {
-        return rs.getLong("firstseen") * 1000;
-    }
-
-    public long getLastSeen() throws SQLException {
-        return rs.getLong("lastseen") * 1000;
-    }
-
-    public Location getLocation() throws SQLException {
+    public void parse(ResultSet rs) {
+        try {
+            boolean au = rs.getBoolean("autoupdate");
+            autoUpdate = !rs.wasNull() && au;
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            community = Community.getCommunity(rs.getString("community"));
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            eMail = rs.getString("email");
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            firmwareBase = rs.getString("firmwareBase");
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            firmwareVersion = rs.getString("firmwareVersion");
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            firstSeen = rs.getLong("firstseen") * 1000;
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            lastSeen = rs.getLong("lastseen") * 1000;
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
         try {
             double latitude = rs.getDouble("latitude");
             latitude = rs.wasNull() ? Double.NaN : latitude;
             double longitude = rs.getDouble("longitude");
             longitude = rs.wasNull() ? Double.NaN : longitude;
-            return new Location(latitude, longitude);
-        } catch (NumberFormatException ex) {
-            return null;
+            location = new Location(latitude, longitude);
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            model = rs.getString("model");
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            name = rs.getString("name");
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
+        }
+        try {
+            String r = rs.getString("role");
+            role = r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
+        } catch (SQLException e) {
+            LOGGER.log(Level.ERROR, "Database read failed", e);
         }
     }
 
-    public String getModel() throws SQLException {
-        return rs.getString("model");
+    public boolean getAutoUpdate() {
+        return autoUpdate;
     }
 
-    public String getName() throws SQLException {
-        return rs.getString("name");
+    public Community getCommunity() {
+        return community;
     }
 
-    public NodeType getRole() throws SQLException {
-        String r = rs.getString("role");
-        return r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
+    public String getEMail() {
+        return eMail;
+    }
+
+    public String getFirmwareBase() {
+        return firmwareBase;
+    }
+
+    public String getFirmwareVersion() {
+        return firmwareVersion;
+    }
+
+    public long getFirstSeen() {
+        return firstSeen;
+    }
+
+    public long getLastSeen() {
+        return lastSeen;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public NodeType getRole() {
+        return role;
     }
 }
