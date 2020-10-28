@@ -23,6 +23,7 @@
  */
 package de.freifunkdresden.viewerbackend.stats;
 
+import de.freifunkdresden.viewerbackend.Airtime;
 import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
@@ -109,6 +110,7 @@ public class StatsSQL {
         List<Point> nodeClients = new ArrayList<>();
         List<Point> nodeLoad = new ArrayList<>();
         List<Point> nodeMemory = new ArrayList<>();
+        List<Point> nodeAirtime = new ArrayList<>();
         nodes.forEach(e -> {
             if (e.canHasClients()) {
                 nodeClients.add(Point.measurement("node_clients")
@@ -124,10 +126,29 @@ public class StatsSQL {
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getMemoryUsage())
                     .build());
+            if (!e.getAirtime2g().equals(Airtime.EMPTY)) {
+                nodeAirtime.add(Point.measurement("node_airtime_2g")
+                        .tag("node", String.valueOf(e.getId()))
+                        .addField("active", e.getAirtime2g().getActive())
+                        .addField("busy", e.getAirtime2g().getBusy())
+                        .addField("receive", e.getAirtime2g().getReceive())
+                        .addField("transmit", e.getAirtime2g().getTransmit())
+                        .build());
+            }
+            if (!e.getAirtime5g().equals(Airtime.EMPTY)) {
+                nodeAirtime.add(Point.measurement("node_airtime_5g")
+                        .tag("node", String.valueOf(e.getId()))
+                        .addField("active", e.getAirtime5g().getActive())
+                        .addField("busy", e.getAirtime5g().getBusy())
+                        .addField("receive", e.getAirtime5g().getReceive())
+                        .addField("transmit", e.getAirtime5g().getTransmit())
+                        .build());
+            }
         });
         DataGen.getInflux().write(nodeClients);
         DataGen.getInflux().write(nodeLoad);
         DataGen.getInflux().write(nodeMemory);
+        DataGen.getInflux().write(nodeAirtime);
         List<Point> nodesVersions = new ArrayList<>();
         versions.forEach((v, c) -> nodesVersions.add(Point.measurement("nodes_versions")
                 .tag("version", v)

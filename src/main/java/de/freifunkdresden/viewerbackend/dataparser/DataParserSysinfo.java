@@ -24,6 +24,7 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.Airtime;
 import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
@@ -186,11 +187,36 @@ public class DataParserSysinfo {
         return system.has("cpucount") ? system.get("cpucount").getAsInt() : 0;
     }
 
+    public Airtime getAirtime2g() {
+        if (data.has("airtime") && data.get("airtime").getAsJsonObject().has("radio2g")) {
+            return getAirtime(data.get("airtime").getAsJsonObject().get("radio2g").getAsString());
+        }
+        return Airtime.EMPTY;
+    }
+
+    public Airtime getAirtime5g() {
+        if (data.has("airtime") && data.get("airtime").getAsJsonObject().has("radio5g")) {
+            return getAirtime(data.get("airtime").getAsJsonObject().get("radio5g").getAsString());
+        }
+        return Airtime.EMPTY;
+    }
+
     private static int parseMinutes(String time) {
         if (time.contains(":")) {
             return Integer.parseInt(time.split(":")[0]) * 60 + Integer.parseInt(time.split(":")[1]);
         } else {
             return Integer.parseInt(time);
+        }
+    }
+
+    private static Airtime getAirtime(String airtime) {
+        String[] split = airtime.split(",");
+        try {
+            return new Airtime(Integer.parseInt(split[0]), Integer.parseInt(split[1]),
+                    Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+        } catch (NumberFormatException e) {
+            LOGGER.log(Level.ERROR, "");
+            return Airtime.EMPTY;
         }
     }
 }

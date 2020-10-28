@@ -320,6 +320,20 @@ public class Node {
         return 0;
     }
 
+    public Airtime getAirtime2g() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getAirtime2g();
+        }
+        return Airtime.EMPTY;
+    }
+
+    public Airtime getAirtime5g() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getAirtime5g();
+        }
+        return Airtime.EMPTY;
+    }
+
     public String getHostname() {
         String name = getName();
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
