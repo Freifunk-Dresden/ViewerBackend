@@ -77,9 +77,9 @@ public class Node {
     public boolean isShown() {
         switch (getRole()) {
             case STANDARD:
-                return isNormalNode() && hasValidLocation();
+                return hasValidLocation();
             case MOBILE:
-                return isNormalNode() && hasValidLocation() && isOnline() && isFWVersionHigher(0, 9);
+                return hasValidLocation() && isOnline() && isFWVersionHigher(0, 9);
             case SERVER:
             default:
                 return false;
