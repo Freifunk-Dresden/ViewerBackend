@@ -111,6 +111,7 @@ public class StatsSQL {
         List<Point> nodeLoad = new ArrayList<>();
         List<Point> nodeMemory = new ArrayList<>();
         List<Point> nodeAirtime = new ArrayList<>();
+        List<Point> nodeUptime = new ArrayList<>();
         nodes.forEach(e -> {
             if (e.canHasClients()) {
                 nodeClients.add(Point.measurement("node_clients")
@@ -125,6 +126,10 @@ public class StatsSQL {
             nodeMemory.add(Point.measurement("node_memory")
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getMemoryUsage())
+                    .build());
+            nodeUptime.add(Point.measurement("node_uptime")
+                    .tag("node", String.valueOf(e.getId()))
+                    .addField("value", e.getUptime())
                     .build());
             if (!e.getAirtime2g().equals(Airtime.EMPTY)) {
                 nodeAirtime.add(Point.measurement("node_airtime_2g")
@@ -148,6 +153,7 @@ public class StatsSQL {
         DataGen.getInflux().write(nodeClients);
         DataGen.getInflux().write(nodeLoad);
         DataGen.getInflux().write(nodeMemory);
+        DataGen.getInflux().write(nodeUptime);
         DataGen.getInflux().write(nodeAirtime);
         List<Point> nodesVersions = new ArrayList<>();
         versions.forEach((v, c) -> nodesVersions.add(Point.measurement("nodes_versions")
