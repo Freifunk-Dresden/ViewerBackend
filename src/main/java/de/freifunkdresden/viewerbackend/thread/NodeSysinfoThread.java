@@ -34,6 +34,7 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV13;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV14;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV15;
 import de.freifunkdresden.viewerbackend.exception.EmptyJsonException;
+import de.freifunkdresden.viewerbackend.exception.HTTPStatusCodeException;
 import de.freifunkdresden.viewerbackend.exception.MalformedSysinfoException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -67,7 +68,8 @@ public class NodeSysinfoThread implements Runnable {
                 checkNode(node);
                 return;
             } catch (NoRouteToHostException ex) {
-            } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException | ConnectException | SocketTimeoutException ex) {
+            } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException |
+                    ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
                 if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
                     LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
                 }
@@ -81,18 +83,22 @@ public class NodeSysinfoThread implements Runnable {
         HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAddress() + "/sysinfo-json.cgi").openConnection();
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
-        String json;
-        try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
-            try (BufferedReader bufferedReader = new BufferedReader(reader)) {
-                json = bufferedReader.lines().collect(Collectors.joining());
+        if (con.getResponseCode() == 200) {
+            String json;
+            try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
+                try (BufferedReader bufferedReader = new BufferedReader(reader)) {
+                    json = bufferedReader.lines().collect(Collectors.joining());
+                }
             }
+            //Fix HTML injected in JSON
+            int begin = json.indexOf("<!DOCTYPE html>");
+            if (begin != -1) {
+                json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*<\\/html>)", "{}");
+            }
+            n.setDpSysinfo(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
+        } else {
+            throw new HTTPStatusCodeException(con.getResponseCode());
         }
-        //Fix HTML injected in JSON
-        int begin = json.indexOf("<!DOCTYPE html>");
-        if (begin != -1) {
-            json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*<\\/html>)", "{}");
-        }
-        n.setDpSysinfo(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
     }
 
     private static DataParserSysinfo getDataParser(JsonObject sysinfo) throws EmptyJsonException, MalformedSysinfoException {
