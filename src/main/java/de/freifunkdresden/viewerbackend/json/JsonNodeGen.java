@@ -2,7 +2,9 @@ package de.freifunkdresden.viewerbackend.json;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.Airtime;
 import de.freifunkdresden.viewerbackend.Node;
+import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,6 +59,8 @@ public class JsonNodeGen {
             JsonArray pages = new JsonArray();
             pages.add(String.format("http://%s.freifunk-dresden.de", n.getId()));
             nodeinfo.add("pages", pages);
+            JsonObject wireless = new JsonObject();
+            nodeinfo.add("wireless", wireless);
             node.add("nodeinfo", nodeinfo);
             JsonObject statistics = new JsonObject();
             statistics.addProperty("clients", n.getClients());
@@ -64,6 +68,32 @@ public class JsonNodeGen {
                 statistics.addProperty("uptime", n.getUptime());
                 statistics.addProperty("memory_usage", n.getMemoryUsage());
                 statistics.addProperty("loadavg", n.getLoadAvg());
+                JsonArray airtime = new JsonArray();
+                JsonObject ja2 = getAirtime(n.getAirtime2g(), n.getAirtime2GOld(), 2472);
+                if (ja2 != null) {
+                    airtime.add(ja2);
+                }
+                JsonObject ja5 = getAirtime(n.getAirtime5g(), n.getAirtime5GOld(), 5220);
+                if (ja5 != null) {
+                    airtime.add(ja5);
+                }
+                statistics.add("airtime", airtime);
+                JsonObject w = new JsonObject();
+                if (!Airtime.EMPTY.equals(n.getAirtime2g())) {
+                    Number wat = getWirelessAirtime(n.getAirtime2g(), n.getAirtime2GOld());
+                    if (wat != null) {
+                        wireless.addProperty("chan2", 13);
+                        w.addProperty("airtime2", wat);
+                    }
+                }
+                if (!Airtime.EMPTY.equals(n.getAirtime5g())) {
+                    Number wat = getWirelessAirtime(n.getAirtime5g(), n.getAirtime5GOld());
+                    if (wat != null) {
+                        wireless.addProperty("chan5", 44);
+                        w.addProperty("airtime5", wat);
+                    }
+                }
+                statistics.add("wireless", w);
             }
             if (!n.isGateway() && n.getGateway() != null) {
                 statistics.addProperty("gateway", n.getGateway().getIpAddress());
@@ -133,6 +163,31 @@ public class JsonNodeGen {
             return node;
         } catch (Exception e) {
             LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", n.getId()), e);
+        }
+        return null;
+    }
+
+    private static JsonObject getAirtime(Airtime at, Airtime old, int freq) {
+        if (!Airtime.EMPTY.equals(at)) {
+            float a = at.getActive() < old.getActive() ? at.getActive() : at.getActive() - old.getActive();
+            float b = at.getBusy() < old.getBusy() ? at.getBusy() : at.getBusy() - old.getBusy();
+            float r = at.getReceive() < old.getReceive() ? at.getReceive() : at.getReceive() - old.getReceive();
+            float t = at.getTransmit() < old.getTransmit() ? at.getTransmit() : at.getTransmit() - old.getTransmit();
+            JsonObject ja = new JsonObject();
+            ja.addProperty("frequency", freq);
+            ja.addProperty("busy", b / a);
+            ja.addProperty("rx", r / a);
+            ja.addProperty("tx", t / a);
+            return ja;
+        }
+        return null;
+    }
+
+    private static Number getWirelessAirtime(Airtime at, Airtime old) {
+        if (!Airtime.EMPTY.equals(at)) {
+            float b = at.getBusy() < old.getBusy() ? at.getBusy() : at.getBusy() - old.getBusy();
+            float a = at.getActive() < old.getActive() ? at.getActive() : at.getActive() - old.getActive();
+            return b / a;
         }
         return null;
     }

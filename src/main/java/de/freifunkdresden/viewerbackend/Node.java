@@ -26,6 +26,7 @@ package de.freifunkdresden.viewerbackend;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
+import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +37,9 @@ public class Node {
     private DataParserAPI dpApi;
     private DataParserDB dpDatabase;
     private DataParserSysinfo dpSysinfo;
+
+    private Airtime airtime2GOld;
+    private Airtime airtime5GOld;
 
     public Node(int id) {
         this.id = id;
@@ -55,6 +59,8 @@ public class Node {
 
     public void setDpDatabase(DataParserDB dp) {
         this.dpDatabase = dp;
+        airtime2GOld = AirtimeSQL.getAirtime2G(this);
+        airtime5GOld = AirtimeSQL.getAirtime5G(this);
     }
 
     public void setDpSysinfo(DataParserSysinfo dp) {
@@ -334,6 +340,14 @@ public class Node {
         return Airtime.EMPTY;
     }
 
+    public Airtime getAirtime2GOld() {
+        return airtime2GOld;
+    }
+
+    public Airtime getAirtime5GOld() {
+        return airtime5GOld;
+    }
+
     public String getHostname() {
         String name = getName();
         return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
@@ -367,6 +381,8 @@ public class Node {
         DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon,
                 getCommunity().getName(), getRole().name(), getModel(), getFirmwareVersion(), getFirmwareBase(),
                 getFirstSeen() / 1000, getLastSeen() / 1000, isAutoUpdateEnabled(), isGateway(), getName(), getEmail());
+        AirtimeSQL.updateAirtime2G(this);
+        AirtimeSQL.updateAirtime5G(this);
     }
 
     public void collectStats() {

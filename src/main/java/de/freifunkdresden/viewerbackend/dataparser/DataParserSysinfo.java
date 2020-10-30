@@ -189,14 +189,20 @@ public class DataParserSysinfo {
 
     public Airtime getAirtime2g() {
         if (data.has("airtime") && data.get("airtime").getAsJsonObject().has("radio2g")) {
-            return getAirtime(data.get("airtime").getAsJsonObject().get("radio2g").getAsString());
+            String at = data.get("airtime").getAsJsonObject().get("radio2g").getAsString();
+            if (!at.isEmpty()) {
+                return getAirtime(at);
+            }
         }
         return Airtime.EMPTY;
     }
 
     public Airtime getAirtime5g() {
         if (data.has("airtime") && data.get("airtime").getAsJsonObject().has("radio5g")) {
-            return getAirtime(data.get("airtime").getAsJsonObject().get("radio5g").getAsString());
+            String at = data.get("airtime").getAsJsonObject().get("radio5g").getAsString();
+            if (!at.isEmpty()) {
+                return getAirtime(at);
+            }
         }
         return Airtime.EMPTY;
     }
@@ -209,13 +215,13 @@ public class DataParserSysinfo {
         }
     }
 
-    private static Airtime getAirtime(String airtime) {
+    private Airtime getAirtime(String airtime) {
         String[] split = airtime.split(",");
         try {
             return new Airtime(Integer.parseInt(split[0]), Integer.parseInt(split[1]),
                     Integer.parseInt(split[2]), Integer.parseInt(split[3]));
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.ERROR, "");
+            LOGGER.log(Level.ERROR, String.format("Airtime format (Node: %d)", getNodeId()), e);
             return Airtime.EMPTY;
         }
     }
