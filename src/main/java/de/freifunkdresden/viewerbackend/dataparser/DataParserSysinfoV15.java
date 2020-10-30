@@ -17,4 +17,11 @@ public class DataParserSysinfoV15 extends DataParserSysinfoV14 {
         }
         return super.getClients();
     }
+
+    @Override
+    public TrafficInfo getTraffic() {
+        TrafficInfo ti = new TrafficInfo();
+        ti.readValues(data.get("statistic").getAsJsonObject());
+        return ti;
+    }
 }

@@ -35,6 +35,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import org.influxdb.dto.Point;
 
 public class StatsSQL {
@@ -112,6 +114,7 @@ public class StatsSQL {
         List<Point> nodeMemory = new ArrayList<>();
         List<Point> nodeAirtime = new ArrayList<>();
         List<Point> nodeUptime = new ArrayList<>();
+        List<Point> nodeTraffic = new ArrayList<>();
         nodes.forEach(e -> {
             if (e.canHasClients()) {
                 nodeClients.add(Point.measurement("node_clients")
@@ -149,12 +152,26 @@ public class StatsSQL {
                         .addField("transmit", e.getAirtime5g().getTransmit())
                         .build());
             }
+            if (!e.getTraffic().isEmpty()) {
+                TrafficInfo t = e.getTraffic();
+                for (TrafficInfo.Interface i : TrafficInfo.Interface.values()) {
+                    if (t.hasInterface(i)) {
+                        nodeTraffic.add(Point.measurement("node_traffic")
+                                .tag("node", String.valueOf(e.getId()))
+                                .tag("interface", i.name().toLowerCase())
+                                .addField("in", t.getInput(i))
+                                .addField("out", t.getOutput(i))
+                                .build());
+                    }
+                }
+            }
         });
         DataGen.getInflux().write(nodeClients);
         DataGen.getInflux().write(nodeLoad);
         DataGen.getInflux().write(nodeMemory);
         DataGen.getInflux().write(nodeUptime);
         DataGen.getInflux().write(nodeAirtime);
+        DataGen.getInflux().write(nodeTraffic);
         List<Point> nodesVersions = new ArrayList<>();
         versions.forEach((v, c) -> nodesVersions.add(Point.measurement("nodes_versions")
                 .tag("version", v)

@@ -26,6 +26,7 @@ package de.freifunkdresden.viewerbackend;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
+import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import java.util.Collection;
@@ -346,6 +347,13 @@ public class Node {
 
     public Airtime getAirtime5GOld() {
         return airtime5GOld;
+    }
+
+    public TrafficInfo getTraffic() {
+        if (dpSysinfo != null) {
+            return dpSysinfo.getTraffic();
+        }
+        return new TrafficInfo();
     }
 
     public String getHostname() {
