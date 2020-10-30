@@ -207,6 +207,10 @@ public class DataParserSysinfo {
         return Airtime.EMPTY;
     }
 
+    public TrafficInfo getTraffic() {
+        return new TrafficInfo();
+    }
+
     private static int parseMinutes(String time) {
         if (time.contains(":")) {
             return Integer.parseInt(time.split(":")[0]) * 60 + Integer.parseInt(time.split(":")[1]);
