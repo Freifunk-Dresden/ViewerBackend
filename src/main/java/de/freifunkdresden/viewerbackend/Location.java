@@ -29,10 +29,12 @@ import java.util.List;
 
 public class Location {
 
+    //TODO: Load from json file
     private static final List<Location> INVALID_LOCATIONS = Arrays.asList(
             new Location(51.05405, 13.74364),
             new Location(51.054741, 13.742642),
-            new Location(51.033865, 13.653252)
+            new Location(51.033865, 13.653252),
+            new Location(51.05448, 13.74362)
     );
 
     private final double latitude;
