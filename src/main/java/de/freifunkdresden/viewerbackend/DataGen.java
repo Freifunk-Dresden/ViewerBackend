@@ -89,7 +89,7 @@ public class DataGen {
             mysqlDb.closeConnection();
             LOGGER.log(Level.INFO, "Done!");
         } catch (JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
-            LOGGER.log(Level.ERROR, "", ex);
+            LOGGER.log(Level.ERROR, "Execution Exception: ", ex);
         }
     }
 
@@ -177,7 +177,7 @@ public class DataGen {
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            LOGGER.log(Level.ERROR, "", ex);
+            LOGGER.log(Level.ERROR, "Execution Interrupted", ex);
         }
     }
 
