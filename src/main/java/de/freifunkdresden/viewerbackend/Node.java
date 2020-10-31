@@ -268,7 +268,7 @@ public class Node {
         return null;
     }
 
-    public String getEmail() {
+    public String getEMail() {
         if (dpSysinfo != null) {
             return dpSysinfo.getEMail();
         }
@@ -388,7 +388,7 @@ public class Node {
         }
         DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon,
                 getCommunity().getName(), getRole().name(), getModel(), getFirmwareVersion(), getFirmwareBase(),
-                getFirstSeen() / 1000, getLastSeen() / 1000, isAutoUpdateEnabled(), isGateway(), getName(), getEmail());
+                getFirstSeen() / 1000, getLastSeen() / 1000, isAutoUpdateEnabled(), isGateway(), getName(), getEMail());
         AirtimeSQL.updateAirtime2G(this);
         AirtimeSQL.updateAirtime5G(this);
     }

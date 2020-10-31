@@ -63,7 +63,7 @@ public class TrafficInfo {
         StringBuilder sb = new StringBuilder();
         for (Interface i : Interface.values()) {
             if (hasInterface(i)) {
-                sb.append(String.format("%s: %d<>%d\n", i.name().toLowerCase(), getInput(i), getOutput(i)));
+                sb.append(String.format("%s: %d<>%d%n", i.name().toLowerCase(), getInput(i), getOutput(i)));
             }
         }
         return sb.toString();

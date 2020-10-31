@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Airtime;
 import de.freifunkdresden.viewerbackend.Node;
-import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,8 +48,8 @@ public class JsonNodeGen {
             }
             nodeinfo.add("software", software);
             JsonObject owner = new JsonObject();
-            if (n.getEmail() != null && !n.getEmail().isEmpty()) {
-                owner.addProperty("contact", n.getEmail());
+            if (n.getEMail() != null && !n.getEMail().isEmpty()) {
+                owner.addProperty("contact", n.getEMail());
             }
             nodeinfo.add("owner", owner);
             if (n.isShown()) {
@@ -153,7 +152,7 @@ public class JsonNodeGen {
             if (n.getModel() != null && !n.getModel().isEmpty()) {
                 node.addProperty("model", n.getModel());
             }
-            node.addProperty("contact", n.getEmail());
+            node.addProperty("contact", n.getEMail());
             JsonObject autoupdater = new JsonObject();
             autoupdater.addProperty("enabled", n.isAutoUpdateEnabled());
             autoupdater.addProperty("branch", "stable");
