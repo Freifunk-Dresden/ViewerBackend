@@ -21,14 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.exception.DatabaseConnectionException;
-import java.util.Collection;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
+
+import java.util.Collection;
 
 public class Influx {
 

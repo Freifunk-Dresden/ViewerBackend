@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
@@ -29,6 +30,7 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
+
 import java.util.Collection;
 import java.util.Collections;
 

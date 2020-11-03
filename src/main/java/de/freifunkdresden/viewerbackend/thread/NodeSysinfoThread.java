@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend.thread;
 
 import com.google.gson.JsonObject;
@@ -36,6 +37,10 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV15;
 import de.freifunkdresden.viewerbackend.exception.EmptyJsonException;
 import de.freifunkdresden.viewerbackend.exception.HTTPStatusCodeException;
 import de.freifunkdresden.viewerbackend.exception.MalformedSysinfoException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,9 +51,6 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class NodeSysinfoThread implements Runnable {
 

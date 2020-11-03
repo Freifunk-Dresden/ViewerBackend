@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
@@ -32,12 +33,13 @@ import de.freifunkdresden.viewerbackend.LinkType;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.NodeType;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 
 public class DataParserSysinfo {
 

@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
@@ -33,6 +34,10 @@ import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
 import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -44,9 +49,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class DataGen {
 

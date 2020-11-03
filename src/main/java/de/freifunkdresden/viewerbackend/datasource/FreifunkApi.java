@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2020 NMerkelt.
+ * Copyright 2020 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend.datasource;
 
 import com.google.gson.Gson;
@@ -31,6 +32,10 @@ import com.google.gson.JsonSyntaxException;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.exception.ApiProcessingException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -39,9 +44,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class FreifunkApi {
 

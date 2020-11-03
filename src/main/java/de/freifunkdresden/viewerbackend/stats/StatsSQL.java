@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend.stats;
 
 import de.freifunkdresden.viewerbackend.Airtime;
@@ -28,6 +29,9 @@ import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.VPN;
+import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
+import org.influxdb.dto.Point;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -35,9 +39,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
-import org.influxdb.dto.Point;
 
 public class StatsSQL {
 

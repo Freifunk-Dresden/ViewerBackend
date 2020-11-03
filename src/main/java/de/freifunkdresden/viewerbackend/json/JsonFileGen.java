@@ -28,13 +28,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Node;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TimeZone;
 
 public class JsonFileGen {
 
@@ -69,7 +75,7 @@ public class JsonFileGen {
                 .filter(link -> link.getSource().isOnline() && link.getTarget().isOnline())
                 .forEach(link -> {
                     JsonObject jsonLink;
-                    //Meshviewer
+                    //MeshViewer
                     jsonLink = new JsonObject();
                     jsonLink.addProperty("source", link.getSource().getFakeId());
                     jsonLink.addProperty("target", link.getTarget().getFakeId());
@@ -79,7 +85,7 @@ public class JsonFileGen {
                     jsonLink.addProperty("source_addr", link.getSource().getFakeMac());
                     jsonLink.addProperty("target_addr", link.getTarget().getFakeMac());
                     meshViewerLinks.add(jsonLink);
-                    //Hopglass
+                    //HopGlass
                     Integer source = nodeIds.get(link.getSource());
                     Integer target = nodeIds.get(link.getTarget());
                     jsonLink = new JsonObject();

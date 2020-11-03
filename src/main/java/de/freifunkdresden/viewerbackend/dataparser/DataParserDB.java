@@ -21,16 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class DataParserDB {
 
