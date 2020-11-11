@@ -32,54 +32,52 @@ import java.util.Map;
 
 public class TrafficInfo {
 
-    private final Map<Interface, Long> traffic_in = new EnumMap<>(Interface.class);
-    private final Map<Interface, Long> traffic_out = new EnumMap<>(Interface.class);
-
-    public TrafficInfo() {
-    }
+    private final Map<Interface, Long> trafficIn = new EnumMap<>(Interface.class);
+    private final Map<Interface, Long> trafficOut = new EnumMap<>(Interface.class);
 
     public void readValues(JsonObject stats) {
-        boolean from_to = false;
+        boolean fromTo = false;
         for (Interface out : Interface.values()) {
             for (Interface in : Interface.values()) {
                 String name = String.format("traffic_%s_%s", out.name().toLowerCase(), in.name().toLowerCase());
                 JsonElement j = stats.get(name);
                 if (j != null) {
-                    from_to = true;
-                    traffic_out.put(out, getOutput(out) + j.getAsLong());
-                    traffic_in.put(in, getInput(in) + j.getAsLong());
+                    fromTo = true;
+                    trafficOut.put(out, getOutput(out) + j.getAsLong());
+                    trafficIn.put(in, getInput(in) + j.getAsLong());
                 }
             }
         }
-        if (!from_to) {
-            for (Interface i : Interface.values()) {
-                String name = String.format("traffic_%s", i.name().toLowerCase());
-                JsonElement j = stats.get(name);
-                if (j != null) {
-                    String[] t = j.getAsString().split(",");
-                    if (t.length == 2) {
-                        traffic_in.put(i, Long.parseLong(t[0]));
-                        traffic_out.put(i, Long.parseLong(t[1]));
-                    }
+        if (fromTo) {
+            return;
+        }
+        for (Interface i : Interface.values()) {
+            String name = String.format("traffic_%s", i.name().toLowerCase());
+            JsonElement j = stats.get(name);
+            if (j != null) {
+                String[] t = j.getAsString().split(",");
+                if (t.length == 2) {
+                    trafficIn.put(i, Long.parseLong(t[0]));
+                    trafficOut.put(i, Long.parseLong(t[1]));
                 }
             }
         }
     }
 
     public boolean isEmpty() {
-        return traffic_in.isEmpty() && traffic_out.isEmpty();
+        return trafficIn.isEmpty() && trafficOut.isEmpty();
     }
 
     public boolean hasInterface(Interface i) {
-        return traffic_in.containsKey(i) || traffic_out.containsKey(i);
+        return trafficIn.containsKey(i) || trafficOut.containsKey(i);
     }
 
     public long getInput(Interface i) {
-        return traffic_in.getOrDefault(i, 0L);
+        return trafficIn.getOrDefault(i, 0L);
     }
 
     public long getOutput(Interface i) {
-        return traffic_out.getOrDefault(i, 0L);
+        return trafficOut.getOrDefault(i, 0L);
     }
 
     @Override

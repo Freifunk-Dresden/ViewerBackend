@@ -50,9 +50,6 @@ public class DataParserDB {
     private String name;
     private NodeType role = NodeType.STANDARD;
 
-    public DataParserDB() {
-    }
-
     public void parse(ResultSet rs) {
         try {
             boolean au = rs.getBoolean("autoupdate");

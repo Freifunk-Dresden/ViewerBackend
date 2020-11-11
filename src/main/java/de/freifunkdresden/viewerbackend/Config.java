@@ -47,9 +47,7 @@ public class Config {
             List<String> lines = Files.readAllLines(path);
             lines.stream().filter(line -> !(line.startsWith("#")))
                     .map(line -> line.split("=", 2))
-                    .forEachOrdered(split -> {
-                        configValues.put(split[0], split[1]);
-                    });
+                    .forEachOrdered(split -> configValues.put(split[0], split[1]));
         } catch (IOException ex) {
             throw new ConfigurationException("Config file couldn't be loaded", ex);
         }

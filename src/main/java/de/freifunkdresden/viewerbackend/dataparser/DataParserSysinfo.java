@@ -40,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.Set;
 
 public class DataParserSysinfo {
 
@@ -142,7 +143,7 @@ public class DataParserSysinfo {
         return stats.get("accepted_user_count").getAsShort();
     }
 
-    public HashSet<Link> getLinkSet() {
+    public Set<Link> getLinkSet() {
         HashSet<Link> linkmap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
@@ -190,23 +191,11 @@ public class DataParserSysinfo {
     }
 
     public Airtime getAirtime2g() {
-        if (data.has("airtime") && data.get("airtime").getAsJsonObject().has("radio2g")) {
-            String at = data.get("airtime").getAsJsonObject().get("radio2g").getAsString();
-            if (!at.isEmpty()) {
-                return getAirtime(at);
-            }
-        }
-        return Airtime.EMPTY;
+        return getAirtime("radio2g");
     }
 
     public Airtime getAirtime5g() {
-        if (data.has("airtime") && data.get("airtime").getAsJsonObject().has("radio5g")) {
-            String at = data.get("airtime").getAsJsonObject().get("radio5g").getAsString();
-            if (!at.isEmpty()) {
-                return getAirtime(at);
-            }
-        }
-        return Airtime.EMPTY;
+        return getAirtime("radio5g");
     }
 
     public TrafficInfo getTraffic() {
@@ -221,7 +210,17 @@ public class DataParserSysinfo {
         }
     }
 
-    private Airtime getAirtime(String airtime) {
+    private Airtime getAirtime(String radio) {
+        if (data.has("airtime") && data.get("airtime").getAsJsonObject().has(radio)) {
+            String at = data.get("airtime").getAsJsonObject().get(radio).getAsString();
+            if (!at.isEmpty()) {
+                return parseAirtime(at);
+            }
+        }
+        return Airtime.EMPTY;
+    }
+
+    private Airtime parseAirtime(String airtime) {
         String[] split = airtime.split(",");
         try {
             return new Airtime(Integer.parseInt(split[0]), Integer.parseInt(split[1]),

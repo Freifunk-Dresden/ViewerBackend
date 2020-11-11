@@ -37,7 +37,10 @@ import java.util.Date;
 
 public class JsonNodeGen {
 
-    private static final Logger LOGGER = LogManager.getLogger(Node.class);
+    private static final Logger LOGGER = LogManager.getLogger(JsonNodeGen.class);
+
+    private JsonNodeGen() {
+    }
 
     public static JsonObject getJsonObject(Node n, DateFormat df) {
         try {

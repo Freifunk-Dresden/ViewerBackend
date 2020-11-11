@@ -31,6 +31,7 @@ import de.freifunkdresden.viewerbackend.LinkType;
 import de.freifunkdresden.viewerbackend.Node;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class DataParserSysinfoV11 extends DataParserSysinfoV10 {
 
@@ -39,7 +40,7 @@ public class DataParserSysinfoV11 extends DataParserSysinfoV10 {
     }
 
     @Override
-    public HashSet<Link> getLinkSet() {
+    public Set<Link> getLinkSet() {
         HashSet<Link> linkmap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();

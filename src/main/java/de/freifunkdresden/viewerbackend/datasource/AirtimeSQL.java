@@ -38,6 +38,9 @@ public class AirtimeSQL {
 
     private static final Logger LOGGER = LogManager.getLogger(AirtimeSQL.class);
 
+    private AirtimeSQL() {
+    }
+
     public static Airtime getAirtime2G(Node n) {
         return getAirtime(n, 2);
     }
