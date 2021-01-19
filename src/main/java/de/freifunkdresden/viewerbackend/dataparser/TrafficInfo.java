@@ -41,7 +41,7 @@ public class TrafficInfo {
             for (Interface in : Interface.values()) {
                 String name = String.format("traffic_%s_%s", out.name().toLowerCase(), in.name().toLowerCase());
                 JsonElement j = stats.get(name);
-                if (j != null) {
+                if (j != null && !j.getAsString().isEmpty()) {
                     fromTo = true;
                     trafficOut.put(out, getOutput(out) + j.getAsLong());
                     trafficIn.put(in, getInput(in) + j.getAsLong());
