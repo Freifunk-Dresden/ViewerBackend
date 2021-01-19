@@ -61,8 +61,14 @@ public class JsonFileGen {
         Iterator<Node> it = nodes.stream().filter(Node::isDisplayed).iterator();
         for (int i = 0; it.hasNext(); i++) {
             Node node = it.next();
-            hopGlassNodes.add(JsonNodeGen.getJsonObject(node, dateHop));
-            meshViewerNodes.add(JsonNodeGen.getMeshViewerObj(node, dateMesh));
+            JsonObject hopNode = JsonNodeGen.getJsonObject(node, dateHop);
+            if (hopNode != null) {
+                hopGlassNodes.add(hopNode);
+            }
+            JsonObject meshNode = JsonNodeGen.getMeshViewerObj(node, dateMesh);
+            if (meshNode != null) {
+                meshViewerNodes.add(meshNode);
+            }
             JsonObject jsonNode = new JsonObject();
             jsonNode.addProperty("node_id", String.valueOf(node.getId()));
             jsonNode.addProperty("id", String.valueOf(node.getId()));
