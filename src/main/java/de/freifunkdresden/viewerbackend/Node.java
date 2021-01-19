@@ -331,6 +331,9 @@ public class Node {
 
     public Airtime getAirtime2g() {
         if (dpSysinfo != null) {
+            if (dpSysinfo.getFirmwareTarget().equals("ipq40xx/generic")) {
+                return Airtime.EMPTY;
+            }
             return dpSysinfo.getAirtime2g();
         }
         return Airtime.EMPTY;
@@ -338,6 +341,9 @@ public class Node {
 
     public Airtime getAirtime5g() {
         if (dpSysinfo != null) {
+            if (dpSysinfo.getFirmwareTarget().equals("ipq40xx/generic")) {
+                return Airtime.EMPTY;
+            }
             return dpSysinfo.getAirtime5g();
         }
         return Airtime.EMPTY;

@@ -98,6 +98,10 @@ public class DataParserSysinfo {
         return distribId + " " + distribRelease + " " + distribRev;
     }
 
+    public String getFirmwareTarget() {
+        return data.get("firmware").getAsJsonObject().get("DISTRIB_TARGET").getAsString();
+    }
+
     public Node getGateway() {
         String ip = data.get("bmxd").getAsJsonObject().get("gateways").getAsJsonObject().get("selected").getAsString();
         int id = Node.convertIpToId(ip);
