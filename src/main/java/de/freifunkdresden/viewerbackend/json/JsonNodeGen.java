@@ -43,6 +43,8 @@ public class JsonNodeGen {
     }
 
     public static JsonObject getJsonObject(Node n, DateFormat df) {
+        Airtime a2g = Airtime.diff(n.getAirtime2g(), n.getAirtime2GOld());
+        Airtime a5g = Airtime.diff(n.getAirtime5g(), n.getAirtime5GOld());
         try {
             JsonObject node = new JsonObject();
             JsonObject nodeinfo = new JsonObject();
@@ -95,29 +97,25 @@ public class JsonNodeGen {
                 statistics.addProperty("memory_usage", n.getMemoryUsage());
                 statistics.addProperty("loadavg", n.getLoadAvg());
                 JsonArray airtime = new JsonArray();
-                JsonObject ja2 = getAirtime(n.getAirtime2g(), n.getAirtime2GOld(), 2472);
+                JsonObject ja2 = getAirtime(a2g, 2472);
                 if (ja2 != null) {
                     airtime.add(ja2);
                 }
-                JsonObject ja5 = getAirtime(n.getAirtime5g(), n.getAirtime5GOld(), 5220);
+                JsonObject ja5 = getAirtime(a5g, 5220);
                 if (ja5 != null) {
                     airtime.add(ja5);
                 }
                 statistics.add("airtime", airtime);
                 JsonObject w = new JsonObject();
-                if (!Airtime.EMPTY.equals(n.getAirtime2g())) {
-                    Number wat = getWirelessAirtime(n.getAirtime2g(), n.getAirtime2GOld());
-                    if (wat != null) {
-                        wireless.addProperty("chan2", 13);
-                        w.addProperty("airtime2", wat);
-                    }
+                Number wat2 = getWirelessAirtime(a2g);
+                if (wat2 != null) {
+                    wireless.addProperty("chan2", 13);
+                    w.addProperty("airtime2", wat2);
                 }
-                if (!Airtime.EMPTY.equals(n.getAirtime5g())) {
-                    Number wat = getWirelessAirtime(n.getAirtime5g(), n.getAirtime5GOld());
-                    if (wat != null) {
-                        wireless.addProperty("chan5", 44);
-                        w.addProperty("airtime5", wat);
-                    }
+                Number wat5 = getWirelessAirtime(a5g);
+                if (wat5 != null) {
+                    wireless.addProperty("chan5", 44);
+                    w.addProperty("airtime5", wat5);
                 }
                 statistics.add("wireless", w);
             }
@@ -193,27 +191,34 @@ public class JsonNodeGen {
         return null;
     }
 
-    private static JsonObject getAirtime(Airtime at, Airtime old, int freq) {
-        if (!Airtime.EMPTY.equals(at)) {
-            float a = at.getActive() < old.getActive() ? at.getActive() : at.getActive() - old.getActive();
-            float b = at.getBusy() < old.getBusy() ? at.getBusy() : at.getBusy() - old.getBusy();
-            float r = at.getReceive() < old.getReceive() ? at.getReceive() : at.getReceive() - old.getReceive();
-            float t = at.getTransmit() < old.getTransmit() ? at.getTransmit() : at.getTransmit() - old.getTransmit();
+    private static JsonObject getAirtime(Airtime diff, int freq) {
+        if (!diff.isEmpty()) {
+            double a = diff.getActive();
+            double b = diff.getBusy();
+            double r = diff.getReceive();
+            double t = diff.getTransmit();
+            double busy = b / a;
+            double rx = r / a;
+            double tx = t / a;
+            if (Double.isNaN(busy) || Double.isNaN(rx) || Double.isNaN(tx)) {
+                return null;
+            }
             JsonObject ja = new JsonObject();
             ja.addProperty("frequency", freq);
-            ja.addProperty("busy", b / a);
-            ja.addProperty("rx", r / a);
-            ja.addProperty("tx", t / a);
+            ja.addProperty("busy", busy);
+            ja.addProperty("rx", rx);
+            ja.addProperty("tx", tx);
             return ja;
         }
         return null;
     }
 
-    private static Number getWirelessAirtime(Airtime at, Airtime old) {
-        if (!Airtime.EMPTY.equals(at)) {
-            float b = at.getBusy() < old.getBusy() ? at.getBusy() : at.getBusy() - old.getBusy();
-            float a = at.getActive() < old.getActive() ? at.getActive() : at.getActive() - old.getActive();
-            return b / a;
+    private static Number getWirelessAirtime(Airtime diff) {
+        if (!diff.isEmpty()) {
+            double b = diff.getBusy();
+            double a = diff.getActive();
+            double airtime = b / a;
+            return Double.isNaN(airtime) ? null : airtime;
         }
         return null;
     }

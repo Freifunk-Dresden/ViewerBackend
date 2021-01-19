@@ -73,4 +73,27 @@ public class Airtime {
     public int hashCode() {
         return Objects.hash(active, busy, receive, transmit);
     }
+
+    @Override
+    public String toString() {
+        return String.format("a: %d \t b: %d \t r: %d \t t: %d", active, busy, receive, transmit);
+    }
+
+    public boolean isEmpty() {
+        return this.equals(EMPTY);
+    }
+
+    public static Airtime diff(Airtime a, Airtime b) {
+        if (a == null && b == null) {
+            return Airtime.EMPTY;
+        } else if (a == null) {
+            return b;
+        } else if (b == null) {
+            return a;
+        }
+        return new Airtime(a.getActive() < b.getActive() ? a.getActive() : a.getActive() - b.getActive(),
+                a.getBusy() < b.getBusy() ? a.getBusy() : a.getBusy() - b.getBusy(),
+                a.getReceive() < b.getReceive() ? a.getReceive() : a.getReceive() - b.getReceive(),
+                a.getTransmit() < b.getTransmit() ? a.getTransmit() : a.getTransmit() - b.getTransmit());
+    }
 }
