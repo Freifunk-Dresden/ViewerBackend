@@ -48,6 +48,10 @@ public enum LinkType {
     public static LinkType getTypeByInterface(String iface) {
         switch (iface.toLowerCase()) {
             case "wlan0":
+            case "mesh-80211s":
+            case "mesh-adhoc":
+            case "mesh2g-80211s":
+            case "mesh5g-80211s":
                 return LinkType.WIRELESS;
             case "br-tbb":
             case "br-meshwire":
@@ -67,6 +71,8 @@ public enum LinkType {
             case "lan":
                 return LinkType.OTHER;
             case "wifi":
+            case "wifi_mesh":
+            case "wifi_adhoc":
                 return LinkType.WIRELESS;
             case "backbone":
             default:
