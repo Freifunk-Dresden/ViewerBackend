@@ -67,10 +67,10 @@ public class AirtimeSQL {
         try (ResultSet rs = DataGen.getDB().querySelect("SELECT * FROM airtime WHERE id = ? AND type = ?",
                 n.getId(), type)) {
             if (rs.next()) {
-                int active = rs.getInt("active");
-                int busy = rs.getInt("busy");
-                int receive = rs.getInt("receive");
-                int transmit = rs.getInt("transmit");
+                long active = rs.getLong("active");
+                long busy = rs.getLong("busy");
+                long receive = rs.getLong("receive");
+                long transmit = rs.getLong("transmit");
                 return new Airtime(active, busy, receive, transmit);
             }
         } catch (SQLException ex) {

@@ -30,31 +30,31 @@ public class Airtime {
 
     public static final Airtime EMPTY = new Airtime(0, 0, 0, 0);
 
-    private final int active;
-    private final int busy;
-    private final int receive;
-    private final int transmit;
+    private final long active;
+    private final long busy;
+    private final long receive;
+    private final long transmit;
 
-    public Airtime(int active, int busy, int receive, int transmit) {
+    public Airtime(long active, long busy, long receive, long transmit) {
         this.active = active;
         this.busy = busy;
         this.receive = receive;
         this.transmit = transmit;
     }
 
-    public int getActive() {
+    public long getActive() {
         return active;
     }
 
-    public int getBusy() {
+    public long getBusy() {
         return busy;
     }
 
-    public int getReceive() {
+    public long getReceive() {
         return receive;
     }
 
-    public int getTransmit() {
+    public long getTransmit() {
         return transmit;
     }
 

@@ -227,8 +227,8 @@ public class DataParserSysinfo {
     private Airtime parseAirtime(String airtime) {
         String[] split = airtime.split(",");
         try {
-            return new Airtime(Integer.parseInt(split[0]), Integer.parseInt(split[1]),
-                    Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+            return new Airtime(Long.parseLong(split[0]), Long.parseLong(split[1]), Long.parseLong(split[2]),
+                    Long.parseLong(split[3]));
         } catch (NumberFormatException e) {
             LOGGER.log(Level.ERROR, String.format("Airtime format (Node: %d)", getNodeId()), e);
             return Airtime.EMPTY;
