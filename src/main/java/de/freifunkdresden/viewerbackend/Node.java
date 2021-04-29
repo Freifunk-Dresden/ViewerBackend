@@ -49,11 +49,7 @@ public class Node {
     }
 
     public String getIpAddress() {
-        return getIpAddress(false);
-    }
-
-    public String getIpAddress(boolean subnet201) {
-        return String.format("10.%s.%s.%s", (subnet201 ? "201" : "200"), (id / 255), ((id % 255) + 1));
+        return String.format("10.200.%s.%s", (id / 255), ((id % 255) + 1));
     }
 
     public void setDpApi(DataParserAPI dp) {
