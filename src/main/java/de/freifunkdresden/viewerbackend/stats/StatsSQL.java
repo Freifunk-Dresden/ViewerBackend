@@ -39,6 +39,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class StatsSQL {
 
@@ -117,26 +118,32 @@ public class StatsSQL {
         List<Point> nodeUptime = new ArrayList<>();
         List<Point> nodeTraffic = new ArrayList<>();
         nodes.forEach(e -> {
+            long currentTimeMillis = System.currentTimeMillis();
             if (e.canHasClients()) {
                 nodeClients.add(Point.measurement("node_clients")
+                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                         .tag("node", String.valueOf(e.getId()))
                         .addField("value", e.getClients())
                         .build());
             }
             nodeLoad.add(Point.measurement("node_load")
+                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getLoadAvg())
                     .build());
             nodeMemory.add(Point.measurement("node_memory")
+                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getMemoryUsage())
                     .build());
             nodeUptime.add(Point.measurement("node_uptime")
+                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                     .tag("node", String.valueOf(e.getId()))
                     .addField("value", e.getUptime())
                     .build());
             if (!e.getAirtime2g().equals(Airtime.EMPTY)) {
                 nodeAirtime.add(Point.measurement("node_airtime_2g")
+                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                         .tag("node", String.valueOf(e.getId()))
                         .addField("active", e.getAirtime2g().getActive())
                         .addField("busy", e.getAirtime2g().getBusy())
@@ -146,6 +153,7 @@ public class StatsSQL {
             }
             if (!e.getAirtime5g().equals(Airtime.EMPTY)) {
                 nodeAirtime.add(Point.measurement("node_airtime_5g")
+                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                         .tag("node", String.valueOf(e.getId()))
                         .addField("active", e.getAirtime5g().getActive())
                         .addField("busy", e.getAirtime5g().getBusy())
@@ -158,6 +166,7 @@ public class StatsSQL {
                 for (TrafficInfo.Interface i : TrafficInfo.Interface.values()) {
                     if (t.hasInterface(i)) {
                         nodeTraffic.add(Point.measurement("node_traffic")
+                                .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
                                 .tag("interface", i.name().toLowerCase())
                                 .addField("in", t.getInput(i))
