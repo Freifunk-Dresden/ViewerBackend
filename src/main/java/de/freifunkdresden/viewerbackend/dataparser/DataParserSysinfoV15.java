@@ -36,7 +36,7 @@ public class DataParserSysinfoV15 extends DataParserSysinfoV14 {
     @Override
     public short getClients() {
         JsonElement clients = data.get("statistic").getAsJsonObject().get("clients");
-        if (clients.isJsonArray()) {
+        if (clients != null && clients.isJsonArray()) {
             return clients.getAsJsonArray().get(1).getAsShort();
         }
         return super.getClients();

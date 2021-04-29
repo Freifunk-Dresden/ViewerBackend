@@ -144,7 +144,10 @@ public class DataParserSysinfo {
     }
 
     public short getClients() {
-        return stats.get("accepted_user_count").getAsShort();
+        if (stats.has("accepted_user_count")) {
+            return stats.get("accepted_user_count").getAsShort();
+        }
+        return 0;
     }
 
     public Set<Link> getLinkSet() {
