@@ -85,7 +85,8 @@ public class Node {
             case STANDARD:
                 return hasValidLocation();
             case MOBILE:
-                return hasValidLocation() && isOnline() && isFWVersionHigher(0, 9);
+                return hasValidLocation() && isOnline() 
+                        && isFWVersionHigher(6, 0, 9);
             case SERVER:
             default:
                 return false;
@@ -150,12 +151,17 @@ public class Node {
         return id > 51000 && id < 60000;
     }
 
-    public boolean isFWVersionHigher(int minor, int patch) {
+    public boolean isFWVersionHigher(int major, int minor, int patch) {
         String[] fw = getFirmwareVersion().split("\\.");
         if (fw.length == 3) {
-            if (Integer.parseInt(fw[1]) > minor) {
+            if (Integer.parseInt(fw[0]) > major) {
                 return true;
-            } else if (Integer.parseInt(fw[1]) == minor && Integer.parseInt(fw[2]) >= patch) {
+            } else if (Integer.parseInt(fw[0]) == major 
+                    && Integer.parseInt(fw[1]) > minor) {
+                return true;
+            } else if (Integer.parseInt(fw[0]) == major 
+                    && Integer.parseInt(fw[1]) == minor 
+                    && Integer.parseInt(fw[2]) >= patch) {
                 return true;
             }
         }
