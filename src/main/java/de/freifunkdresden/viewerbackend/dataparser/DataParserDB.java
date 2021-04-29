@@ -52,7 +52,7 @@ public class DataParserDB {
 
     public void parse(ResultSet rs) {
         try {
-            boolean au = rs.getBoolean("autoupdate");
+            boolean au = rs.getInt("autoupdate") == 1;
             autoUpdate = !rs.wasNull() && au;
         } catch (SQLException e) {
             LOGGER.log(Level.ERROR, "Database read failed", e);

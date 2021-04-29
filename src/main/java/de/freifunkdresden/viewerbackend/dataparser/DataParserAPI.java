@@ -66,7 +66,7 @@ public class DataParserAPI {
     }
 
     public boolean hasBackbone() {
-        return status.get("backbone").getAsBoolean();
+        return status.get("backbone").getAsInt() == 1;
     }
 
     public String getName() {
@@ -82,6 +82,6 @@ public class DataParserAPI {
     }
 
     public boolean getAutoUpdate() {
-        return status.get("autoupdate").getAsBoolean();
+        return status.get("autoupdate").getAsInt() == 1;
     }
 }
