@@ -51,6 +51,9 @@ public class StatsSQL {
     private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<String, Integer> versions = new LinkedHashMap<>();
     private static final Map<String, Integer> communities = new LinkedHashMap<>();
+    private static final Map<String, Integer> model = new LinkedHashMap<>();
+    private static final Map<String, Integer> modelWithoutVersion = new LinkedHashMap<>();
+    private static final Map<String, Integer> manufacturer = new LinkedHashMap<>();
     private static final Map<Node, Integer> gatewayUsage = new LinkedHashMap<>();
     private static final Map<Node, Integer> gatewayClients = new LinkedHashMap<>();
 
@@ -78,6 +81,22 @@ public class StatsSQL {
         synchronized (communities) {
             String cName = c.getName();
             communities.put(cName, communities.getOrDefault(cName, 0) + 1);
+        }
+    }
+
+    public static void addModel(String mod, String manu) {
+        if (mod.isBlank()) {
+            return;
+        }
+        synchronized (model) {
+            model.put(mod, model.getOrDefault(mod, 0) + 1);
+        }
+        synchronized (manufacturer) {
+            manufacturer.put(manu, manufacturer.getOrDefault(manu, 0) + 1);
+        }
+        String modWithoutV = mod.replaceAll("(?:\\s\\(IL\\))*(?:N\\/ND)*(?:N)*(?:ND)*\\s*v\\d+(?:\\.\\d)*$", "");
+        synchronized (modelWithoutVersion) {
+            modelWithoutVersion.put(modWithoutV, modelWithoutVersion.getOrDefault(modWithoutV, 0) + 1);
         }
     }
 
@@ -208,5 +227,24 @@ public class StatsSQL {
                 .addField("value", v)
                 .build()));
         DataGen.getInflux().write(nodesGatewayClients);
+        // model, modelWithoutVersion, manufacturer
+        List<Point> nodesModel = new ArrayList<>();
+        model.forEach((m, v) -> nodesModel.add(Point.measurement("nodes_model")
+                .tag("model", m)
+                .addField("value", v)
+                .build()));
+        DataGen.getInflux().write(nodesModel);
+        List<Point> nodesModelWithoutVersion = new ArrayList<>();
+        modelWithoutVersion.forEach((m, v) -> nodesModelWithoutVersion.add(Point.measurement("nodes_model_without_version")
+                .tag("model", m)
+                .addField("value", v)
+                .build()));
+        DataGen.getInflux().write(nodesModelWithoutVersion);
+        List<Point> nodesManufacturer = new ArrayList<>();
+        manufacturer.forEach((m, v) -> nodesManufacturer.add(Point.measurement("nodes_manufacturer")
+                .tag("manufacturer", m)
+                .addField("value", v)
+                .build()));
+        DataGen.getInflux().write(nodesManufacturer);
     }
 }

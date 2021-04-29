@@ -299,6 +299,27 @@ public class Node {
         return null;
     }
 
+    public String getManufacturer() {
+        String model = this.getModel();
+        if (model.toLowerCase().contains("fujitsu")) {
+            return "FUJITSU SIEMENS";
+        } else if (model.toLowerCase().contains("ubnt")) {
+            return "Ubiquiti";
+        } else if (model.toLowerCase().contains("newifi")) {
+            return "Newifi";
+        } else if (model.toLowerCase().contains("vmware, inc.")) {
+            return "VMware, Inc.";
+        } else if (model.toLowerCase().contains("western digital")) {
+            return "Western Digital";
+        } else if (model.toLowerCase().contains("tp-link")) {
+            return "TP-Link";
+        } else if (model.toLowerCase().contains("netgear")) {
+            return "Netgear";
+        } else {
+            return model.split(" ")[0];
+        }
+    }
+    
     public Location getLocation() {
         if (dpSysinfo != null) {
             return dpSysinfo.getLocation();
@@ -411,6 +432,7 @@ public class Node {
         if (!isDisplayed()) return;
         StatsSQL.addVersion(getFirmwareVersion());
         StatsSQL.addCommunity(getCommunity());
+        StatsSQL.addModel(getModel(), getManufacturer());
         if (isNormalNode()) {
             StatsSQL.addGatewayUsage(getGateway());
             StatsSQL.addGatewayUsageClients(getGateway(), getClients());
