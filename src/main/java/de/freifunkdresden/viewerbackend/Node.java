@@ -36,6 +36,7 @@ import java.util.Collections;
 
 public class Node {
 
+    private static final long DAYS_30 = 1000L * 60 * 60 * 24 * 30;
     private final int id;
     private DataParserAPI dpApi;
     private DataParserDB dpDatabase;
@@ -76,7 +77,7 @@ public class Node {
 
     public boolean isDisplayed() {
         //display only nodes last seen within the last 30 days
-        return isValid() && (getLastSeen() > System.currentTimeMillis() - (1000L * 60 * 60 * 24 * 30));
+        return isValid() && (getLastSeen() > System.currentTimeMillis() - DAYS_30);
     }
 
     public boolean isShown() {
