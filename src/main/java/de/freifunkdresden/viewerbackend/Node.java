@@ -33,10 +33,13 @@ import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 public class Node {
 
     private static final long DAYS_30 = 1000L * 60 * 60 * 24 * 30;
+    private static final Set<String> IGNORE_AIRTIME = Set.of("ipq40xx/generic", "ramips/rt305x");
+
     private final int id;
     private DataParserAPI dpApi;
     private DataParserDB dpDatabase;
@@ -334,7 +337,7 @@ public class Node {
 
     public Airtime getAirtime2g() {
         if (dpSysinfo != null) {
-            if (dpSysinfo.getFirmwareTarget().equals("ipq40xx/generic")) {
+            if (IGNORE_AIRTIME.contains(dpSysinfo.getFirmwareTarget())) {
                 return Airtime.EMPTY;
             }
             return dpSysinfo.getAirtime2g();
@@ -344,7 +347,7 @@ public class Node {
 
     public Airtime getAirtime5g() {
         if (dpSysinfo != null) {
-            if (dpSysinfo.getFirmwareTarget().equals("ipq40xx/generic")) {
+            if (IGNORE_AIRTIME.contains(dpSysinfo.getFirmwareTarget())) {
                 return Airtime.EMPTY;
             }
             return dpSysinfo.getAirtime5g();
