@@ -30,6 +30,7 @@ import de.freifunkdresden.viewerbackend.Node;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,14 +50,14 @@ public class AirtimeSQL {
         return getAirtime(n, 5);
     }
 
-    public static void updateAirtime2G(Node n) {
+    public static void updateAirtime2G(@NotNull Node n) {
         Airtime at = n.getAirtime2g();
         if (!Airtime.EMPTY.equals(at)) {
             updateAirtime(n.getId(), 2, at);
         }
     }
 
-    public static void updateAirtime5G(Node n) {
+    public static void updateAirtime5G(@NotNull Node n) {
         Airtime at = n.getAirtime5g();
         if (!Airtime.EMPTY.equals(at)) {
             updateAirtime(n.getId(), 5, at);
@@ -79,7 +80,7 @@ public class AirtimeSQL {
         return Airtime.EMPTY;
     }
 
-    private static void updateAirtime(int id, int type, Airtime at) {
+    private static void updateAirtime(int id, int type, @NotNull Airtime at) {
         DataGen.getDB().queryUpdate("INSERT INTO airtime SET id = ?, type = ?, active = ?, busy = ?, " +
                         "receive = ?, transmit = ? ON DUPLICATE KEY UPDATE active = ?, busy = ?, receive = ?, " +
                         "transmit = ?",

@@ -31,6 +31,7 @@ import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.VPN;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import org.influxdb.dto.Point;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,11 +58,7 @@ public class StatsSQL {
     private static final Map<Node, Integer> gatewayUsage = new LinkedHashMap<>();
     private static final Map<Node, Integer> gatewayClients = new LinkedHashMap<>();
 
-    public static void addToStats(Node n) {
-        nodes.add(n);
-    }
-
-    public static void addGeneralStats(GeneralStatType type, double value) {
+    public static void addGeneralStats(@NotNull GeneralStatType type, double value) {
         synchronized (general) {
             general.add(Point.measurement(type.name().toLowerCase())
                     .addField("value", value)
@@ -69,7 +66,7 @@ public class StatsSQL {
         }
     }
 
-    public static void addVersion(String version) {
+    public static void addVersion(@NotNull String version) {
         if (!version.isEmpty()) {
             synchronized (versions) {
                 versions.put(version, versions.getOrDefault(version, 0) + 1);
@@ -77,14 +74,14 @@ public class StatsSQL {
         }
     }
 
-    public static void addCommunity(Community c) {
+    public static void addCommunity(@NotNull Community c) {
         synchronized (communities) {
             String cName = c.getName();
             communities.put(cName, communities.getOrDefault(cName, 0) + 1);
         }
     }
 
-    public static void addModel(String mod, String manu) {
+    public static void addModel(@NotNull String mod, @NotNull String manu) {
         if (mod.isBlank()) {
             return;
         }
@@ -100,7 +97,7 @@ public class StatsSQL {
         }
     }
 
-    public static void addVpnUsage(VPN vpn, int usage) {
+    public static void addVpnUsage(@NotNull VPN vpn, int usage) {
         synchronized (vpnUsage) {
             vpnUsage.add(Point.measurement("vpn_usage")
                     .tag("vpn", vpn.getVpnId())

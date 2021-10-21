@@ -25,12 +25,13 @@
 package de.freifunkdresden.viewerbackend.thread;
 
 import de.freifunkdresden.viewerbackend.Node;
+import org.jetbrains.annotations.NotNull;
 
 public class NodeDatabaseThread implements Runnable {
 
     private final Node node;
 
-    public NodeDatabaseThread(Node node) {
+    public NodeDatabaseThread(@NotNull Node node) {
         this.node = node;
     }
 

@@ -36,6 +36,7 @@ import de.freifunkdresden.viewerbackend.NodeType;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,7 @@ public class DataParserSysinfo {
     private final long lastSeen = System.currentTimeMillis();
     private final Community community;
 
-    public DataParserSysinfo(JsonObject data) {
+    public DataParserSysinfo(@NotNull JsonObject data) {
         this.data = data;
         if (data.has("statistic")) {
             stats = data.get("statistic").getAsJsonObject();
@@ -209,7 +210,7 @@ public class DataParserSysinfo {
         return new TrafficInfo();
     }
 
-    private static int parseMinutes(String time) {
+    private static int parseMinutes(@NotNull String time) {
         if (time.contains(":")) {
             return Integer.parseInt(time.split(":")[0]) * 60 + Integer.parseInt(time.split(":")[1]);
         } else {
@@ -227,7 +228,7 @@ public class DataParserSysinfo {
         return Airtime.EMPTY;
     }
 
-    private Airtime parseAirtime(String airtime) {
+    private Airtime parseAirtime(@NotNull String airtime) {
         String[] split = airtime.split(",");
         try {
             return new Airtime(Long.parseLong(split[0]), Long.parseLong(split[1]), Long.parseLong(split[2]),

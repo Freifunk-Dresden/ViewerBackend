@@ -31,6 +31,8 @@ import de.freifunkdresden.viewerbackend.Node;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -42,7 +44,8 @@ public class JsonNodeGen {
     private JsonNodeGen() {
     }
 
-    public static JsonObject getJsonObject(Node n, DateFormat df) {
+    @Nullable
+    public static JsonObject getJsonObject(@NotNull Node n, @NotNull DateFormat df) {
         Airtime a2g = Airtime.diff(n.getAirtime2g(), n.getAirtime2GOld());
         Airtime a5g = Airtime.diff(n.getAirtime5g(), n.getAirtime5GOld());
         try {
@@ -137,7 +140,8 @@ public class JsonNodeGen {
         return null;
     }
 
-    public static JsonObject getMeshViewerObj(Node n, DateFormat df) {
+    @Nullable
+    public static JsonObject getMeshViewerObj(@NotNull Node n, @NotNull DateFormat df) {
         try {
             JsonObject node = new JsonObject();
             node.addProperty("firstseen", df.format(new Date(n.getFirstSeen())));
@@ -191,7 +195,8 @@ public class JsonNodeGen {
         return null;
     }
 
-    private static JsonObject getAirtime(Airtime diff, int freq) {
+    @Nullable
+    private static JsonObject getAirtime(@NotNull Airtime diff, int freq) {
         if (!diff.isEmpty()) {
             double a = diff.getActive();
             double b = diff.getBusy();
@@ -213,7 +218,8 @@ public class JsonNodeGen {
         return null;
     }
 
-    private static Number getWirelessAirtime(Airtime diff) {
+    @Nullable
+    private static Number getWirelessAirtime(@NotNull Airtime diff) {
         if (!diff.isEmpty()) {
             double b = diff.getBusy();
             double a = diff.getActive();
