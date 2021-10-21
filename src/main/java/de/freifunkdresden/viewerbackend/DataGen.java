@@ -33,7 +33,7 @@ import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
-import de.freifunkdresden.viewerbackend.thread.NodeSysinfoThread;
+import de.freifunkdresden.viewerbackend.thread.NodeSysInfoThread;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,7 +104,7 @@ public class DataGen {
     private static void collectNodeInfo() throws NodeInfoCollectionException {
         try {
             ExecutorService pool = Executors.newFixedThreadPool(10);
-            HOLDER.getNodes().values().forEach(n -> pool.submit(new NodeSysinfoThread(n)));
+            HOLDER.getNodes().values().forEach(n -> pool.submit(new NodeSysInfoThread(n)));
             pool.shutdown();
             LOGGER.log(Level.INFO, "Waiting threads to finish...");
             pool.awaitTermination(2, TimeUnit.MINUTES);

@@ -46,7 +46,7 @@ public class DataParserSysinfoV14 extends DataParserSysinfoV13 {
 
     @Override
     public Set<Link> getLinkSet() {
-        HashSet<Link> linkmap = new HashSet<>();
+        HashSet<Link> linkMap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         bmxd.get("links").getAsJsonArray().forEach(link -> {
@@ -54,9 +54,9 @@ public class DataParserSysinfoV14 extends DataParserSysinfoV13 {
             Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
             byte tq = Byte.parseByte(l.get("tq").getAsString());
             LinkType linkType = LinkType.getTypeByType(l.get("type").getAsString());
-            linkmap.add(new Link(linkType, tq, target, node));
+            linkMap.add(new Link(linkType, tq, target, node));
         });
-        return linkmap;
+        return linkMap;
     }
 
     @Override

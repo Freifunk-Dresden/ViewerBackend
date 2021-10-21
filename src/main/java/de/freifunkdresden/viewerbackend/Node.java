@@ -43,7 +43,7 @@ public class Node {
     private final int id;
     private DataParserAPI dpApi;
     private DataParserDB dpDatabase;
-    private DataParserSysinfo dpSysinfo;
+    private DataParserSysinfo dpSysInfo;
 
     private Airtime airtime2GOld;
     private Airtime airtime5GOld;
@@ -66,8 +66,8 @@ public class Node {
         airtime5GOld = AirtimeSQL.getAirtime5G(this);
     }
 
-    public void setDpSysinfo(DataParserSysinfo dp) {
-        this.dpSysinfo = dp;
+    public void setDpSysInfo(DataParserSysinfo dp) {
+        this.dpSysInfo = dp;
     }
 
     public int getId() {
@@ -108,7 +108,7 @@ public class Node {
     }
 
     public boolean isOnline() {
-        return dpSysinfo != null;
+        return dpSysInfo != null;
     }
 
     public boolean isGateway() {
@@ -126,8 +126,8 @@ public class Node {
     }
 
     public boolean isAutoUpdateEnabled() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getAutoUpdate();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getAutoUpdate();
         }
         if (dpApi != null) {
             return dpApi.getAutoUpdate();
@@ -172,50 +172,50 @@ public class Node {
     }
 
     public Collection<Link> getLinks() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getLinkSet();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getLinkSet();
         }
         return Collections.emptySet();
     }
 
     public short getClients() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getClients();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getClients();
         }
         return 0;
     }
 
     public double getMemoryUsage() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getMemoryUsage();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getMemoryUsage();
         }
         return 0;
     }
 
     public float getLoadAvg() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getLoadAvg();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getLoadAvg();
         }
         return 0;
     }
 
     public float getUptime() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getUptime();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getUptime();
         }
         return 0;
     }
 
     public int getNproc() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getCPUCount();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getCPUCount();
         }
         return 0;
     }
 
     public String getFirmwareVersion() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getFirmwareVersion();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getFirmwareVersion();
         }
         if (dpApi != null) {
             return dpApi.getFirmwareVersion();
@@ -227,8 +227,8 @@ public class Node {
     }
 
     public String getFirmwareBase() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getFirmwareBase();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getFirmwareBase();
         }
         if (dpDatabase != null) {
             return dpDatabase.getFirmwareBase();
@@ -237,8 +237,8 @@ public class Node {
     }
 
     public Community getCommunity() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getCommunity();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getCommunity();
         }
         if (dpDatabase != null) {
             return dpDatabase.getCommunity();
@@ -247,15 +247,15 @@ public class Node {
     }
 
     public Node getGateway() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getGateway();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getGateway();
         }
         return null;
     }
 
     public NodeType getRole() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getRole();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getRole();
         }
         if (dpDatabase != null) {
             return dpDatabase.getRole();
@@ -264,8 +264,8 @@ public class Node {
     }
 
     public String getName() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getName();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getName();
         }
         if (dpApi != null) {
             return dpApi.getName();
@@ -277,8 +277,8 @@ public class Node {
     }
 
     public String getEMail() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getEMail();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getEMail();
         }
         if (dpDatabase != null) {
             return dpDatabase.getEMail();
@@ -287,8 +287,8 @@ public class Node {
     }
 
     public String getModel() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getModel();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getModel();
         }
         if (dpApi != null) {
             return dpApi.getModel();
@@ -321,8 +321,8 @@ public class Node {
     }
     
     public Location getLocation() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getLocation();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getLocation();
         }
         if (dpApi != null) {
             return dpApi.getLocation();
@@ -334,8 +334,8 @@ public class Node {
     }
 
     public long getLastSeen() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getLastSeen();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getLastSeen();
         }
         if (dpApi != null) {
             return dpApi.getLastSeen();
@@ -357,21 +357,21 @@ public class Node {
     }
 
     public Airtime getAirtime2g() {
-        if (dpSysinfo != null) {
-            if (IGNORE_AIRTIME.contains(dpSysinfo.getFirmwareTarget())) {
+        if (dpSysInfo != null) {
+            if (IGNORE_AIRTIME.contains(dpSysInfo.getFirmwareTarget())) {
                 return Airtime.EMPTY;
             }
-            return dpSysinfo.getAirtime2g();
+            return dpSysInfo.getAirtime2g();
         }
         return Airtime.EMPTY;
     }
 
     public Airtime getAirtime5g() {
-        if (dpSysinfo != null) {
-            if (IGNORE_AIRTIME.contains(dpSysinfo.getFirmwareTarget())) {
+        if (dpSysInfo != null) {
+            if (IGNORE_AIRTIME.contains(dpSysInfo.getFirmwareTarget())) {
                 return Airtime.EMPTY;
             }
-            return dpSysinfo.getAirtime5g();
+            return dpSysInfo.getAirtime5g();
         }
         return Airtime.EMPTY;
     }
@@ -385,8 +385,8 @@ public class Node {
     }
 
     public TrafficInfo getTraffic() {
-        if (dpSysinfo != null) {
-            return dpSysinfo.getTraffic();
+        if (dpSysInfo != null) {
+            return dpSysInfo.getTraffic();
         }
         return new TrafficInfo();
     }

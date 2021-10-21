@@ -46,19 +46,19 @@ public class DataParserSysinfoV10 extends DataParserSysinfo {
 
     @Override
     public Set<Link> getLinkSet() {
-        Set<Link> linkmap = super.getLinkSet();
+        Set<Link> linkMap = super.getLinkSet();
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         bmxd.get("links").getAsJsonArray().forEach(link -> {
             JsonObject l = link.getAsJsonObject();
             Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
             byte tq = Byte.parseByte(l.get("tq").getAsString());
-            for (Link lnk : linkmap) {
+            for (Link lnk : linkMap) {
                 if (lnk.getTarget().equals(target)) {
                     lnk.setSourceTq(tq);
                     return;
                 }
             }
         });
-        return linkmap;
+        return linkMap;
     }
 }

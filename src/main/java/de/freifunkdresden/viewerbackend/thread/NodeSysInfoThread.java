@@ -41,6 +41,8 @@ import de.freifunkdresden.viewerbackend.exception.MalformedSysinfoException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,14 +55,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
-public class NodeSysinfoThread implements Runnable {
+public class NodeSysInfoThread implements Runnable {
 
     private static final int RETRY_COUNT = 3;
-    private static final Logger LOGGER = LogManager.getLogger(NodeSysinfoThread.class);
+    private static final Logger LOGGER = LogManager.getLogger(NodeSysInfoThread.class);
 
     private final Node node;
 
-    public NodeSysinfoThread(Node node) {
+    public NodeSysInfoThread(Node node) {
         this.node = node;
     }
 
@@ -70,7 +72,7 @@ public class NodeSysinfoThread implements Runnable {
             try {
                 checkNode(node);
                 return;
-            } catch (NoRouteToHostException ex) {
+            } catch (NoRouteToHostException ignored) {
             } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException |
                     ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
                 if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
@@ -82,7 +84,7 @@ public class NodeSysinfoThread implements Runnable {
         }
     }
 
-    private static void checkNode(Node n) throws IOException, EmptyJsonException, MalformedSysinfoException {
+    private static void checkNode(@NotNull Node n) throws IOException, EmptyJsonException, MalformedSysinfoException {
         HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAddress() + "/sysinfo-json.cgi").openConnection();
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
@@ -98,21 +100,23 @@ public class NodeSysinfoThread implements Runnable {
             if (begin != -1) {
                 json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*<\\/html>)", "{}");
             }
-            n.setDpSysinfo(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
+            n.setDpSysInfo(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
         } else {
             throw new HTTPStatusCodeException(con.getResponseCode());
         }
     }
 
-    private static DataParserSysinfo getDataParser(JsonObject sysinfo) throws EmptyJsonException, MalformedSysinfoException {
-        if (sysinfo.size() == 0) {
+    @NotNull
+    @Contract("_ -> new")
+    private static DataParserSysinfo getDataParser(@NotNull JsonObject sysInfo) throws EmptyJsonException, MalformedSysinfoException {
+        if (sysInfo.size() == 0) {
             throw new EmptyJsonException();
         }
-        if (!sysinfo.has("version") || !sysinfo.has("data")) {
+        if (!sysInfo.has("version") || !sysInfo.has("data")) {
             throw new MalformedSysinfoException();
         }
-        int version = sysinfo.get("version").getAsInt();
-        JsonObject data = sysinfo.get("data").getAsJsonObject();
+        int version = sysInfo.get("version").getAsInt();
+        JsonObject data = sysInfo.get("data").getAsJsonObject();
         if (version >= 16) {
             return new DataParserSysinfoV16(data);
         } else if (version >= 15) {
