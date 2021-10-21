@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Node;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -55,7 +56,7 @@ public class JsonFileGen {
     private final Map<Node, Integer> nodeIds = new HashMap<>();
     private final Path path;
 
-    public JsonFileGen(Path path, Collection<Node> nodes, Collection<Map<Integer, Link>> links) {
+    public JsonFileGen(@NotNull Path path, @NotNull Collection<Node> nodes, @NotNull Collection<Map<Integer, Link>> links) {
         this.path = path;
         dateHop.setTimeZone(TimeZone.getTimeZone("UTC"));
         Iterator<Node> it = nodes.stream().filter(Node::isDisplayed).iterator();

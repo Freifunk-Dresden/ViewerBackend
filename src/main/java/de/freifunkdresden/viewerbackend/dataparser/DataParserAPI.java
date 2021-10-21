@@ -26,13 +26,14 @@ package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Location;
+import org.jetbrains.annotations.NotNull;
 
 public class DataParserAPI {
 
     private final JsonObject node;
     private final JsonObject status;
 
-    public DataParserAPI(JsonObject node) {
+    public DataParserAPI(@NotNull JsonObject node) {
         this.node = node;
         this.status = node.get("status").getAsJsonObject();
     }

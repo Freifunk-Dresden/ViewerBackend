@@ -30,6 +30,7 @@ import de.freifunkdresden.viewerbackend.NodeType;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,7 +51,7 @@ public class DataParserDB {
     private String name;
     private NodeType role = NodeType.STANDARD;
 
-    public void parse(ResultSet rs) {
+    public void parse(@NotNull ResultSet rs) {
         try {
             boolean au = rs.getInt("autoupdate") == 1;
             autoUpdate = !rs.wasNull() && au;
