@@ -32,6 +32,7 @@ import de.freifunkdresden.viewerbackend.Node;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataParserSysinfoV11 extends DataParserSysinfoV10 {
 
@@ -41,7 +42,7 @@ public class DataParserSysinfoV11 extends DataParserSysinfoV10 {
 
     @Override
     public Set<Link> getLinkSet() {
-        HashSet<Link> linkmap = new HashSet<>();
+        HashSet<Link> linkMap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         bmxd.get("links").getAsJsonArray().forEach(link -> {
@@ -49,8 +50,34 @@ public class DataParserSysinfoV11 extends DataParserSysinfoV10 {
             Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
             byte tq = Byte.parseByte(l.get("tq").getAsString());
             LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
-            linkmap.add(new Link(linkType, tq, target, node));
+            linkMap.add(new Link(linkType, tq, target, node));
         });
-        return linkmap;
+        return linkMap;
+    }
+
+    @Override
+    public int getLinkCountFastD() {
+        AtomicInteger result = new AtomicInteger(0);
+        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
+        bmxd.get("links").getAsJsonArray().forEach(link -> {
+            JsonObject l = link.getAsJsonObject();
+            if (l.get("interface").getAsString().startsWith("tbb_fastd")) {
+                result.incrementAndGet();
+            }
+        });
+        return result.get();
+    }
+
+    @Override
+    public int getLinkCountWireGuard() {
+        AtomicInteger result = new AtomicInteger(0);
+        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
+        bmxd.get("links").getAsJsonArray().forEach(link -> {
+            JsonObject l = link.getAsJsonObject();
+            if (l.get("interface").getAsString().startsWith("tbb_wg")) {
+                result.incrementAndGet();
+            }
+        });
+        return result.get();
     }
 }

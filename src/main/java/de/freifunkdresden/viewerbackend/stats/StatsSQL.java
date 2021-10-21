@@ -34,12 +34,9 @@ import org.influxdb.dto.Point;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class StatsSQL {
@@ -49,7 +46,8 @@ public class StatsSQL {
 
     private static final List<Point> general = new ArrayList<>();
     private static final List<Point> vpnUsage = new ArrayList<>();
-    private static final Set<Node> nodes = Collections.synchronizedSet(new LinkedHashSet<>());
+    private static final List<Point> vpnUsageFastD = new ArrayList<>();
+    private static final List<Point> vpnUsageWireGuard = new ArrayList<>();
     private static final Map<String, Integer> versions = new LinkedHashMap<>();
     private static final Map<String, Integer> communities = new LinkedHashMap<>();
     private static final Map<String, Integer> model = new LinkedHashMap<>();
@@ -91,7 +89,7 @@ public class StatsSQL {
         synchronized (manufacturer) {
             manufacturer.put(manu, manufacturer.getOrDefault(manu, 0) + 1);
         }
-        String modWithoutV = mod.replaceAll("(?:\\s\\(IL\\))*(?:N\\/ND)*(?:N)*(?:ND)*\\s*v\\d+(?:\\.\\d)*$", "");
+        String modWithoutV = mod.replaceAll("(?:\\s\\(IL\\))*(?:N\\/ND)*(?:N)*(?:ND)*\\s*v\\d+(?:\\.\\d)*$", "").replace("TP-LINK", "TP-Link");
         synchronized (modelWithoutVersion) {
             modelWithoutVersion.put(modWithoutV, modelWithoutVersion.getOrDefault(modWithoutV, 0) + 1);
         }
@@ -100,6 +98,24 @@ public class StatsSQL {
     public static void addVpnUsage(@NotNull VPN vpn, int usage) {
         synchronized (vpnUsage) {
             vpnUsage.add(Point.measurement("vpn_usage")
+                    .tag("vpn", vpn.getVpnId())
+                    .addField("usage", usage)
+                    .build());
+        }
+    }
+
+    public static void addVpnUsageFastD(@NotNull VPN vpn, int usage) {
+        synchronized (vpnUsageFastD) {
+            vpnUsageFastD.add(Point.measurement("vpn_usage_fastd")
+                    .tag("vpn", vpn.getVpnId())
+                    .addField("usage", usage)
+                    .build());
+        }
+    }
+
+    public static void addVpnUsageWireGuard(@NotNull VPN vpn, int usage) {
+        synchronized (vpnUsageWireGuard) {
+            vpnUsageWireGuard.add(Point.measurement("vpn_usage_wg")
                     .tag("vpn", vpn.getVpnId())
                     .addField("usage", usage)
                     .build());
@@ -127,71 +143,75 @@ public class StatsSQL {
     public static void processStats() {
         DataGen.getInflux().write(general);
         DataGen.getInflux().write(vpnUsage);
+        DataGen.getInflux().write(vpnUsageFastD);
+        DataGen.getInflux().write(vpnUsageWireGuard);
         List<Point> nodeClients = new ArrayList<>();
         List<Point> nodeLoad = new ArrayList<>();
         List<Point> nodeMemory = new ArrayList<>();
         List<Point> nodeAirtime = new ArrayList<>();
         List<Point> nodeUptime = new ArrayList<>();
         List<Point> nodeTraffic = new ArrayList<>();
-        nodes.forEach(e -> {
-            long currentTimeMillis = System.currentTimeMillis();
-            if (e.canHasClients()) {
-                nodeClients.add(Point.measurement("node_clients")
-                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                        .tag("node", String.valueOf(e.getId()))
-                        .addField("value", e.getClients())
-                        .build());
-            }
-            nodeLoad.add(Point.measurement("node_load")
-                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                    .tag("node", String.valueOf(e.getId()))
-                    .addField("value", e.getLoadAvg())
-                    .build());
-            nodeMemory.add(Point.measurement("node_memory")
-                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                    .tag("node", String.valueOf(e.getId()))
-                    .addField("value", e.getMemoryUsage())
-                    .build());
-            nodeUptime.add(Point.measurement("node_uptime")
-                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                    .tag("node", String.valueOf(e.getId()))
-                    .addField("value", e.getUptime())
-                    .build());
-            if (!e.getAirtime2g().equals(Airtime.EMPTY)) {
-                nodeAirtime.add(Point.measurement("node_airtime_2g")
-                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                        .tag("node", String.valueOf(e.getId()))
-                        .addField("active", e.getAirtime2g().getActive())
-                        .addField("busy", e.getAirtime2g().getBusy())
-                        .addField("receive", e.getAirtime2g().getReceive())
-                        .addField("transmit", e.getAirtime2g().getTransmit())
-                        .build());
-            }
-            if (!e.getAirtime5g().equals(Airtime.EMPTY)) {
-                nodeAirtime.add(Point.measurement("node_airtime_5g")
-                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                        .tag("node", String.valueOf(e.getId()))
-                        .addField("active", e.getAirtime5g().getActive())
-                        .addField("busy", e.getAirtime5g().getBusy())
-                        .addField("receive", e.getAirtime5g().getReceive())
-                        .addField("transmit", e.getAirtime5g().getTransmit())
-                        .build());
-            }
-            if (!e.getTraffic().isEmpty()) {
-                TrafficInfo t = e.getTraffic();
-                for (TrafficInfo.Interface i : TrafficInfo.Interface.values()) {
-                    if (t.hasInterface(i)) {
-                        nodeTraffic.add(Point.measurement("node_traffic")
+        DataGen.getDataHolder().getNodes().values().stream()
+                .filter(Node::isOnline)
+                .forEach(e -> {
+                    long currentTimeMillis = System.currentTimeMillis();
+                    if (e.canHasClients()) {
+                        nodeClients.add(Point.measurement("node_clients")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .tag("interface", i.name().toLowerCase())
-                                .addField("in", t.getInput(i))
-                                .addField("out", t.getOutput(i))
+                                .addField("value", e.getClients())
                                 .build());
                     }
-                }
-            }
-        });
+                    nodeLoad.add(Point.measurement("node_load")
+                            .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                            .tag("node", String.valueOf(e.getId()))
+                            .addField("value", e.getLoadAvg())
+                            .build());
+                    nodeMemory.add(Point.measurement("node_memory")
+                            .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                            .tag("node", String.valueOf(e.getId()))
+                            .addField("value", e.getMemoryUsage())
+                            .build());
+                    nodeUptime.add(Point.measurement("node_uptime")
+                            .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                            .tag("node", String.valueOf(e.getId()))
+                            .addField("value", e.getUptime())
+                            .build());
+                    if (!e.getAirtime2g().equals(Airtime.EMPTY)) {
+                        nodeAirtime.add(Point.measurement("node_airtime_2g")
+                                .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                                .tag("node", String.valueOf(e.getId()))
+                                .addField("active", e.getAirtime2g().getActive())
+                                .addField("busy", e.getAirtime2g().getBusy())
+                                .addField("receive", e.getAirtime2g().getReceive())
+                                .addField("transmit", e.getAirtime2g().getTransmit())
+                                .build());
+                    }
+                    if (!e.getAirtime5g().equals(Airtime.EMPTY)) {
+                        nodeAirtime.add(Point.measurement("node_airtime_5g")
+                                .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                                .tag("node", String.valueOf(e.getId()))
+                                .addField("active", e.getAirtime5g().getActive())
+                                .addField("busy", e.getAirtime5g().getBusy())
+                                .addField("receive", e.getAirtime5g().getReceive())
+                                .addField("transmit", e.getAirtime5g().getTransmit())
+                                .build());
+                    }
+                    if (!e.getTraffic().isEmpty()) {
+                        TrafficInfo t = e.getTraffic();
+                        for (TrafficInfo.Interface i : TrafficInfo.Interface.values()) {
+                            if (t.hasInterface(i)) {
+                                nodeTraffic.add(Point.measurement("node_traffic")
+                                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                                        .tag("node", String.valueOf(e.getId()))
+                                        .tag("interface", i.name().toLowerCase())
+                                        .addField("in", t.getInput(i))
+                                        .addField("out", t.getOutput(i))
+                                        .build());
+                            }
+                        }
+                    }
+                });
         DataGen.getInflux().write(nodeClients);
         DataGen.getInflux().write(nodeLoad);
         DataGen.getInflux().write(nodeMemory);

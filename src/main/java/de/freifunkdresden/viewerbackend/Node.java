@@ -178,6 +178,20 @@ public class Node {
         return Collections.emptySet();
     }
 
+    public int getFastDCount() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getLinkCountFastD();
+        }
+        return 0;
+    }
+
+    public int getWireGuardCount() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getLinkCountWireGuard();
+        }
+        return 0;
+    }
+
     public short getClients() {
         if (dpSysInfo != null) {
             return dpSysInfo.getClients();
@@ -437,12 +451,11 @@ public class Node {
             StatsSQL.addGatewayUsage(getGateway());
             StatsSQL.addGatewayUsageClients(getGateway(), getClients());
         }
-        if (isOnline()) {
-            StatsSQL.addToStats(this);
-        }
         VPN vpn = VPN.getVPN(id);
         if (vpn != null) {
             StatsSQL.addVpnUsage(vpn, getLinks().size());
+            StatsSQL.addVpnUsageFastD(vpn, getFastDCount());
+            StatsSQL.addVpnUsageWireGuard(vpn, getWireGuardCount());
         }
     }
 
