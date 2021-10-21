@@ -42,6 +42,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataParserSysinfo {
 
@@ -152,7 +153,7 @@ public class DataParserSysinfo {
     }
 
     public Set<Link> getLinkSet() {
-        HashSet<Link> linkmap = new HashSet<>();
+        HashSet<Link> linkMap = new HashSet<>();
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
@@ -161,9 +162,35 @@ public class DataParserSysinfo {
             int targetId = Node.convertIpToId(l.get("target").getAsString());
             LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
             Node target = DataGen.getDataHolder().getNode(targetId);
-            linkmap.add(new Link(linkType, target, node));
+            linkMap.add(new Link(linkType, target, node));
         });
-        return linkmap;
+        return linkMap;
+    }
+
+    public int getLinkCountFastD() {
+        AtomicInteger result = new AtomicInteger(0);
+        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
+        JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
+        rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach(link -> {
+            JsonObject l = link.getAsJsonObject();
+            if (l.get("interface").getAsString().startsWith("tbb_fastd")) {
+                result.incrementAndGet();
+            }
+        });
+        return result.get();
+    }
+
+    public int getLinkCountWireGuard() {
+        AtomicInteger result = new AtomicInteger(0);
+        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
+        JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
+        rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach(link -> {
+            JsonObject l = link.getAsJsonObject();
+            if (l.get("interface").getAsString().startsWith("tbb_wg")) {
+                result.incrementAndGet();
+            }
+        });
+        return result.get();
     }
 
     public String getName() {
