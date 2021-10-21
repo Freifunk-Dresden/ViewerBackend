@@ -67,7 +67,7 @@ public class FreifunkApi {
                 JsonArray api = JsonParser.parseReader(reader).getAsJsonArray();
                 Files.writeString(c, gson.toJson(api), StandardCharsets.UTF_8);
             }
-        } catch (JsonSyntaxException | IOException e) {
+        } catch (JsonSyntaxException | IOException | IllegalStateException e) {
             LOGGER.log(Level.WARN, "API download failed", e);
         }
     }

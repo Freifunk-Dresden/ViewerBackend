@@ -205,7 +205,7 @@ public class JsonNodeGen {
             double busy = b / a;
             double rx = r / a;
             double tx = t / a;
-            if (Double.isNaN(busy) || Double.isNaN(rx) || Double.isNaN(tx)) {
+            if (!Double.isFinite(busy) || !Double.isFinite(rx) || !Double.isFinite(tx)) {
                 return null;
             }
             JsonObject ja = new JsonObject();
@@ -224,7 +224,7 @@ public class JsonNodeGen {
             double b = diff.getBusy();
             double a = diff.getActive();
             double airtime = b / a;
-            return Double.isNaN(airtime) ? null : airtime;
+            return Double.isFinite(airtime) ? airtime : null;
         }
         return null;
     }
