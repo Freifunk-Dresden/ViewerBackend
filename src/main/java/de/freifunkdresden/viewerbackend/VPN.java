@@ -25,6 +25,7 @@
 package de.freifunkdresden.viewerbackend;
 
 public enum VPN {
+    VPN0("0", 0),
     VPN1("1", 255),
     VPN2("2", 111),
     VPN3("3", 2),
@@ -33,6 +34,7 @@ public enum VPN {
     VPN6("6", 51017),
     VPN6_2("6_2", 51001),
     VPN7("7", 4),
+    VPN8("8", 51015),
     VPN10("10", 120),
     VPN11("11", 200),
     VPN12("12", 256),
