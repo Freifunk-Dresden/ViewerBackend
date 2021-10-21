@@ -103,6 +103,7 @@ public class TrafficInfo {
         TBB_WG,
         MESH_LAN,
         MESH_WAN,
+        MESH_VLAN,
         MESH2G,
         MESH5G,
     }
