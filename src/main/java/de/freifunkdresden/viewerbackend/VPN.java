@@ -24,6 +24,9 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
+
 public enum VPN {
     VPN0("0", 0),
     VPN1("1", 255),
@@ -42,8 +45,8 @@ public enum VPN {
     VPN14("14", 14),
     VPN16("16", 201),
     VPN17("17", 51007),
-    VPNZH("ZH", 51064),
-    VPNOFF("OFF", 51051),
+    VPN_ZH("ZH", 51064),
+    VPN_OFF("OFF", 51051),
     NS1("NS1", 3),
     NS2("NS2", 15);
 
@@ -59,10 +62,8 @@ public enum VPN {
         return vpnId;
     }
 
-    public int getNodeId() {
-        return nodeId;
-    }
-
+    @Nullable
+    @Contract(pure = true)
     public static VPN getVPN(int nodeId) {
         for (VPN vpn : VPN.values()) {
             if (vpn.nodeId == nodeId) {

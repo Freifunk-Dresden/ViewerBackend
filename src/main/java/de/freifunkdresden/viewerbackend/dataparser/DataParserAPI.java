@@ -38,10 +38,6 @@ public class DataParserAPI {
         this.status = node.get("status").getAsJsonObject();
     }
 
-    public short getClients() {
-        return status.get("clients").getAsShort();
-    }
-
     public Location getLocation() {
         try {
             double lat = node.get("position").getAsJsonObject().get("lat").getAsDouble();

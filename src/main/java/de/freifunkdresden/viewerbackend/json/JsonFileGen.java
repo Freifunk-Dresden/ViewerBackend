@@ -88,7 +88,7 @@ public class JsonFileGen {
                     jsonLink.addProperty("target", link.getTarget().getFakeId());
                     jsonLink.addProperty("source_tq", Link.convertToMeshV(link.getSourceTq()));
                     jsonLink.addProperty("target_tq", Link.convertToMeshV(link.getTargetTq()));
-                    jsonLink.addProperty("type", link.getType().getMeshviewer());
+                    jsonLink.addProperty("type", link.getType().getMeshViewer());
                     jsonLink.addProperty("source_addr", link.getSource().getFakeMac());
                     jsonLink.addProperty("target_addr", link.getTarget().getFakeMac());
                     meshViewerLinks.add(jsonLink);
@@ -99,14 +99,14 @@ public class JsonFileGen {
                     jsonLink.addProperty("source", source);
                     jsonLink.addProperty("target", target);
                     jsonLink.addProperty("tq", Link.convertToHop(link.getSourceTq()));
-                    jsonLink.addProperty("type", link.getType().getHopglass());
+                    jsonLink.addProperty("type", link.getType().getHopGlass());
                     graphLinks.add(jsonLink);
                     if (link.getTargetTq() != -1) {
                         jsonLink = new JsonObject();
                         jsonLink.addProperty("source", target);
                         jsonLink.addProperty("target", source);
                         jsonLink.addProperty("tq", Link.convertToHop(link.getTargetTq()));
-                        jsonLink.addProperty("type", link.getType().getHopglass());
+                        jsonLink.addProperty("type", link.getType().getHopGlass());
                         graphLinks.add(jsonLink);
                     }
                 }));

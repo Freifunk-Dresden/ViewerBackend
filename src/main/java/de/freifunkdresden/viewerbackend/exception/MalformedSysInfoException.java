@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2021 NMerkelt.
+ * Copyright 2020 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,31 +22,15 @@
  * THE SOFTWARE.
  */
 
-package de.freifunkdresden.viewerbackend.dataparser;
+package de.freifunkdresden.viewerbackend.exception;
 
-import com.google.gson.JsonObject;
+public class MalformedSysInfoException extends Exception {
 
-public class DataParserSysinfoV16 extends DataParserSysinfoV15 {
-
-    public DataParserSysinfoV16(JsonObject data) {
-        super(data);
-    }
+    private static final long serialVersionUID = 1L;
 
     @Override
-    public short getClients() {
-        short client = 0;
-        JsonObject stats = data.get("statistic").getAsJsonObject();
-        if (stats != null) {
-            JsonObject c2g = stats.get("client2g").getAsJsonObject();
-            if (c2g != null) {
-                client += c2g.get("5min").getAsShort();
-            }
-            JsonObject c5g = stats.get("client5g").getAsJsonObject();
-            if (c5g != null) {
-                client += c5g.get("5min").getAsShort();
-            }
-        }
-        return client;
+    public String getMessage() {
+        return "Malformed SysInfo";
     }
 
 }

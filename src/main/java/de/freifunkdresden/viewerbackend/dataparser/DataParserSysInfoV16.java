@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Niklas Merkelt.
+ * Copyright 2021 NMerkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,41 +24,30 @@
 
 package de.freifunkdresden.viewerbackend.dataparser;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.freifunkdresden.viewerbackend.DataGen;
-import de.freifunkdresden.viewerbackend.Link;
-import de.freifunkdresden.viewerbackend.Node;
 
-import java.util.Set;
+public class DataParserSysInfoV16 extends DataParserSysInfoV15 {
 
-public class DataParserSysinfoV10 extends DataParserSysinfo {
-
-    public DataParserSysinfoV10(JsonObject data) {
+    public DataParserSysInfoV16(JsonObject data) {
         super(data);
     }
 
     @Override
-    public float getUptime() {
-        String jsonUptime = data.get("system").getAsJsonObject().get("uptime").getAsString();
-        String[] uptime = jsonUptime.split("\\s+");
-        return Float.parseFloat(uptime[0]);
+    public short getClients() {
+        short client = 0;
+        JsonElement stats = data.get("statistic");
+        if (stats != null) {
+            JsonElement c2g = stats.getAsJsonObject().get("client2g");
+            if (c2g != null) {
+                client += c2g.getAsJsonObject().get("5min").getAsShort();
+            }
+            JsonElement c5g = stats.getAsJsonObject().get("client5g");
+            if (c5g != null) {
+                client += c5g.getAsJsonObject().get("5min").getAsShort();
+            }
+        }
+        return client;
     }
 
-    @Override
-    public Set<Link> getLinkSet() {
-        Set<Link> linkMap = super.getLinkSet();
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach(link -> {
-            JsonObject l = link.getAsJsonObject();
-            Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
-            byte tq = Byte.parseByte(l.get("tq").getAsString());
-            for (Link lnk : linkMap) {
-                if (lnk.getTarget().equals(target)) {
-                    lnk.setSourceTq(tq);
-                    return;
-                }
-            }
-        });
-        return linkMap;
-    }
 }

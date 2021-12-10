@@ -28,6 +28,8 @@ import de.freifunkdresden.viewerbackend.exception.DatabaseConnectionException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -72,7 +74,7 @@ public class MySQL {
         }
     }
 
-    public void queryUpdate(String query, Object... args) {
+    public void queryUpdate(String query, @NotNull Object... args) {
         try (PreparedStatement st = conn.prepareStatement(query)) {
             int i = 1;
             for (Object o : args) {
@@ -94,7 +96,7 @@ public class MySQL {
         }
     }
 
-    public ResultSet querySelect(String query, Object... args) {
+    public ResultSet querySelect(String query, @NotNull Object... args) {
         try (PreparedStatement st = conn.prepareStatement(query)) {
             int i = 1;
             for (Object o : args) {
@@ -108,11 +110,12 @@ public class MySQL {
         }
     }
 
-    private ResultSet querySelect(PreparedStatement st) {
+    @Nullable
+    private ResultSet querySelect(@NotNull PreparedStatement st) {
         try {
             return st.executeQuery();
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, String.format("Failed to send SELECT query: %s", st.toString()), e);
+            LOGGER.log(Level.ERROR, String.format("Failed to send SELECT query: %s", st), e);
             return null;
         }
     }
@@ -122,7 +125,7 @@ public class MySQL {
             if (this.conn != null) {
                 this.conn.close();
             }
-        } catch (SQLException e) {
+        } catch (SQLException ignored) {
         } finally {
             this.conn = null;
         }
@@ -136,7 +139,7 @@ public class MySQL {
             stmt = statement;
         }
 
-        public PreparedUpdate add(Object... args) {
+        public PreparedUpdate add(@NotNull Object... args) {
             try {
                 int i = 1;
                 for (Object o : args) {
@@ -154,7 +157,7 @@ public class MySQL {
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException e) {
+                } catch (SQLException ignored) {
                 }
             }
         }

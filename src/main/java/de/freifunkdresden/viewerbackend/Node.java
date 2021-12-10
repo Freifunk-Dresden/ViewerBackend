@@ -26,7 +26,7 @@ package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfo;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
@@ -43,7 +43,7 @@ public class Node {
     private final int id;
     private DataParserAPI dpApi;
     private DataParserDB dpDatabase;
-    private DataParserSysinfo dpSysInfo;
+    private DataParserSysInfo dpSysInfo;
 
     private Airtime airtime2GOld;
     private Airtime airtime5GOld;
@@ -66,7 +66,7 @@ public class Node {
         airtime5GOld = AirtimeSQL.getAirtime5G(this);
     }
 
-    public void setDpSysInfo(DataParserSysinfo dp) {
+    public void setDpSysInfo(DataParserSysInfo dp) {
         this.dpSysInfo = dp;
     }
 

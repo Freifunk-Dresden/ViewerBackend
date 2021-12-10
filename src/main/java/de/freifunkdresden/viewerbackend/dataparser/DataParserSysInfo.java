@@ -44,23 +44,26 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DataParserSysinfo {
+public class DataParserSysInfo {
 
-    private static final Logger LOGGER = LogManager.getLogger(DataParserSysinfo.class);
+    private static final Logger LOGGER = LogManager.getLogger(DataParserSysInfo.class);
 
     final JsonObject data;
     private final JsonObject stats;
     private final long lastSeen = System.currentTimeMillis();
-    private final Community community;
+    protected Community community;
 
-    public DataParserSysinfo(@NotNull JsonObject data) {
+    public DataParserSysInfo(@NotNull JsonObject data) {
         this.data = data;
         if (data.has("statistic")) {
             stats = data.get("statistic").getAsJsonObject();
         } else {
             stats = data.get("statistics").getAsJsonObject();
         }
+        checkCommunity();
+    }
 
+    protected void checkCommunity() {
         String c = data.get("common").getAsJsonObject().get("city").getAsString();
         community = Community.getCommunity(c);
         if (community == Community.DEFAULT) {
@@ -94,10 +97,10 @@ public class DataParserSysinfo {
 
     public String getFirmwareBase() {
         JsonObject firmware = data.get("firmware").getAsJsonObject();
-        String distribId = firmware.get("DISTRIB_ID").getAsString();
-        String distribRelease = firmware.get("DISTRIB_RELEASE").getAsString();
-        String distribRev = firmware.get("DISTRIB_REVISION").getAsString();
-        return distribId + " " + distribRelease + " " + distribRev;
+        String distributionId = firmware.get("DISTRIB_ID").getAsString();
+        String distributionRelease = firmware.get("DISTRIB_RELEASE").getAsString();
+        String distributionRevision = firmware.get("DISTRIB_REVISION").getAsString();
+        return distributionId + " " + distributionRelease + " " + distributionRevision;
     }
 
     public String getFirmwareTarget() {

@@ -28,16 +28,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import de.freifunkdresden.viewerbackend.Node;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfo;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV10;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV11;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV13;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV14;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV15;
-import de.freifunkdresden.viewerbackend.dataparser.DataParserSysinfoV16;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfo;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV10;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV11;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV13;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV14;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV15;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV16;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV17;
 import de.freifunkdresden.viewerbackend.exception.EmptyJsonException;
 import de.freifunkdresden.viewerbackend.exception.HTTPStatusCodeException;
-import de.freifunkdresden.viewerbackend.exception.MalformedSysinfoException;
+import de.freifunkdresden.viewerbackend.exception.MalformedSysInfoException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,7 +74,7 @@ public class NodeSysInfoThread implements Runnable {
                 checkNode(node);
                 return;
             } catch (NoRouteToHostException ignored) {
-            } catch (JsonSyntaxException | EmptyJsonException | MalformedSysinfoException |
+            } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
                     ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
                 if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
                     LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
@@ -84,7 +85,7 @@ public class NodeSysInfoThread implements Runnable {
         }
     }
 
-    private static void checkNode(@NotNull Node n) throws IOException, EmptyJsonException, MalformedSysinfoException {
+    private static void checkNode(@NotNull Node n) throws IOException, EmptyJsonException, MalformedSysInfoException {
         HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAddress() + "/sysinfo-json.cgi").openConnection();
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
@@ -98,7 +99,7 @@ public class NodeSysInfoThread implements Runnable {
             //Fix HTML injected in JSON
             int begin = json.indexOf("<!DOCTYPE html>");
             if (begin != -1) {
-                json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*<\\/html>)", "{}");
+                json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*</html>)", "{}");
             }
             n.setDpSysInfo(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
         } else {
@@ -108,29 +109,31 @@ public class NodeSysInfoThread implements Runnable {
 
     @NotNull
     @Contract("_ -> new")
-    private static DataParserSysinfo getDataParser(@NotNull JsonObject sysInfo) throws EmptyJsonException, MalformedSysinfoException {
+    private static DataParserSysInfo getDataParser(@NotNull JsonObject sysInfo) throws EmptyJsonException, MalformedSysInfoException {
         if (sysInfo.size() == 0) {
             throw new EmptyJsonException();
         }
         if (!sysInfo.has("version") || !sysInfo.has("data")) {
-            throw new MalformedSysinfoException();
+            throw new MalformedSysInfoException();
         }
         int version = sysInfo.get("version").getAsInt();
         JsonObject data = sysInfo.get("data").getAsJsonObject();
-        if (version >= 16) {
-            return new DataParserSysinfoV16(data);
+        if (version >= 17) {
+            return new DataParserSysInfoV17(data);
+        } else if (version >= 16) {
+            return new DataParserSysInfoV16(data);
         } else if (version >= 15) {
-            return new DataParserSysinfoV15(data);
+            return new DataParserSysInfoV15(data);
         } else if (version >= 14) {
-            return new DataParserSysinfoV14(data);
+            return new DataParserSysInfoV14(data);
         } else if (version >= 13) {
-            return new DataParserSysinfoV13(data);
+            return new DataParserSysInfoV13(data);
         } else if (version >= 11) {
-            return new DataParserSysinfoV11(data);
+            return new DataParserSysInfoV11(data);
         } else if (version >= 10) {
-            return new DataParserSysinfoV10(data);
+            return new DataParserSysInfoV10(data);
         } else {
-            return new DataParserSysinfo(data);
+            return new DataParserSysInfo(data);
         }
     }
 }

@@ -24,29 +24,33 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 public enum LinkType {
     WIRELESS("wireless", "wifi"),
     TUNNEL("tunnel", "vpn"),
     OTHER("other", "other");
 
-    private final String hopglass;
-    private final String meshviewer;
+    private final String hopGlass;
+    private final String meshViewer;
 
-    LinkType(String hopglass, String meshviewer) {
-        this.hopglass = hopglass;
-        this.meshviewer = meshviewer;
+    LinkType(String hopGlass, String meshViewer) {
+        this.hopGlass = hopGlass;
+        this.meshViewer = meshViewer;
     }
 
-    public String getHopglass() {
-        return hopglass;
+    public String getHopGlass() {
+        return hopGlass;
     }
 
-    public String getMeshviewer() {
-        return meshviewer;
+    public String getMeshViewer() {
+        return meshViewer;
     }
 
-    public static LinkType getTypeByInterface(String iface) {
-        switch (iface.toLowerCase()) {
+    @Contract(pure = true)
+    public static LinkType getTypeByInterface(@NotNull String interfaceName) {
+        switch (interfaceName.toLowerCase()) {
             case "wlan0":
             case "mesh-80211s":
             case "mesh-adhoc":
@@ -66,7 +70,8 @@ public enum LinkType {
         }
     }
 
-    public static LinkType getTypeByType(String type) {
+    @Contract(pure = true)
+    public static LinkType getTypeByType(@NotNull String type) {
         switch (type.toLowerCase()) {
             case "lan":
                 return LinkType.OTHER;

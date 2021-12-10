@@ -22,15 +22,35 @@
  * THE SOFTWARE.
  */
 
-package de.freifunkdresden.viewerbackend.exception;
+package de.freifunkdresden.viewerbackend.dataparser;
 
-public class MalformedSysinfoException extends Exception {
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-    private static final long serialVersionUID = 1L;
+public class DataParserSysInfoV15 extends DataParserSysInfoV14 {
 
-    @Override
-    public String getMessage() {
-        return "Malformed sysinfo";
+    public DataParserSysInfoV15(JsonObject data) {
+        super(data);
     }
 
+    @Override
+    public short getClients() {
+        JsonElement clients = data.get("statistic").getAsJsonObject().get("clients");
+        if (clients != null && clients.isJsonArray()) {
+            return clients.getAsJsonArray().get(1).getAsShort();
+        }
+        return super.getClients();
+    }
+
+    @Override
+    public TrafficInfo getTraffic() {
+        TrafficInfo ti = new TrafficInfo();
+        ti.readValues(data.get("statistic").getAsJsonObject());
+        return ti;
+    }
+
+    @Override
+    public String getFirmwareBase() {
+        return data.get("firmware").getAsJsonObject().get("DISTRIB_DESCRIPTION").getAsString();
+    }
 }

@@ -79,7 +79,7 @@ public class StatsSQL {
         }
     }
 
-    public static void addModel(@NotNull String mod, @NotNull String manu) {
+    public static void addModel(@NotNull String mod, @NotNull String man) {
         if (mod.isBlank()) {
             return;
         }
@@ -87,9 +87,9 @@ public class StatsSQL {
             model.put(mod, model.getOrDefault(mod, 0) + 1);
         }
         synchronized (manufacturer) {
-            manufacturer.put(manu, manufacturer.getOrDefault(manu, 0) + 1);
+            manufacturer.put(man, manufacturer.getOrDefault(man, 0) + 1);
         }
-        String modWithoutV = mod.replaceAll("(?:\\s\\(IL\\))*(?:N\\/ND)*(?:N)*(?:ND)*\\s*v\\d+(?:\\.\\d)*$", "").replace("TP-LINK", "TP-Link");
+        String modWithoutV = mod.replaceAll("(?:\\s\\(IL\\))*(?:N/ND)*(?:N)*(?:ND)*\\s*v\\d+(?:\\.\\d)*$", "").replace("TP-LINK", "TP-Link");
         synchronized (modelWithoutVersion) {
             modelWithoutVersion.put(modWithoutV, modelWithoutVersion.getOrDefault(modWithoutV, 0) + 1);
         }

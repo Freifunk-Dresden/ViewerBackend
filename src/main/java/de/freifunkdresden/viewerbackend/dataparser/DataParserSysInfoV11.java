@@ -34,9 +34,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DataParserSysinfoV11 extends DataParserSysinfoV10 {
+public class DataParserSysInfoV11 extends DataParserSysInfoV10 {
 
-    public DataParserSysinfoV11(JsonObject data) {
+    public DataParserSysInfoV11(JsonObject data) {
         super(data);
     }
 
