@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2020 Niklas Merkelt.
+ * Copyright 2021 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,44 +24,20 @@
 
 package de.freifunkdresden.viewerbackend.dataparser;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 public class TrafficInfo {
 
-    private final Map<Interface, Long> trafficIn = new EnumMap<>(Interface.class);
-    private final Map<Interface, Long> trafficOut = new EnumMap<>(Interface.class);
+    protected final Map<Interface, Long> trafficIn = new EnumMap<>(Interface.class);
+    protected final Map<Interface, Long> trafficOut = new EnumMap<>(Interface.class);
 
     public void readValues(JsonObject stats) {
-        boolean fromTo = false;
-        for (Interface out : Interface.values()) {
-            for (Interface in : Interface.values()) {
-                String name = String.format("traffic_%s_%s", out.name().toLowerCase(), in.name().toLowerCase());
-                JsonElement j = stats.get(name);
-                if (j != null && !j.getAsString().isEmpty()) {
-                    fromTo = true;
-                    trafficOut.put(out, getOutput(out) + j.getAsLong());
-                    trafficIn.put(in, getInput(in) + j.getAsLong());
-                }
-            }
-        }
-        if (fromTo) {
-            return;
-        }
-        for (Interface i : Interface.values()) {
-            String name = String.format("traffic_%s", i.name().toLowerCase());
-            JsonElement j = stats.get(name);
-            if (j != null) {
-                String[] t = j.getAsString().split(",");
-                if (t.length == 2) {
-                    trafficIn.put(i, Long.parseLong(t[0]));
-                    trafficOut.put(i, Long.parseLong(t[1]));
-                }
-            }
-        }
     }
 
     public boolean isEmpty() {
@@ -94,17 +70,28 @@ public class TrafficInfo {
     public enum Interface {
         LAN,
         WAN,
-        ADHOC,
-        AP,
+        ADHOC("wifi_adhoc"),
+        AP("wifi2"),
         OVPN,
-        GWT,
+        GWT("ffgw"),
         PRIVNET,
-        TBB_FASTD,
-        TBB_WG,
-        MESH_LAN,
-        MESH_WAN,
-        MESH_VLAN,
-        MESH2G,
-        MESH5G,
+        TBB_FASTD("tbb_fastd"),
+        TBB_WG("tbb_wg"),
+        MESH_LAN("mesh_lan"),
+        MESH_WAN("mesh_wan"),
+        MESH_VLAN("mesh_vlan"),
+        MESH2G("wifi_mesh2g"),
+        MESH5G("wifi_mesh5g"),
+        ;
+
+        private final List<String> interfaceNames = new ArrayList<>();
+
+        Interface(String... interfaceNames) {
+            this.interfaceNames.addAll(Arrays.asList(interfaceNames));
+        }
+
+        public List<String> getInterfaceNames() {
+            return interfaceNames;
+        }
     }
 }

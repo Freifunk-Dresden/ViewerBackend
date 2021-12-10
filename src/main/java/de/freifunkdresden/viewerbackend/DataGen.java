@@ -107,7 +107,9 @@ public class DataGen {
             HOLDER.getNodes().values().forEach(n -> pool.submit(new NodeSysInfoThread(n)));
             pool.shutdown();
             LOGGER.log(Level.INFO, "Waiting threads to finish...");
-            pool.awaitTermination(2, TimeUnit.MINUTES);
+            if (!pool.awaitTermination(2, TimeUnit.MINUTES)) {
+                LOGGER.log(Level.ERROR, "Node Collector hit 2 min limit!");
+            }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new NodeInfoCollectionException(ex);

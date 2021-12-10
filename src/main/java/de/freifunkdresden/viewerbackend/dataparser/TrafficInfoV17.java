@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2020 Niklas Merkelt.
+ * Copyright 2021 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,30 +27,25 @@ package de.freifunkdresden.viewerbackend.dataparser;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class DataParserSysInfoV15 extends DataParserSysInfoV14 {
-
-    public DataParserSysInfoV15(JsonObject data) {
-        super(data);
-    }
+public class TrafficInfoV17 extends TrafficInfoV15 {
 
     @Override
-    public short getClients() {
-        JsonElement clients = data.get("statistic").getAsJsonObject().get("clients");
-        if (clients != null && clients.isJsonArray()) {
-            return clients.getAsJsonArray().get(1).getAsShort();
+    public void readValues(JsonObject interfaces) {
+        for (Interface i : Interface.values()) {
+            for (String interfaceName : i.getInterfaceNames()) {
+                String iRxName = String.format("%s_%s", interfaceName, "tx");
+                String iTxName = String.format("%s_%s", interfaceName, "rx");
+
+                JsonElement jRx = interfaces.get(iRxName);
+                if (jRx != null) {
+                    trafficIn.put(i, getInput(i) + jRx.getAsLong());
+                }
+
+                JsonElement jTx = interfaces.get(iTxName);
+                if (jTx != null) {
+                    trafficOut.put(i, getOutput(i) + jTx.getAsLong());
+                }
+            }
         }
-        return super.getClients();
-    }
-
-    @Override
-    public TrafficInfo getTraffic() {
-        TrafficInfo ti = new TrafficInfoV15();
-        ti.readValues(data.get("statistic").getAsJsonObject());
-        return ti;
-    }
-
-    @Override
-    public String getFirmwareBase() {
-        return data.get("firmware").getAsJsonObject().get("DISTRIB_DESCRIPTION").getAsString();
     }
 }

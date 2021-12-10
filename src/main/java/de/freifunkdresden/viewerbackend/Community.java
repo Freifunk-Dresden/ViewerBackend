@@ -26,23 +26,18 @@ package de.freifunkdresden.viewerbackend;
 
 public enum Community {
     DRESDEN("Dresden"),
-    FREIBERG("Freiberg"),
-    FREITAL("Freital"),
-    MEISSEN("Meissen"),
     OBERLAUSITZ("Oberlausitz"),
     PIRNA("Pirna"),
-    RADEBEUL("Radebeul"),
-    THARANDT("Tharandt"),
-    WALDHEIM("Waldheim"),
-    DEFAULT(DRESDEN);
+    DRESDEN_NW("Dresden Nord-West"),
+    DRESDEN_NO("Dresden Nord-Ost"),
+    DRESDEN_SO("Dresden Süd-Ost"),
+    DRESDEN_SW("Dresden Süd-West"),
+    DEFAULT("Dresden"),
+    ;
 
     private final String name;
 
-    private Community(Community c) {
-        this(c.getName());
-    }
-
-    private Community(String name) {
+    Community(String name) {
         this.name = name;
     }
 
@@ -52,30 +47,31 @@ public enum Community {
 
     public static Community getCommunity(String community) {
         if (community == null) {
-            return DRESDEN;
+            return DEFAULT;
         }
         switch (community) {
             case "Dresden":
                 return DRESDEN;
-            case "Freiberg":
-                return FREIBERG;
-            case "Freital":
-                return FREITAL;
             case "Meißen":
             case "Meissen":
-                return MEISSEN;
+            case "Radebeul":
+            case "Dresden NW":
+                return DRESDEN_NW;
+            case "Dresden NO":
+                return DRESDEN_NO;
+            case "Dresden SO":
+                return DRESDEN_SO;
+            case "Freiberg":
+            case "Freital":
+            case "Tharandt":
+            case "Dresden SW":
+                return DRESDEN_SW;
             case "OL":
             case "O.L.":
             case "Oberlausitz":
                 return OBERLAUSITZ;
             case "Pirna":
                 return PIRNA;
-            case "Radebeul":
-                return RADEBEUL;
-            case "Tharandt":
-                return THARANDT;
-            case "Waldheim":
-                return WALDHEIM;
             default:
                 return DEFAULT;
         }

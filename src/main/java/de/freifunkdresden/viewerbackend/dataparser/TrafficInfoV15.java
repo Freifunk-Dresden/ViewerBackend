@@ -27,30 +27,34 @@ package de.freifunkdresden.viewerbackend.dataparser;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class DataParserSysInfoV15 extends DataParserSysInfoV14 {
+public class TrafficInfoV15 extends TrafficInfo {
 
-    public DataParserSysInfoV15(JsonObject data) {
-        super(data);
-    }
-
-    @Override
-    public short getClients() {
-        JsonElement clients = data.get("statistic").getAsJsonObject().get("clients");
-        if (clients != null && clients.isJsonArray()) {
-            return clients.getAsJsonArray().get(1).getAsShort();
+    public void readValues(JsonObject stats) {
+        boolean fromTo = false;
+        for (Interface out : Interface.values()) {
+            for (Interface in : Interface.values()) {
+                String name = String.format("traffic_%s_%s", out.name().toLowerCase(), in.name().toLowerCase());
+                JsonElement j = stats.get(name);
+                if (j != null && !j.getAsString().isEmpty()) {
+                    fromTo = true;
+                    trafficOut.put(out, getOutput(out) + j.getAsLong());
+                    trafficIn.put(in, getInput(in) + j.getAsLong());
+                }
+            }
         }
-        return super.getClients();
-    }
-
-    @Override
-    public TrafficInfo getTraffic() {
-        TrafficInfo ti = new TrafficInfoV15();
-        ti.readValues(data.get("statistic").getAsJsonObject());
-        return ti;
-    }
-
-    @Override
-    public String getFirmwareBase() {
-        return data.get("firmware").getAsJsonObject().get("DISTRIB_DESCRIPTION").getAsString();
+        if (fromTo) {
+            return;
+        }
+        for (Interface i : Interface.values()) {
+            String name = String.format("traffic_%s", i.name().toLowerCase());
+            JsonElement j = stats.get(name);
+            if (j != null) {
+                String[] t = j.getAsString().split(",");
+                if (t.length == 2) {
+                    trafficIn.put(i, Long.parseLong(t[0]));
+                    trafficOut.put(i, Long.parseLong(t[1]));
+                }
+            }
+        }
     }
 }
