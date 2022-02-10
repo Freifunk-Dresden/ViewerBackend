@@ -348,16 +348,18 @@ public class Node {
     }
 
     public long getLastSeen() {
+        long lastSeenApi = 0;
+        long lastSeenDatabase = 0;
         if (dpSysInfo != null) {
             return dpSysInfo.getLastSeen();
         }
         if (dpApi != null) {
-            return dpApi.getLastSeen();
+            lastSeenApi = dpApi.getLastSeen();
         }
         if (dpDatabase != null) {
-            return dpDatabase.getLastSeen();
+            lastSeenDatabase = dpDatabase.getLastSeen();
         }
-        return 0;
+        return Math.max(lastSeenDatabase, lastSeenApi);
     }
 
     public long getFirstSeen() {
