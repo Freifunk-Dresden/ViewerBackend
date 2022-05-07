@@ -53,7 +53,7 @@ public class JsonNodeGen {
             JsonObject nodeinfo = new JsonObject();
             JsonObject network = new JsonObject();
             JsonArray addresses = new JsonArray();
-            addresses.add(n.getIpAddress());
+            addresses.add(n.getIpAddressString());
             network.add("addresses", addresses);
             nodeinfo.add("network", network);
             nodeinfo.addProperty("hostname", n.getHostname());
@@ -123,7 +123,7 @@ public class JsonNodeGen {
                 statistics.add("wireless", w);
             }
             if (!n.isGateway() && n.getGateway() != null) {
-                statistics.addProperty("gateway", n.getGateway().getIpAddress());
+                statistics.addProperty("gateway", n.getGateway().getIpAddressString());
             }
             node.add("statistics", statistics);
             JsonObject flags = new JsonObject();
@@ -165,7 +165,7 @@ public class JsonNodeGen {
             }
             node.addProperty("node_id", n.getFakeId());
             JsonArray addresses = new JsonArray();
-            addresses.add(n.getIpAddress());
+            addresses.add(n.getIpAddressString());
             node.add("addresses", addresses);
             node.addProperty("site_code", n.getCommunity().getName());
             node.addProperty("hostname", n.getHostname());

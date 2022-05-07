@@ -32,6 +32,8 @@ import de.freifunkdresden.viewerbackend.dataparser.TrafficInfoEmpty;
 import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -42,6 +44,7 @@ public class Node {
     private static final Set<String> IGNORE_AIRTIME = Set.of("ipq40xx/generic", "ramips/rt305x");
 
     private final int id;
+    private InetAddress ip;
     private DataParserAPI dpApi;
     private DataParserDB dpDatabase;
     private DataParserSysInfo dpSysInfo;
@@ -53,8 +56,15 @@ public class Node {
         this.id = id;
     }
 
-    public String getIpAddress() {
-        return String.format("10.200.%s.%s", (id / 255), ((id % 255) + 1));
+    public InetAddress getIpAddress() throws UnknownHostException {
+        if (this.ip == null) {
+            this.ip = InetAddress.getByAddress(new byte[]{10, (byte) 200, (byte) (id / 255), (byte) ((id % 255) + 1)});
+        }
+        return ip;
+    }
+
+    public String getIpAddressString() throws UnknownHostException {
+        return this.getIpAddress().getHostAddress();
     }
 
     public void setDpApi(DataParserAPI dp) {

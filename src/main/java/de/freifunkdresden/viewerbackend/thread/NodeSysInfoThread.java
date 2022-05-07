@@ -50,10 +50,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class NodeSysInfoThread implements Runnable {
@@ -71,7 +73,12 @@ public class NodeSysInfoThread implements Runnable {
     public void run() {
         for (int i = 0; i < RETRY_COUNT; i++) {
             try {
-                checkNode(node);
+                if (!isReachable(node.getIpAddress())) {
+                    continue;
+                }
+                String sysInfoString = getSysInfoString();
+                JsonObject json = JsonParser.parseString(sysInfoString).getAsJsonObject();
+                node.setDpSysInfo(getDataParser(json));
                 return;
             } catch (NoRouteToHostException ignored) {
             } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
@@ -85,8 +92,9 @@ public class NodeSysInfoThread implements Runnable {
         }
     }
 
-    private static void checkNode(@NotNull Node n) throws IOException, EmptyJsonException, MalformedSysInfoException {
-        HttpURLConnection con = (HttpURLConnection) new URL("http://" + n.getIpAddress() + "/sysinfo-json.cgi").openConnection();
+    private String getSysInfoString() throws IOException {
+        String conString = String.format("http://%s/sysinfo-json.cgi", node.getIpAddressString());
+        HttpURLConnection con = (HttpURLConnection) new URL(conString).openConnection();
         con.setConnectTimeout(10000);
         con.setReadTimeout(15000);
         if (con.getResponseCode() == 200) {
@@ -100,8 +108,9 @@ public class NodeSysInfoThread implements Runnable {
             int begin = json.indexOf("<!DOCTYPE html>");
             if (begin != -1) {
                 json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*</html>)", "{}");
+                LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), "Stripped html from json");
             }
-            n.setDpSysInfo(getDataParser(JsonParser.parseString(json).getAsJsonObject()));
+            return json;
         } else {
             throw new HTTPStatusCodeException(con.getResponseCode());
         }
@@ -135,5 +144,18 @@ public class NodeSysInfoThread implements Runnable {
         } else {
             return new DataParserSysInfo(data);
         }
+    }
+
+    private static boolean isReachable(InetAddress inetAddress) {
+        try {
+            Process process = Runtime.getRuntime().exec("ip r get " + inetAddress.getHostAddress());
+            process.waitFor(100, TimeUnit.MILLISECONDS);
+            return process.exitValue() != 2;
+        } catch (IOException e) {
+            // empty
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return false;
     }
 }
