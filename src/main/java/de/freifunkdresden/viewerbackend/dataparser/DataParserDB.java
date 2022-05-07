@@ -56,37 +56,37 @@ public class DataParserDB {
             boolean au = rs.getInt("autoupdate") == 1;
             autoUpdate = !rs.wasNull() && au;
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ auto_update failed", e);
         }
         try {
             community = Community.getCommunity(rs.getString("community"));
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ community failed", e);
         }
         try {
             eMail = rs.getString("email");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ email failed", e);
         }
         try {
             firmwareBase = rs.getString("firmwareBase");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ firmware base failed", e);
         }
         try {
             firmwareVersion = rs.getString("firmwareVersion");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ firmware version failed", e);
         }
         try {
             firstSeen = rs.getLong("firstseen") * 1000;
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ first seen failed", e);
         }
         try {
             lastSeen = rs.getLong("lastseen") * 1000;
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ last seen failed", e);
         }
         try {
             double latitude = rs.getDouble("latitude");
@@ -95,23 +95,23 @@ public class DataParserDB {
             longitude = rs.wasNull() ? Double.NaN : longitude;
             location = new Location(latitude, longitude);
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ location failed", e);
         }
         try {
             model = rs.getString("model");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ model failed", e);
         }
         try {
             name = rs.getString("name");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ name failed", e);
         }
         try {
             String r = rs.getString("role");
             role = r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "Database read failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ role failed", e);
         }
     }
 
