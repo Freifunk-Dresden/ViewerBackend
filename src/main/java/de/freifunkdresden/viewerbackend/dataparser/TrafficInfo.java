@@ -32,13 +32,12 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public class TrafficInfo {
+public abstract class TrafficInfo {
 
     protected final Map<Interface, Long> trafficIn = new EnumMap<>(Interface.class);
     protected final Map<Interface, Long> trafficOut = new EnumMap<>(Interface.class);
 
-    public void readValues(JsonObject stats) {
-    }
+    public abstract void readValues(JsonObject stats);
 
     public boolean isEmpty() {
         return trafficIn.isEmpty() && trafficOut.isEmpty();

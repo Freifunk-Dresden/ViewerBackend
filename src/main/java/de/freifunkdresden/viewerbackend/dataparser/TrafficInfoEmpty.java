@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2020 Niklas Merkelt.
+ * Copyright 2022 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,38 +24,32 @@
 
 package de.freifunkdresden.viewerbackend.dataparser;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class TrafficInfoV15 extends TrafficInfo {
+public class TrafficInfoEmpty extends TrafficInfo {
 
     @Override
     public void readValues(JsonObject stats) {
-        boolean fromTo = false;
-        for (Interface out : Interface.values()) {
-            for (Interface in : Interface.values()) {
-                String name = String.format("traffic_%s_%s", out.name().toLowerCase(), in.name().toLowerCase());
-                JsonElement j = stats.get(name);
-                if (j != null && !j.getAsString().isEmpty()) {
-                    fromTo = true;
-                    trafficOut.put(out, getOutput(out) + j.getAsLong());
-                    trafficIn.put(in, getInput(in) + j.getAsLong());
-                }
-            }
-        }
-        if (fromTo) {
-            return;
-        }
-        for (Interface i : Interface.values()) {
-            String name = String.format("traffic_%s", i.name().toLowerCase());
-            JsonElement j = stats.get(name);
-            if (j != null) {
-                String[] t = j.getAsString().split(",");
-                if (t.length == 2) {
-                    trafficIn.put(i, Long.parseLong(t[0]));
-                    trafficOut.put(i, Long.parseLong(t[1]));
-                }
-            }
-        }
+        // Empty on purpose
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
+    public boolean hasInterface(Interface i) {
+        return false;
+    }
+
+    @Override
+    public long getInput(Interface i) {
+        return 0;
+    }
+
+    @Override
+    public long getOutput(Interface i) {
+        return 0;
     }
 }

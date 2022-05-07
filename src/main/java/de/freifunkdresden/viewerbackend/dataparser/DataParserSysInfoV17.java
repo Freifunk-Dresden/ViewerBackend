@@ -68,6 +68,6 @@ public class DataParserSysInfoV17 extends DataParserSysInfoV16 {
             }
             return trafficInfo;
         }
-        return new TrafficInfo();
+        return new TrafficInfoEmpty();
     }
 }

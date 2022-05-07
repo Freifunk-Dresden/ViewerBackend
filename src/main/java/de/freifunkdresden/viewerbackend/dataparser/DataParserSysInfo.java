@@ -237,7 +237,7 @@ public class DataParserSysInfo {
     }
 
     public TrafficInfo getTraffic() {
-        return new TrafficInfo();
+        return new TrafficInfoEmpty();
     }
 
     private static int parseMinutes(@NotNull String time) {

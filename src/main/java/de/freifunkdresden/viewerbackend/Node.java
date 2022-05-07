@@ -28,6 +28,7 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfo;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
+import de.freifunkdresden.viewerbackend.dataparser.TrafficInfoEmpty;
 import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 
@@ -404,7 +405,7 @@ public class Node {
         if (dpSysInfo != null) {
             return dpSysInfo.getTraffic();
         }
-        return new TrafficInfo();
+        return new TrafficInfoEmpty();
     }
 
     public String getHostname() {
