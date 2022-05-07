@@ -81,6 +81,7 @@ public class NodeSysInfoThread implements Runnable {
                 node.setDpSysInfo(getDataParser(json));
                 return;
             } catch (NoRouteToHostException ignored) {
+                // Empty on purpose
             } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
                     ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
                 if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {

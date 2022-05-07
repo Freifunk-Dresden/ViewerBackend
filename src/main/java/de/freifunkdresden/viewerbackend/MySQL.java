@@ -126,6 +126,7 @@ public class MySQL {
                 this.conn.close();
             }
         } catch (SQLException ignored) {
+            // Empty on purpose
         } finally {
             this.conn = null;
         }
@@ -158,6 +159,7 @@ public class MySQL {
                 try {
                     stmt.close();
                 } catch (SQLException ignored) {
+                    // Empty on purpose
                 }
             }
         }

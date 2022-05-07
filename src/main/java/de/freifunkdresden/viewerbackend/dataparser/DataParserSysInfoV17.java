@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 public class DataParserSysInfoV17 extends DataParserSysInfoV16 {
 
-    private static final Logger LOGGER = LogManager.getLogger(DataParserSysInfo.class);
+    private static final Logger LOGGER = LogManager.getLogger(DataParserSysInfoV17.class);
 
     public DataParserSysInfoV17(JsonObject data) {
         super(data);

@@ -99,7 +99,7 @@ public class Node {
             case STANDARD:
                 return hasValidLocation();
             case MOBILE:
-                return hasValidLocation() && isOnline() 
+                return hasValidLocation() && isOnline()
                         && isFWVersionHigher(6, 0, 9);
             case SERVER:
             default:
@@ -156,10 +156,6 @@ public class Node {
         return false;
     }
 
-    public boolean isServerNode() {
-        return id <= 256;
-    }
-
     public boolean isTemporaryNode() {
         return id >= 900 && id < 1000;
     }
@@ -168,19 +164,17 @@ public class Node {
         return id > 1000 && id < 51000;
     }
 
-    public boolean isAlternativeNode() {
-        return id > 51000 && id < 60000;
-    }
-
     public boolean isFWVersionHigher(int major, int minor, int patch) {
         String[] fw = getFirmwareVersion().split("\\.");
         if (fw.length == 3) {
             if (Integer.parseInt(fw[0]) > major) {
                 return true;
-            } else if (Integer.parseInt(fw[0]) == major 
+            }
+            if (Integer.parseInt(fw[0]) == major
                     && Integer.parseInt(fw[1]) > minor) {
                 return true;
-            } else if (Integer.parseInt(fw[0]) == major 
+            }
+            if (Integer.parseInt(fw[0]) == major
                     && Integer.parseInt(fw[1]) == minor 
                     && Integer.parseInt(fw[2]) >= patch) {
                 return true;
@@ -372,7 +366,7 @@ public class Node {
             return model.split(" ")[0];
         }
     }
-    
+
     public Location getLocation() {
         if (dpSysInfo != null) {
             return dpSysInfo.getLocation();
