@@ -140,6 +140,13 @@ public class Node {
         if (dpSysInfo != null) {
             return dpSysInfo.getAutoUpdate();
         }
+        if (dpApi != null && dpDatabase != null) {
+            if (dpApi.getLastSeen() > dpDatabase.getLastSeen()) {
+                return dpApi.getAutoUpdate();
+            } else {
+                return dpDatabase.getAutoUpdate();
+            }
+        }
         if (dpApi != null) {
             return dpApi.getAutoUpdate();
         }
@@ -242,6 +249,13 @@ public class Node {
         if (dpSysInfo != null) {
             return dpSysInfo.getFirmwareVersion();
         }
+        if (dpApi != null && dpDatabase != null) {
+            if (dpApi.getLastSeen() > dpDatabase.getLastSeen()) {
+                return dpApi.getFirmwareVersion();
+            } else {
+                return dpDatabase.getFirmwareVersion();
+            }
+        }
         if (dpApi != null) {
             return dpApi.getFirmwareVersion();
         }
@@ -292,6 +306,13 @@ public class Node {
         if (dpSysInfo != null) {
             return dpSysInfo.getName();
         }
+        if (dpApi != null && dpDatabase != null) {
+            if (dpApi.getLastSeen() > dpDatabase.getLastSeen()) {
+                return dpApi.getName();
+            } else {
+                return dpDatabase.getName();
+            }
+        }
         if (dpApi != null) {
             return dpApi.getName();
         }
@@ -314,6 +335,13 @@ public class Node {
     public String getModel() {
         if (dpSysInfo != null) {
             return dpSysInfo.getModel();
+        }
+        if (dpApi != null && dpDatabase != null) {
+            if (dpApi.getLastSeen() > dpDatabase.getLastSeen()) {
+                return dpApi.getModel();
+            } else {
+                return dpDatabase.getModel();
+            }
         }
         if (dpApi != null) {
             return dpApi.getModel();
@@ -348,6 +376,13 @@ public class Node {
     public Location getLocation() {
         if (dpSysInfo != null) {
             return dpSysInfo.getLocation();
+        }
+        if (dpApi != null && dpDatabase != null) {
+            if (dpApi.getLastSeen() > dpDatabase.getLastSeen()) {
+                return dpApi.getLocation();
+            } else {
+                return dpDatabase.getLocation();
+            }
         }
         if (dpApi != null) {
             return dpApi.getLocation();
