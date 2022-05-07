@@ -32,13 +32,17 @@ public enum Community {
     DRESDEN_NO("Dresden Nord-Ost"),
     DRESDEN_SO("Dresden Süd-Ost"),
     DRESDEN_SW("Dresden Süd-West"),
-    DEFAULT("Dresden"),
+    DEFAULT(DRESDEN),
     ;
 
     private final String name;
 
     Community(String name) {
         this.name = name;
+    }
+
+    Community(Community community) {
+        this.name = community.name;
     }
 
     public String getName() {
