@@ -119,7 +119,7 @@ public class DataGen {
     private static void collectLinks() {
         LOGGER.log(Level.INFO, "Collect links...");
         HOLDER.getNodes().values().forEach(node -> node.getLinks().forEach(link -> {
-            Link lnk = HOLDER.getLink(link.getSource().getId(), link.getTarget().getId());
+            Link lnk = HOLDER.getLink(link.getSource(), link.getTarget(), link.getType());
             if (lnk == null) {
                 HOLDER.addLink(link);
             } else {
@@ -154,7 +154,7 @@ public class DataGen {
             if (Files.notExists(dir)) {
                 Files.createDirectory(dir);
             }
-            JsonFileGen jfg = new JsonFileGen(dir, HOLDER.getNodes().values(), HOLDER.getLinks().values());
+            JsonFileGen jfg = new JsonFileGen(dir, HOLDER.getNodes().values(), HOLDER.getLinks());
             jfg.genNodes();
             jfg.genGraph();
             jfg.genMeshViewer();

@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend.dataparser;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Airtime;
 import de.freifunkdresden.viewerbackend.Community;
@@ -40,8 +41,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataParserSysInfo {
@@ -52,6 +54,10 @@ public class DataParserSysInfo {
     private final JsonObject stats;
     private final long lastSeen = System.currentTimeMillis();
     protected Community community;
+    protected AtomicInteger linkCountFastD = new AtomicInteger(0);
+    protected AtomicInteger linkCountWireGuard = new AtomicInteger(0);
+    protected Collection<Link> linkCollection = Collections.emptyList();
+    protected boolean linksProcessed = false;
 
     public DataParserSysInfo(@NotNull JsonObject data) {
         this.data = data;
@@ -155,45 +161,41 @@ public class DataParserSysInfo {
         return 0;
     }
 
-    public Set<Link> getLinkSet() {
-        HashSet<Link> linkMap = new HashSet<>();
+    public Collection<Link> getLinkSet() {
+        return linkCollection;
+    }
+
+    public void processLinks() {
+        if (linksProcessed) {
+            return;
+        }
         Node node = DataGen.getDataHolder().getNode(getNodeId());
         JsonObject bmxd = data.get("bmxd").getAsJsonObject();
         JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
-        rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach(link -> {
+        JsonArray linkArray = rt.get("route").getAsJsonObject().get("link").getAsJsonArray();
+        linkCollection = new ArrayList<>(linkArray.size());
+        linkArray.forEach(link -> {
             JsonObject l = link.getAsJsonObject();
             int targetId = Node.convertIpToId(l.get("target").getAsString());
-            LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
+            String linkInterface = l.get("interface").getAsString();
+            if (linkInterface.startsWith("tbb_fastd")) {
+                linkCountFastD.incrementAndGet();
+            } else if (linkInterface.startsWith("tbb_wg")) {
+                linkCountWireGuard.incrementAndGet();
+            }
+            LinkType linkType = LinkType.getTypeByInterface(linkInterface);
             Node target = DataGen.getDataHolder().getNode(targetId);
-            linkMap.add(new Link(linkType, target, node));
+            linkCollection.add(new Link(linkType, target, node));
         });
-        return linkMap;
+        linksProcessed = true;
     }
 
     public int getLinkCountFastD() {
-        AtomicInteger result = new AtomicInteger(0);
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
-        rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach(link -> {
-            JsonObject l = link.getAsJsonObject();
-            if (l.get("interface").getAsString().startsWith("tbb_fastd")) {
-                result.incrementAndGet();
-            }
-        });
-        return result.get();
+        return linkCountFastD.get();
     }
 
     public int getLinkCountWireGuard() {
-        AtomicInteger result = new AtomicInteger(0);
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        JsonObject rt = bmxd.has("routing_tables") ? bmxd.get("routing_tables").getAsJsonObject() : bmxd.get("RoutingTables").getAsJsonObject();
-        rt.get("route").getAsJsonObject().get("link").getAsJsonArray().forEach(link -> {
-            JsonObject l = link.getAsJsonObject();
-            if (l.get("interface").getAsString().startsWith("tbb_wg")) {
-                result.incrementAndGet();
-            }
-        });
-        return result.get();
+        return linkCountWireGuard.get();
     }
 
     public String getName() {

@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,5 +84,16 @@ public enum LinkType {
             default:
                 return LinkType.TUNNEL;
         }
+    }
+
+    public static LinkType getTypeFromLink(@NotNull JsonObject l) {
+        if (l.has("type")) {
+            String type = l.get("type").getAsString();
+            if (!type.isBlank()) {
+                return getTypeByType(type);
+            }
+        }
+        String linkInterface = l.get("interface").getAsString();
+        return getTypeByInterface(linkInterface);
     }
 }

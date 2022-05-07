@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,39 +32,62 @@ import java.util.Map;
 public class DataHolder {
 
     private final Map<Integer, Node> nodes = new LinkedHashMap<>();
-    private final Map<Integer, Map<Integer, Link>> links = new HashMap<>();
+    private final Map<LinkKey, Link> links = new HashMap<>();
 
     public Node getNode(int id) {
-        Node n = nodes.getOrDefault(id, new Node(id));
-        if (!nodes.containsKey(id)) {
-            nodes.put(id, n);
-        }
-        return n;
+        return nodes.computeIfAbsent(id, Node::new);
     }
 
-    public Link getLink(int node1, int node2) {
-        int min = Math.min(node1, node2);
-        int max = Math.max(node1, node2);
-        if (!links.containsKey(min)) {
-            links.put(min, new HashMap<>());
-        }
-        return links.get(min).get(max);
+    public Link getLink(Node node1, Node node2, LinkType type) {
+        return links.get(new LinkKey(node1, node2, type));
     }
 
     public void addLink(Link l) {
-        int min = Math.min(l.getSource().getId(), l.getTarget().getId());
-        int max = Math.max(l.getSource().getId(), l.getTarget().getId());
-        if (!links.containsKey(min)) {
-            links.put(min, new HashMap<>());
-        }
-        links.get(min).put(max, l);
+        links.put(new LinkKey(l.getSource(), l.getTarget(), l.getType()), l);
     }
 
     public Map<Integer, Node> getNodes() {
         return new LinkedHashMap<>(nodes);
     }
 
-    public Map<Integer, Map<Integer, Link>> getLinks() {
-        return new HashMap<>(links);
+    public Collection<Link> getLinks() {
+        return links.values();
+    }
+
+    private static class LinkKey {
+        private final Node small;
+        private final Node big;
+        private final LinkType type;
+
+        public LinkKey(Node node1, Node node2, LinkType type) {
+            if (node1.getId() < node2.getId()) {
+                this.small = node1;
+                this.big = node2;
+            } else {
+                this.small = node2;
+                this.big = node1;
+            }
+            this.type = type;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            LinkKey linkKey = (LinkKey) o;
+
+            if (!small.equals(linkKey.small)) return false;
+            if (!big.equals(linkKey.big)) return false;
+            return type == linkKey.type;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = small.hashCode();
+            result = 31 * result + big.hashCode();
+            result = 31 * result + type.hashCode();
+            return result;
+        }
     }
 }

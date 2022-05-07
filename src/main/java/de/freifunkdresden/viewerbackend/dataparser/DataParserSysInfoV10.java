@@ -29,8 +29,6 @@ import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Node;
 
-import java.util.Set;
-
 public class DataParserSysInfoV10 extends DataParserSysInfo {
 
     public DataParserSysInfoV10(JsonObject data) {
@@ -45,20 +43,22 @@ public class DataParserSysInfoV10 extends DataParserSysInfo {
     }
 
     @Override
-    public Set<Link> getLinkSet() {
-        Set<Link> linkMap = super.getLinkSet();
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach(link -> {
+    public void processLinks() {
+        if (linksProcessed) {
+            return;
+        }
+        super.processLinks();
+        data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray().forEach(link -> {
             JsonObject l = link.getAsJsonObject();
             Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
             byte tq = Byte.parseByte(l.get("tq").getAsString());
-            for (Link lnk : linkMap) {
+            for (Link lnk : linkCollection) {
                 if (lnk.getTarget().equals(target)) {
                     lnk.setSourceTq(tq);
                     return;
                 }
             }
         });
-        return linkMap;
+        linksProcessed = true;
     }
 }

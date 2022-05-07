@@ -185,9 +185,10 @@ public class Node {
 
     public Collection<Link> getLinks() {
         if (dpSysInfo != null) {
+            dpSysInfo.processLinks();
             return dpSysInfo.getLinkSet();
         }
-        return Collections.emptySet();
+        return Collections.emptyList();
     }
 
     public int getFastDCount() {
@@ -509,5 +510,20 @@ public class Node {
             return third * 255 + (fourth - 1);
         }
         return -1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Node node = (Node) o;
+
+        return id == node.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

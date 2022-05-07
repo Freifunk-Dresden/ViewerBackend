@@ -56,7 +56,7 @@ public class JsonFileGen {
     private final Map<Node, Integer> nodeIds = new HashMap<>();
     private final Path path;
 
-    public JsonFileGen(@NotNull Path path, @NotNull Collection<Node> nodes, @NotNull Collection<Map<Integer, Link>> links) {
+    public JsonFileGen(@NotNull Path path, @NotNull Collection<Node> nodes, @NotNull Collection<Link> links) {
         this.path = path;
         dateHop.setTimeZone(TimeZone.getTimeZone("UTC"));
         Iterator<Node> it = nodes.stream().filter(Node::isDisplayed).iterator();
@@ -77,7 +77,7 @@ public class JsonFileGen {
             graphNodes.add(jsonNode);
             nodeIds.put(node, i);
         }
-        links.forEach(map -> map.values().stream()
+        links.stream()
                 .filter(link -> link.getSource().isDisplayed() && link.getTarget().isDisplayed())
                 .filter(link -> link.getSource().isOnline() && link.getTarget().isOnline())
                 .forEach(link -> {
@@ -109,7 +109,7 @@ public class JsonFileGen {
                         jsonLink.addProperty("type", link.getType().getHopGlass());
                         graphLinks.add(jsonLink);
                     }
-                }));
+                });
     }
 
     public void genNodes() throws IOException {

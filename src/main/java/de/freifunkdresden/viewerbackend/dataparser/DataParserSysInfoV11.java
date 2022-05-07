@@ -24,15 +24,14 @@
 
 package de.freifunkdresden.viewerbackend.dataparser;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.LinkType;
 import de.freifunkdresden.viewerbackend.Node;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
 
 public class DataParserSysInfoV11 extends DataParserSysInfoV10 {
 
@@ -41,43 +40,26 @@ public class DataParserSysInfoV11 extends DataParserSysInfoV10 {
     }
 
     @Override
-    public Set<Link> getLinkSet() {
-        HashSet<Link> linkMap = new HashSet<>();
+    public void processLinks() {
+        if (linksProcessed) {
+            return;
+        }
         Node node = DataGen.getDataHolder().getNode(getNodeId());
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach(link -> {
+        JsonArray links = data.get("bmxd").getAsJsonObject().get("links").getAsJsonArray();
+        linkCollection = new ArrayList<>(links.size());
+        links.forEach(link -> {
             JsonObject l = link.getAsJsonObject();
             Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
             byte tq = Byte.parseByte(l.get("tq").getAsString());
-            LinkType linkType = LinkType.getTypeByInterface(l.get("interface").getAsString());
-            linkMap.add(new Link(linkType, tq, target, node));
-        });
-        return linkMap;
-    }
-
-    @Override
-    public int getLinkCountFastD() {
-        AtomicInteger result = new AtomicInteger(0);
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach(link -> {
-            JsonObject l = link.getAsJsonObject();
-            if (l.get("interface").getAsString().startsWith("tbb_fastd")) {
-                result.incrementAndGet();
+            String linkInterface = l.get("interface").getAsString();
+            if (linkInterface.startsWith("tbb_fastd")) {
+                linkCountFastD.incrementAndGet();
+            } else if (linkInterface.startsWith("tbb_wg")) {
+                linkCountWireGuard.incrementAndGet();
             }
+            LinkType linkType = LinkType.getTypeFromLink(l);
+            linkCollection.add(new Link(linkType, tq, target, node));
         });
-        return result.get();
-    }
-
-    @Override
-    public int getLinkCountWireGuard() {
-        AtomicInteger result = new AtomicInteger(0);
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach(link -> {
-            JsonObject l = link.getAsJsonObject();
-            if (l.get("interface").getAsString().startsWith("tbb_wg")) {
-                result.incrementAndGet();
-            }
-        });
-        return result.get();
+        linksProcessed = true;
     }
 }

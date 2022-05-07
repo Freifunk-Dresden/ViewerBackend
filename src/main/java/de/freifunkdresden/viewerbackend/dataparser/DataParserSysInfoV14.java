@@ -25,13 +25,6 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
-import de.freifunkdresden.viewerbackend.DataGen;
-import de.freifunkdresden.viewerbackend.Link;
-import de.freifunkdresden.viewerbackend.LinkType;
-import de.freifunkdresden.viewerbackend.Node;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class DataParserSysInfoV14 extends DataParserSysInfoV13 {
 
@@ -42,21 +35,6 @@ public class DataParserSysInfoV14 extends DataParserSysInfoV13 {
     @Override
     public String getModel() {
         return data.get("system").getAsJsonObject().get("model2").getAsString();
-    }
-
-    @Override
-    public Set<Link> getLinkSet() {
-        HashSet<Link> linkMap = new HashSet<>();
-        Node node = DataGen.getDataHolder().getNode(getNodeId());
-        JsonObject bmxd = data.get("bmxd").getAsJsonObject();
-        bmxd.get("links").getAsJsonArray().forEach(link -> {
-            JsonObject l = link.getAsJsonObject();
-            Node target = DataGen.getDataHolder().getNode(l.get("node").getAsInt());
-            byte tq = Byte.parseByte(l.get("tq").getAsString());
-            LinkType linkType = LinkType.getTypeByType(l.get("type").getAsString());
-            linkMap.add(new Link(linkType, tq, target, node));
-        });
-        return linkMap;
     }
 
     @Override
