@@ -71,7 +71,7 @@ public class DataHolder {
         private final Node big;
         private final LinkType type;
 
-        public LinkKey(Node node1, Node node2, LinkType type) {
+        public LinkKey(@NotNull Node node1, @NotNull Node node2, LinkType type) {
             if (node1.getId() < node2.getId()) {
                 this.small = node1;
                 this.big = node2;
