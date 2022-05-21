@@ -26,6 +26,7 @@ package de.freifunkdresden.viewerbackend;
 
 public enum Community {
     DRESDEN("Dresden"),
+    LEIPZIG("Leipzig"),
     OBERLAUSITZ("Oberlausitz"),
     PIRNA("Pirna"),
     DRESDEN_NW("Dresden Nord-West"),
@@ -56,6 +57,8 @@ public enum Community {
         switch (community) {
             case "Dresden":
                 return DRESDEN;
+            case "Leipzig":
+                return LEIPZIG;
             case "Meißen":
             case "Meissen":
             case "Radebeul":
