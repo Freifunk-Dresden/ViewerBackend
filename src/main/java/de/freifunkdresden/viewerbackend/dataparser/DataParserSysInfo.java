@@ -115,8 +115,7 @@ public class DataParserSysInfo {
 
     public Node getGateway() {
         String ip = data.get("bmxd").getAsJsonObject().get("gateways").getAsJsonObject().get("selected").getAsString();
-        int id = Node.convertIpToId(ip);
-        return DataGen.getDataHolder().getNode(id);
+        return DataGen.getDataHolder().getNodeByIp(ip);
     }
 
     public float getUptime() {
@@ -176,7 +175,6 @@ public class DataParserSysInfo {
         linkCollection = new ArrayList<>(linkArray.size());
         linkArray.forEach(link -> {
             JsonObject l = link.getAsJsonObject();
-            int targetId = Node.convertIpToId(l.get("target").getAsString());
             String linkInterface = l.get("interface").getAsString();
             if (linkInterface.startsWith("tbb_fastd")) {
                 linkCountFastD.incrementAndGet();
@@ -184,7 +182,7 @@ public class DataParserSysInfo {
                 linkCountWireGuard.incrementAndGet();
             }
             LinkType linkType = LinkType.getTypeByInterface(linkInterface);
-            Node target = DataGen.getDataHolder().getNode(targetId);
+            Node target = DataGen.getDataHolder().getNodeByIp(l.get("target").getAsString());
             linkCollection.add(new Link(linkType, target, node));
         });
         linksProcessed = true;

@@ -31,6 +31,7 @@ import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfoEmpty;
 import de.freifunkdresden.viewerbackend.datasource.AirtimeSQL;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -502,7 +503,7 @@ public class Node {
         }
     }
 
-    public static int convertIpToId(String ip) {
+    public static int convertIpToId(@NotNull String ip) {
         String[] split = ip.split("\\.");
         if (split.length == 4) {
             int third = Integer.parseInt(split[2]);

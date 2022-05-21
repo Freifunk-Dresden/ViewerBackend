@@ -24,6 +24,9 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -36,6 +39,15 @@ public class DataHolder {
 
     public Node getNode(int id) {
         return nodes.computeIfAbsent(id, Node::new);
+    }
+
+    @Nullable
+    public Node getNodeByIp(@NotNull String ip) {
+        int id = Node.convertIpToId(ip);
+        if (id == -1) {
+            return null;
+        }
+        return getNode(id);
     }
 
     public Link getLink(Node node1, Node node2, LinkType type) {
