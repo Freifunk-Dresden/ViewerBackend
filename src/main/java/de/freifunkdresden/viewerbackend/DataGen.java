@@ -127,7 +127,7 @@ public class DataGen {
         try {
             ExecutorService pool = Executors.newFixedThreadPool(10);
             HOLDER.getNodes().values().stream().filter(n -> getDataHolder().isReachable(n))
-                    .forEach(n -> pool.submit(new NodeSysInfoThread(n, pool::submit)));
+                    .forEach(n -> pool.submit(new NodeSysInfoThread(n)));
             pool.shutdown();
             LOGGER.log(Level.INFO, "Waiting threads to finish...");
             if (!pool.awaitTermination(2, TimeUnit.MINUTES)) {

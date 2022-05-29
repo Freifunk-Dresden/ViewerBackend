@@ -62,12 +62,10 @@ public class NodeSysInfoThread implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(NodeSysInfoThread.class);
 
     private final Node node;
-    private final RequeueListener rq;
-    private short count = 0;
+    private short round = 1;
 
-    public NodeSysInfoThread(Node node, RequeueListener rq) {
+    public NodeSysInfoThread(Node node) {
         this.node = node;
-        this.rq = rq;
     }
 
     @Override
@@ -81,15 +79,15 @@ public class NodeSysInfoThread implements Runnable {
             // Empty on purpose
         } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
                 ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
-            if (count + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
+            if (round == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
                 LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
             }
         } catch (IOException | NullPointerException ex) {
             LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), ex);
         }
-        if (count < RETRY_COUNT) {
-            count++;
-            rq.requeue(this);
+        if (round < RETRY_COUNT) {
+            round++;
+            run();
         }
     }
 
@@ -145,9 +143,5 @@ public class NodeSysInfoThread implements Runnable {
         } else {
             return new DataParserSysInfo(data);
         }
-    }
-
-    public interface RequeueListener {
-        void requeue(NodeSysInfoThread thread);
     }
 }
