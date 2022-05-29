@@ -50,46 +50,46 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class NodeSysInfoThread implements Runnable {
 
-    private static final int RETRY_COUNT = 3;
+    private static final short RETRY_COUNT = 3;
     private static final Logger LOGGER = LogManager.getLogger(NodeSysInfoThread.class);
 
     private final Node node;
+    private final RequeueListener rq;
+    private short count = 0;
 
-    public NodeSysInfoThread(Node node) {
+    public NodeSysInfoThread(Node node, RequeueListener rq) {
         this.node = node;
+        this.rq = rq;
     }
 
     @Override
     public void run() {
-        for (int i = 0; i < RETRY_COUNT; i++) {
-            try {
-                if (!isReachable(node.getIpAddress())) {
-                    continue;
-                }
-                String sysInfoString = getSysInfoString();
-                JsonObject json = JsonParser.parseString(sysInfoString).getAsJsonObject();
-                node.setDpSysInfo(getDataParser(json));
-                return;
-            } catch (NoRouteToHostException ignored) {
-                // Empty on purpose
-            } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
-                    ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
-                if (i + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
-                    LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
-                }
-            } catch (IOException | NullPointerException ex) {
-                LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), ex);
+        try {
+            String sysInfoString = getSysInfoString();
+            JsonObject json = JsonParser.parseString(sysInfoString).getAsJsonObject();
+            node.setDpSysInfo(getDataParser(json));
+            return;
+        } catch (NoRouteToHostException ignored) {
+            // Empty on purpose
+        } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
+                ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
+            if (count + 1 == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
+                LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
             }
+        } catch (IOException | NullPointerException ex) {
+            LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), ex);
+        }
+        if (count < RETRY_COUNT) {
+            count++;
+            rq.requeue(this);
         }
     }
 
@@ -147,16 +147,7 @@ public class NodeSysInfoThread implements Runnable {
         }
     }
 
-    private static boolean isReachable(InetAddress inetAddress) {
-        try {
-            Process process = Runtime.getRuntime().exec("ip r get " + inetAddress.getHostAddress());
-            process.waitFor(100, TimeUnit.MILLISECONDS);
-            return process.exitValue() != 2;
-        } catch (IOException e) {
-            // empty
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        return false;
+    public interface RequeueListener {
+        void requeue(NodeSysInfoThread thread);
     }
 }

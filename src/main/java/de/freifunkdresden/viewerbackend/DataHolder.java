@@ -27,15 +27,19 @@ package de.freifunkdresden.viewerbackend;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class DataHolder {
 
     private final Map<Integer, Node> nodes = new LinkedHashMap<>();
     private final Map<LinkKey, Link> links = new HashMap<>();
+    private final Set<String> routes = new HashSet<>();
 
     public Node getNode(int id) {
         return nodes.computeIfAbsent(id, Node::new);
@@ -64,6 +68,19 @@ public class DataHolder {
 
     public Collection<Link> getLinks() {
         return links.values();
+    }
+
+    public void addRoutes(Collection<String> ips) {
+        routes.addAll(ips);
+    }
+
+    public boolean isReachable(@NotNull Node node) {
+        try {
+            return routes.contains(node.getIpAddressString());
+        } catch (UnknownHostException e) {
+            // Empty on purpose
+        }
+        return false;
     }
 
     private static class LinkKey {

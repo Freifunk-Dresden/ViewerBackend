@@ -29,6 +29,7 @@ import de.freifunkdresden.viewerbackend.datasource.FreifunkApi;
 import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
 import de.freifunkdresden.viewerbackend.exception.NodeInfoCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
+import de.freifunkdresden.viewerbackend.exception.RouteCollectionException;
 import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
@@ -80,6 +81,7 @@ public class DataGen {
             CONFIG.loadConfig();
             setupDatabase();
             processFreifunkApi();
+            collectLocalData();
             collectNodeInfo();
             fillOfflineNodes();
             startDbSave();
@@ -90,7 +92,8 @@ public class DataGen {
             influxDb.closeConnection();
             mysqlDb.closeConnection();
             LOGGER.log(Level.INFO, "Done!");
-        } catch (JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException ex) {
+        } catch (JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException |
+                 RouteCollectionException ex) {
             LOGGER.log(Level.ERROR, "Execution Exception: ", ex);
         }
     }
@@ -101,10 +104,16 @@ public class DataGen {
         FreifunkApi.processApi();
     }
 
+    private static void collectLocalData() throws RouteCollectionException {
+        LOGGER.log(Level.INFO, "Collect local data...");
+        LocalDataCollector.collectRoutes();
+    }
+
     private static void collectNodeInfo() throws NodeInfoCollectionException {
         try {
             ExecutorService pool = Executors.newFixedThreadPool(10);
-            HOLDER.getNodes().values().forEach(n -> pool.submit(new NodeSysInfoThread(n)));
+            HOLDER.getNodes().values().stream().filter(n -> getDataHolder().isReachable(n))
+                    .forEach(n -> pool.submit(new NodeSysInfoThread(n, pool::submit)));
             pool.shutdown();
             LOGGER.log(Level.INFO, "Waiting threads to finish...");
             if (!pool.awaitTermination(2, TimeUnit.MINUTES)) {
