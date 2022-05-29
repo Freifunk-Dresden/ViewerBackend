@@ -33,11 +33,11 @@ import de.freifunkdresden.viewerbackend.exception.RouteCollectionException;
 import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
-import de.freifunkdresden.viewerbackend.thread.NodeDatabaseThread;
 import de.freifunkdresden.viewerbackend.thread.NodeSysInfoThread;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -81,7 +81,7 @@ public class DataGen {
         return debug;
     }
 
-    public static void main(String[] args) {
+    public static void main(@NotNull String[] args) {
         if (args.length == 1 && args[0].equalsIgnoreCase("--debug")) {
             debug = true;
             LOGGER.log(Level.INFO, "DEBUG mode on");

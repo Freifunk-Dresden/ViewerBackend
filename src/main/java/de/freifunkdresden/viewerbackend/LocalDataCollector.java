@@ -42,7 +42,7 @@ public class LocalDataCollector {
 
     private LocalDataCollector() {
     }
-    
+
     public static void collectRoutes() throws RouteCollectionException {
         try {
             Process process = Runtime.getRuntime().exec("ip r list table bat_route");
