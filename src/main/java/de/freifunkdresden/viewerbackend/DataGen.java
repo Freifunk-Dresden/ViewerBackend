@@ -177,7 +177,7 @@ public class DataGen {
             if (Files.notExists(dir)) {
                 Files.createDirectory(dir);
             }
-            JsonFileGen jfg = new JsonFileGen(dir, HOLDER.getNodes().values(), HOLDER.getLinks());
+            JsonFileGen jfg = new JsonFileGen(dir);
             jfg.genNodes();
             jfg.genGraph();
             jfg.genMeshViewer();

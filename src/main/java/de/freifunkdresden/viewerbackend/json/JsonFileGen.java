@@ -26,6 +26,7 @@ package de.freifunkdresden.viewerbackend.json;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Node;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,10 +56,10 @@ public class JsonFileGen {
     private final Map<Node, Integer> nodeIds = new HashMap<>();
     private final Path path;
 
-    public JsonFileGen(@NotNull Path path, @NotNull Collection<Node> nodes, @NotNull Collection<Link> links) {
+    public JsonFileGen(@NotNull Path path) {
         this.path = path;
         dateHop.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Iterator<Node> it = nodes.stream().filter(Node::isDisplayed).iterator();
+        Iterator<Node> it = DataGen.getDataHolder().getNodes().values().stream().filter(Node::isDisplayed).iterator();
         for (int i = 0; it.hasNext(); i++) {
             Node node = it.next();
             JsonObject hopNode = JsonNodeGen.getJsonObject(node, dateHop);
@@ -77,7 +77,7 @@ public class JsonFileGen {
             graphNodes.add(jsonNode);
             nodeIds.put(node, i);
         }
-        links.stream()
+        DataGen.getDataHolder().getLinks().stream()
                 .filter(link -> link.getSource().isDisplayed() && link.getTarget().isDisplayed())
                 .filter(link -> link.getSource().isOnline() && link.getTarget().isOnline())
                 .forEach(link -> {
