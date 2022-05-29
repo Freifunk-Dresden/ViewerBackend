@@ -54,6 +54,8 @@ public class LocalDataCollector {
             List<String> collect = routeArray.stream().map(s -> s.split(" ")[0])
                     .filter(s -> s.startsWith("10.200.") && !s.endsWith("/16"))
                     .collect(Collectors.toList());
+            String[] s = routeArray.get(0).split(" ");
+            collect.add(s[s.length - 1]);
             if (DataGen.isDebug()) {
                 LOGGER.log(Level.DEBUG, "Collected routes: {}", collect);
             }
