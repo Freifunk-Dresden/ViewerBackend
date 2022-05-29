@@ -194,7 +194,7 @@ public class DataGen {
         HOLDER.getNodes().values().stream()
                 .filter(Node::isOnline)
                 .filter(Node::isDisplayed)
-                .forEach(node -> POOL.submit(new NodeDatabaseThread(node)));
+                .forEach(node -> POOL.submit(node::updateDatabase));
         POOL.shutdown();
     }
 
