@@ -57,6 +57,7 @@ public class DataGen {
     private static final DataHolder HOLDER = new DataHolder();
     private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
     private static final Config CONFIG = new Config();
+    private static boolean debug = false;
     private static MySQL mysqlDb;
     private static Influx influxDb;
 
@@ -76,7 +77,15 @@ public class DataGen {
         return CONFIG;
     }
 
+    public static boolean isDebug() {
+        return debug;
+    }
+
     public static void main(String[] args) {
+        if (args.length == 1 && args[0].equalsIgnoreCase("--debug")) {
+            debug = true;
+            LOGGER.log(Level.INFO, "DEBUG mode on");
+        }
         try {
             CONFIG.loadConfig();
             setupDatabase();
@@ -95,6 +104,11 @@ public class DataGen {
         } catch (JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException |
                  RouteCollectionException ex) {
             LOGGER.log(Level.ERROR, "Execution Exception: ", ex);
+        }
+        if (debug) {
+            LOGGER.log(Level.DEBUG, "{} nodes, {} nodes online",
+                    getDataHolder().getNodes().size(),
+                    getDataHolder().getNodes().values().stream().filter(Node::isOnline).count());
         }
     }
 
@@ -173,6 +187,9 @@ public class DataGen {
     }
 
     private static void startDbSave() {
+        if (debug) {
+            return;
+        }
         LOGGER.log(Level.INFO, "Start Save to database");
         HOLDER.getNodes().values().stream()
                 .filter(Node::isOnline)
@@ -182,6 +199,9 @@ public class DataGen {
     }
 
     private static void endDbSave() {
+        if (debug) {
+            return;
+        }
         LOGGER.log(Level.INFO, "End Save to database...");
         try {
             if (!POOL.awaitTermination(3, TimeUnit.MINUTES)) {
@@ -195,6 +215,9 @@ public class DataGen {
     }
 
     private static void saveStats() {
+        if (debug) {
+            return;
+        }
         LOGGER.log(Level.INFO, "Save stats to database...");
         HOLDER.getNodes().values().stream().filter(Node::isDisplayed)
                 .forEach(Node::collectStats);
