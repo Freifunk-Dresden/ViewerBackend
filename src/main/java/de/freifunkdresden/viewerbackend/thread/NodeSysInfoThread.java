@@ -48,9 +48,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -81,7 +81,7 @@ public class NodeSysInfoThread implements Runnable {
         } catch (NoRouteToHostException ignored) {
             // Empty on purpose
         } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
-                ConnectException | SocketTimeoutException | HTTPStatusCodeException ex) {
+                SocketException | SocketTimeoutException | HTTPStatusCodeException ex) {
             if (round == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
                 LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
             }
