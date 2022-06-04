@@ -70,6 +70,9 @@ public class NodeSysInfoThread implements Runnable {
 
     @Override
     public void run() {
+        if (Thread.interrupted()) {
+            return;
+        }
         try {
             String sysInfoString = getSysInfoString();
             JsonObject json = JsonParser.parseString(sysInfoString).getAsJsonObject();

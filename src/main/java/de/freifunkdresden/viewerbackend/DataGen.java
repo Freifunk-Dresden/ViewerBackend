@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -131,7 +132,9 @@ public class DataGen {
             pool.shutdown();
             LOGGER.log(Level.INFO, "Waiting threads to finish...");
             if (!pool.awaitTermination(2, TimeUnit.MINUTES)) {
-                LOGGER.log(Level.ERROR, "Node Collector hit 2 min limit!");
+                LOGGER.log(Level.ERROR, "Node Collector hit execution limit!");
+                List<Runnable> notExecuted = pool.shutdownNow();
+                LOGGER.log(Level.ERROR, "{} tasks not processed", notExecuted.size());
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
@@ -205,7 +208,7 @@ public class DataGen {
         LOGGER.log(Level.INFO, "End Save to database...");
         try {
             if (!POOL.awaitTermination(3, TimeUnit.MINUTES)) {
-                LOGGER.log(Level.ERROR, "3 min limit!");
+                LOGGER.log(Level.ERROR, "Database save hit execution limit!");
                 POOL.shutdownNow();
             }
         } catch (InterruptedException ex) {
