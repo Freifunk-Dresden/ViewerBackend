@@ -26,24 +26,29 @@ package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TrafficInfoV17 extends TrafficInfoV15 {
+
+    private static final Logger LOGGER = LogManager.getLogger(TrafficInfoV17.class);
 
     @Override
     public void readValues(JsonObject interfaces) {
         for (Interface i : Interface.values()) {
-            for (String interfaceName : i.getInterfaceNames()) {
-                String iRxName = String.format("%s_%s", interfaceName, "tx");
-                String iTxName = String.format("%s_%s", interfaceName, "rx");
-
-                JsonElement jRx = interfaces.get(iRxName);
-                if (jRx != null) {
-                    trafficIn.put(i, getInput(i) + jRx.getAsLong());
-                }
-
-                JsonElement jTx = interfaces.get(iTxName);
-                if (jTx != null) {
-                    trafficOut.put(i, getOutput(i) + jTx.getAsLong());
+            for (String name : i.getInterfaceNames()) {
+                JsonElement jRx = interfaces.get(String.format("%s_tx", name));
+                JsonElement jTx = interfaces.get(String.format("%s_rx", name));
+                try {
+                    if (jRx != null) {
+                        trafficIn.put(i, getInput(i) + jRx.getAsLong());
+                    }
+                    if (jTx != null) {
+                        trafficOut.put(i, getOutput(i) + jTx.getAsLong());
+                    }
+                } catch (NumberFormatException e) {
+                    LOGGER.log(Level.ERROR, String.format("Interface %s: values unreadable (%s,%s)", name, jRx, jTx));
                 }
             }
         }
