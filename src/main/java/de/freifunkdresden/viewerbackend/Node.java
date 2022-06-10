@@ -176,7 +176,7 @@ public class Node {
                 return true;
             }
             if (Integer.parseInt(fw[0]) == major
-                    && Integer.parseInt(fw[1]) == minor 
+                    && Integer.parseInt(fw[1]) == minor
                     && Integer.parseInt(fw[2]) >= patch) {
                 return true;
             }
@@ -472,10 +472,10 @@ public class Node {
     }
 
     public void updateDatabase() {
-        Location l = getLocation();
         Double lat = null;
         Double lon = null;
         if (hasValidLocation()) {
+            Location l = getLocation();
             lat = l.getLatitude();
             lon = l.getLongitude();
         }

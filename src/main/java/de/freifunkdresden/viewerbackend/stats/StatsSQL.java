@@ -177,28 +177,30 @@ public class StatsSQL {
                             .tag("node", String.valueOf(e.getId()))
                             .addField("value", e.getUptime())
                             .build());
-                    if (!e.getAirtime2g().equals(Airtime.EMPTY)) {
+                    Airtime airtime2g = e.getAirtime2g();
+                    if (!airtime2g.isEmpty()) {
                         nodeAirtime.add(Point.measurement("node_airtime_2g")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", e.getAirtime2g().getActive())
-                                .addField("busy", e.getAirtime2g().getBusy())
-                                .addField("receive", e.getAirtime2g().getReceive())
-                                .addField("transmit", e.getAirtime2g().getTransmit())
+                                .addField("active", airtime2g.getActive())
+                                .addField("busy", airtime2g.getBusy())
+                                .addField("receive", airtime2g.getReceive())
+                                .addField("transmit", airtime2g.getTransmit())
                                 .build());
                     }
-                    if (!e.getAirtime5g().equals(Airtime.EMPTY)) {
+                    Airtime airtime5g = e.getAirtime5g();
+                    if (!airtime5g.isEmpty()) {
                         nodeAirtime.add(Point.measurement("node_airtime_5g")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", e.getAirtime5g().getActive())
-                                .addField("busy", e.getAirtime5g().getBusy())
-                                .addField("receive", e.getAirtime5g().getReceive())
-                                .addField("transmit", e.getAirtime5g().getTransmit())
+                                .addField("active", airtime5g.getActive())
+                                .addField("busy", airtime5g.getBusy())
+                                .addField("receive", airtime5g.getReceive())
+                                .addField("transmit", airtime5g.getTransmit())
                                 .build());
                     }
-                    if (!e.getTraffic().isEmpty()) {
-                        TrafficInfo t = e.getTraffic();
+                    TrafficInfo t = e.getTraffic();
+                    if (!t.isEmpty()) {
                         for (TrafficInfo.Interface i : TrafficInfo.Interface.values()) {
                             if (t.hasInterface(i)) {
                                 nodeTraffic.add(Point.measurement("node_traffic")
