@@ -493,17 +493,29 @@ public class Node {
             lat = l.getLatitude();
             lon = l.getLongitude();
         }
+        String community = getCommunity().getName();
+        String role = getRole().name();
+        String model = getModel();
+        long firstSeen = getFirstSeen() / 1000;
+        long lastSeen = getLastSeen() / 1000;
+        boolean gateway = isGateway();
+        String name = getName();
+        String eMail = getEMail();
+        DataGen.getDB().queryUpdate("INSERT INTO nodes " +
+                        "SET id = ?, community = ?, role = ?, model = ?, firstseen = ?, lastseen = ?, latitude = ?, " +
+                        "longitude = ?, gateway = ?, name = ?, email = ? " +
+                        "ON DUPLICATE KEY UPDATE community = ?, role = ?, model = ?, firstseen = ?, lastseen = ?, " +
+                        "latitude = ?, longitude = ?, gateway = ?, name = ?, email = ?",
+                id, community, role, model, firstSeen, lastSeen, lat, lon, gateway, name, eMail,
+                community, role, model, firstSeen, lastSeen, lat, lon, gateway, name, eMail);
         String firmwareVersion = getFirmwareVersion();
         String firmwareBranch = getFirmwareBranch();
         String firmwareGitRev = getFirmwareGitRev();
         String firmwareBase = getFirmwareBase();
         boolean autoUpdateEnabled = isAutoUpdateEnabled();
-        DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon,
-                getCommunity().getName(), getRole().name(), getModel(), firmwareVersion, firmwareBase,
-                getFirstSeen() / 1000, getLastSeen() / 1000, autoUpdateEnabled, isGateway(), getName(), getEMail());
         DataGen.getDB().queryUpdate("INSERT INTO nodes_firmware " +
                         "SET id = ?, version = ?, branch = ?, git_rev = ?, base = ?, auto_update = ? " +
-                        "ON DUPLICATE KEY UPDATE version = ?, branch = ?, git_rev = ?, base = ?, auto_update = ? ",
+                        "ON DUPLICATE KEY UPDATE version = ?, branch = ?, git_rev = ?, base = ?, auto_update = ?",
                 id, firmwareVersion, firmwareBranch, firmwareGitRev, firmwareBase, autoUpdateEnabled,
                 firmwareVersion, firmwareBranch, firmwareGitRev, firmwareBase, autoUpdateEnabled);
         AirtimeSQL.updateAirtime2G(this);
