@@ -32,6 +32,7 @@ import de.freifunkdresden.viewerbackend.VPN;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import org.influxdb.dto.Point;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -64,8 +65,8 @@ public class StatsSQL {
         }
     }
 
-    public static void addVersion(@NotNull String version) {
-        if (!version.isEmpty()) {
+    public static void addVersion(@Nullable String version) {
+        if (version != null && !version.isEmpty()) {
             synchronized (versions) {
                 versions.put(version, versions.getOrDefault(version, 0) + 1);
             }
