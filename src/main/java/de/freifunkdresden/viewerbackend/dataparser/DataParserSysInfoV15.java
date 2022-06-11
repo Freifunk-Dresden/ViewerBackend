@@ -48,9 +48,4 @@ public class DataParserSysInfoV15 extends DataParserSysInfoV14 {
         ti.readValues(data.get("statistic").getAsJsonObject());
         return ti;
     }
-
-    @Override
-    public String getFirmwareBase() {
-        return data.get("firmware").getAsJsonObject().get("DISTRIB_DESCRIPTION").getAsString();
-    }
 }

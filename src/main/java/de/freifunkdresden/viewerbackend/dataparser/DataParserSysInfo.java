@@ -106,8 +106,12 @@ public class DataParserSysInfo {
         JsonObject firmware = data.get("firmware").getAsJsonObject();
         String distributionId = firmware.get("DISTRIB_ID").getAsString();
         String distributionRelease = firmware.get("DISTRIB_RELEASE").getAsString();
-        String distributionRevision = firmware.get("DISTRIB_REVISION").getAsString();
-        return distributionId + " " + distributionRelease + " " + distributionRevision;
+        if (distributionRelease.contains("SNAPSHOT")) {
+            String distributionRevision = firmware.get("DISTRIB_REVISION").getAsString();
+            return String.format("%s %s %s", distributionId, distributionRelease, distributionRevision);
+        } else {
+            return String.format("%s %s", distributionId, distributionRelease);
+        }
     }
 
     public String getFirmwareTarget() {
@@ -260,8 +264,9 @@ public class DataParserSysInfo {
     }
 
     private Airtime getAirtime(String radio) {
-        if (data.has("airtime") && data.get("airtime").getAsJsonObject().has(radio)) {
-            String at = data.get("airtime").getAsJsonObject().get(radio).getAsString();
+        JsonElement airtime = data.get("airtime");
+        if (airtime != null && airtime.getAsJsonObject().has(radio)) {
+            String at = airtime.getAsJsonObject().get(radio).getAsString();
             if (!at.isEmpty()) {
                 return parseAirtime(at);
             }
