@@ -239,26 +239,41 @@ public class DataGen {
         mysqlDb.openConnection();
         mysqlDb.queryUpdate("CREATE TABLE IF NOT EXISTS `nodes` ( "
                 + " `id` INT(11) NOT NULL, "
-                + " `community` VARCHAR(50) NULL DEFAULT NULL, "
-                + " `role` TEXT NULL, "
-                + " `model` TEXT NULL, "
-                + " `firmwareVersion` VARCHAR(10) NULL DEFAULT NULL, "
-                + " `firmwareBase` TEXT NULL, "
+                + " `community` VARCHAR(50) NULL DEFAULT NULL COLLATE 'utf8_general_ci', "
+                + " `role` TEXT NULL DEFAULT NULL COLLATE 'utf8_general_ci', "
+                + " `model` TEXT NULL DEFAULT NULL COLLATE 'utf8_general_ci', "
+                + " `firmwareVersion` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8_general_ci', "
+                + " `firmwareBase` TEXT NULL DEFAULT NULL COLLATE 'utf8_general_ci', "
                 + " `firstseen` INT(11) NULL DEFAULT NULL, "
                 + " `lastseen` INT(11) NULL DEFAULT NULL, "
-                + " `gatewayIp` TEXT NULL, "
                 + " `latitude` DOUBLE NULL DEFAULT NULL, "
                 + " `longitude` DOUBLE NULL DEFAULT NULL, "
-                + " `uptime` DOUBLE NULL DEFAULT NULL, "
-                + " `memory_usage` DOUBLE NULL DEFAULT NULL, "
-                + " `loadavg` DOUBLE NULL DEFAULT NULL, "
-                + " `clients` INT(4) NULL DEFAULT NULL, "
                 + " `gateway` INT(1) NULL DEFAULT NULL, "
-                + " `online` INT(1) NULL DEFAULT NULL, "
-                + " `name` TEXT NULL, "
-                + " `email` TEXT NULL, "
-                + " PRIMARY KEY (`id`) "
+                + " `autoupdate` INT(1) NULL DEFAULT NULL, "
+                + " `name` TEXT NULL DEFAULT NULL COLLATE 'utf8_general_ci', "
+                + " `email` TEXT NULL DEFAULT NULL COLLATE 'utf8_general_ci', "
+                + " PRIMARY KEY (`id`) USING BTREE "
                 + ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
+        mysqlDb.queryUpdate("CREATE TABLE IF NOT EXISTS `airtime` ( " +
+                " `id` INT(11) NOT NULL AUTO_INCREMENT, " +
+                " `type` TINYINT(4) NOT NULL, " +
+                " `active` BIGINT(20) UNSIGNED NOT NULL, " +
+                " `busy` BIGINT(20) UNSIGNED NOT NULL, " +
+                " `receive` BIGINT(20) UNSIGNED NOT NULL, " +
+                " `transmit` BIGINT(20) UNSIGNED NOT NULL, " +
+                " PRIMARY KEY (`id`, `type`) USING BTREE, " +
+                " CONSTRAINT `FK_airtime_nodes` FOREIGN KEY (`id`) REFERENCES `nodes` (`id`) ON UPDATE CASCADE ON DELETE CASCADE " +
+                ") COLLATE='utf8mb4_general_ci' ENGINE=InnoDB;");
+        mysqlDb.queryUpdate("CREATE TABLE IF NOT EXISTS `nodes_firmware` ( " +
+                " `id` INT(11) NOT NULL, " +
+                " `version` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8_general_ci', " +
+                " `branch` VARCHAR(50) NULL DEFAULT NULL COLLATE 'utf8_general_ci', " +
+                " `git_rev` CHAR(40) NULL DEFAULT NULL COLLATE 'utf8_general_ci', " +
+                " `base` VARCHAR(100) NULL DEFAULT NULL COLLATE 'utf8_general_ci', " +
+                " `auto_update` INT(1) NULL DEFAULT NULL, " +
+                " PRIMARY KEY (`id`) USING BTREE, " +
+                " CONSTRAINT `FK_nodesFirmware_nodes` FOREIGN KEY (`id`) REFERENCES `nodes` (`id`) ON UPDATE CASCADE ON DELETE CASCADE " +
+                ") COLLATE='utf8_general_ci' ENGINE=InnoDB;");
         influxDb = new Influx();
         influxDb.openConnection();
     }
