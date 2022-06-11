@@ -271,6 +271,20 @@ public class Node {
         return null;
     }
 
+    public String getFirmwareBranch() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getFirmwareBranch();
+        }
+        return null;
+    }
+
+    public String getFirmwareGitRev() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getFirmwareGitRev();
+        }
+        return null;
+    }
+
     public Community getCommunity() {
         if (dpSysInfo != null) {
             return dpSysInfo.getCommunity();
@@ -479,9 +493,19 @@ public class Node {
             lat = l.getLatitude();
             lon = l.getLongitude();
         }
+        String firmwareVersion = getFirmwareVersion();
+        String firmwareBranch = getFirmwareBranch();
+        String firmwareGitRev = getFirmwareGitRev();
+        String firmwareBase = getFirmwareBase();
+        boolean autoUpdateEnabled = isAutoUpdateEnabled();
         DataGen.getDB().queryUpdate("CALL updateNode(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", id, lat, lon,
-                getCommunity().getName(), getRole().name(), getModel(), getFirmwareVersion(), getFirmwareBase(),
-                getFirstSeen() / 1000, getLastSeen() / 1000, isAutoUpdateEnabled(), isGateway(), getName(), getEMail());
+                getCommunity().getName(), getRole().name(), getModel(), firmwareVersion, firmwareBase,
+                getFirstSeen() / 1000, getLastSeen() / 1000, autoUpdateEnabled, isGateway(), getName(), getEMail());
+        DataGen.getDB().queryUpdate("INSERT INTO nodes_firmware " +
+                        "SET id = ?, version = ?, branch = ?, git_rev = ?, base = ?, auto_update = ? " +
+                        "ON DUPLICATE KEY UPDATE version = ?, branch = ?, git_rev = ?, base = ?, auto_update = ? ",
+                id, firmwareVersion, firmwareBranch, firmwareGitRev, firmwareBase, autoUpdateEnabled,
+                firmwareVersion, firmwareBranch, firmwareGitRev, firmwareBase, autoUpdateEnabled);
         AirtimeSQL.updateAirtime2G(this);
         AirtimeSQL.updateAirtime5G(this);
     }

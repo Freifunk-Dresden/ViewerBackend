@@ -25,6 +25,7 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Airtime;
 import de.freifunkdresden.viewerbackend.Community;
@@ -111,6 +112,16 @@ public class DataParserSysInfo {
 
     public String getFirmwareTarget() {
         return data.get("firmware").getAsJsonObject().get("DISTRIB_TARGET").getAsString();
+    }
+
+    public String getFirmwareBranch() {
+        JsonElement branch = data.get("firmware").getAsJsonObject().get("git-ddmesh-branch");
+        return branch != null ? branch.getAsString() : null;
+    }
+
+    public String getFirmwareGitRev() {
+        JsonElement rev = data.get("firmware").getAsJsonObject().get("git-ddmesh-rev");
+        return rev != null ? rev.getAsString() : null;
     }
 
     public Node getGateway() {
