@@ -53,40 +53,40 @@ public class DataParserDB {
 
     public void parse(@NotNull ResultSet rs) {
         try {
-            boolean au = rs.getInt("autoupdate") == 1;
+            boolean au = rs.getInt("auto_update") == 1;
             autoUpdate = !rs.wasNull() && au;
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ auto_update failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `auto_update` failed", e);
         }
         try {
             community = Community.getCommunity(rs.getString("community"));
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ community failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `community` failed", e);
         }
         try {
             eMail = rs.getString("email");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ email failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `email` failed", e);
         }
         try {
-            firmwareBase = rs.getString("firmwareBase");
+            firmwareBase = rs.getString("firmware_base");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ firmware base failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `firmware_base` failed", e);
         }
         try {
-            firmwareVersion = rs.getString("firmwareVersion");
+            firmwareVersion = rs.getString("firmware_version");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ firmware version failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `firmware_version` failed", e);
         }
         try {
-            firstSeen = rs.getLong("firstseen") * 1000;
+            firstSeen = rs.getLong("first_seen") * 1000;
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ first seen failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `first_seen` failed", e);
         }
         try {
-            lastSeen = rs.getLong("lastseen") * 1000;
+            lastSeen = rs.getLong("last_seen") * 1000;
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ last seen failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `last_seen` failed", e);
         }
         try {
             double latitude = rs.getDouble("latitude");
@@ -100,18 +100,18 @@ public class DataParserDB {
         try {
             model = rs.getString("model");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ model failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `model` failed", e);
         }
         try {
             name = rs.getString("name");
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ name failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `name` failed", e);
         }
         try {
             String r = rs.getString("role");
             role = r == null ? NodeType.STANDARD : NodeType.valueOf(r.toUpperCase());
         } catch (SQLException e) {
-            LOGGER.log(Level.ERROR, "DB_READ role failed", e);
+            LOGGER.log(Level.ERROR, "DB_READ `role` failed", e);
         }
     }
 

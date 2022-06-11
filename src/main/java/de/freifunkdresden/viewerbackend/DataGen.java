@@ -162,7 +162,7 @@ public class DataGen {
         if (ids.isEmpty()) {
             return;
         }
-        try (ResultSet rs = mysqlDb.querySelect("SELECT * FROM nodes WHERE id IN (" + ids + ")")) {
+        try (ResultSet rs = mysqlDb.querySelect("SELECT * FROM nodes_current WHERE id IN (" + ids + ")")) {
             while (rs.next()) {
                 DataParserDB dataParserDB = new DataParserDB();
                 dataParserDB.parse(rs);
