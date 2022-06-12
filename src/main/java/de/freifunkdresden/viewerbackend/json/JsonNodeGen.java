@@ -157,7 +157,7 @@ public class JsonNodeGen {
                 node.addProperty("memory_usage", n.getMemoryUsage());
                 Date date = new Date(System.currentTimeMillis() - (long) (n.getUptime() * 1000));
                 node.addProperty("uptime", df.format(date));
-                node.addProperty("nproc", n.getNproc());
+                node.addProperty("nproc", n.getCpuCount());
             }
             if (!n.isGateway() && n.getGateway() != null) {
                 node.addProperty("gateway", n.getGateway().getFakeId());

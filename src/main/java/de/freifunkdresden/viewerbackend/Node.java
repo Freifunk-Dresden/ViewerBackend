@@ -231,7 +231,7 @@ public class Node {
         return 0;
     }
 
-    public int getNproc() {
+    public int getCpuCount() {
         if (dpSysInfo != null) {
             return dpSysInfo.getCPUCount();
         }
