@@ -58,10 +58,6 @@ public class DataParserAPI {
         return status.get("lastseen").getAsLong() * 1000;
     }
 
-    public boolean isGateway() {
-        return status.get("gateway").getAsBoolean();
-    }
-
     public boolean hasBackbone() {
         return status.get("backbone").getAsInt() == 1;
     }

@@ -124,10 +124,7 @@ public class Node {
     }
 
     public boolean isGateway() {
-        if (dpApi != null) {
-            return dpApi.isGateway();
-        }
-        return false;
+        return DataGen.getDataHolder().isGateway(this);
     }
 
     public boolean hasBackbone() {
@@ -498,16 +495,15 @@ public class Node {
         String model = getModel();
         long firstSeen = getFirstSeen() / 1000;
         long lastSeen = getLastSeen() / 1000;
-        boolean gateway = isGateway();
         String name = getName();
         String eMail = getEMail();
         DataGen.getDB().queryUpdate("INSERT INTO nodes " +
                         "SET id = ?, community = ?, role = ?, model = ?, firstseen = ?, lastseen = ?, latitude = ?, " +
-                        "longitude = ?, gateway = ?, name = ?, email = ? " +
+                        "longitude = ?, name = ?, email = ? " +
                         "ON DUPLICATE KEY UPDATE community = ?, role = ?, model = ?, firstseen = ?, lastseen = ?, " +
-                        "latitude = ?, longitude = ?, gateway = ?, name = ?, email = ?",
-                id, community, role, model, firstSeen, lastSeen, lat, lon, gateway, name, eMail,
-                community, role, model, firstSeen, lastSeen, lat, lon, gateway, name, eMail);
+                        "latitude = ?, longitude = ?, name = ?, email = ?",
+                id, community, role, model, firstSeen, lastSeen, lat, lon, name, eMail,
+                community, role, model, firstSeen, lastSeen, lat, lon, name, eMail);
         String firmwareVersion = getFirmwareVersion();
         String firmwareBranch = getFirmwareBranch();
         String firmwareGitRev = getFirmwareGitRev();

@@ -40,6 +40,7 @@ public class DataHolder {
     private final Map<Integer, Node> nodes = new LinkedHashMap<>();
     private final Map<LinkKey, Link> links = new HashMap<>();
     private final Set<String> routes = new HashSet<>();
+    private final Set<String> gateways = new HashSet<>();
 
     public Node getNode(int id) {
         return nodes.computeIfAbsent(id, Node::new);
@@ -77,6 +78,19 @@ public class DataHolder {
     public boolean isReachable(@NotNull Node node) {
         try {
             return routes.contains(node.getIpAddressString());
+        } catch (UnknownHostException e) {
+            // Empty on purpose
+        }
+        return false;
+    }
+
+    public void addGateways(Collection<String> ips) {
+        gateways.addAll(ips);
+    }
+
+    public boolean isGateway(@NotNull Node node) {
+        try {
+            return gateways.contains(node.getIpAddressString());
         } catch (UnknownHostException e) {
             // Empty on purpose
         }

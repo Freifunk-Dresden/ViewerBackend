@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.exception.GatewaysCollectionException;
 import de.freifunkdresden.viewerbackend.exception.RouteCollectionException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -50,11 +51,11 @@ public class LocalDataCollector {
             InputStream inputStream = process.getInputStream();
             String routes = new String(inputStream.readAllBytes());
             inputStream.close();
-            List<String> routeArray = Arrays.asList(routes.split("\n"));
-            List<String> collect = routeArray.stream().map(s -> s.split(" ")[0])
+            List<String> routeArray = Arrays.asList(routes.split("\\n"));
+            List<String> collect = routeArray.stream().map(s -> s.split("\\s")[0])
                     .filter(s -> s.startsWith("10.200.") && !s.endsWith("/16"))
                     .collect(Collectors.toList());
-            String[] s = routeArray.get(0).split(" ");
+            String[] s = routeArray.get(0).split("\\s");
             collect.add(s[s.length - 1]);
             if (DataGen.isDebug()) {
                 LOGGER.log(Level.DEBUG, "Collected routes: {}", collect);
@@ -66,6 +67,28 @@ public class LocalDataCollector {
             Thread.currentThread().interrupt();
             throw new RouteCollectionException(e);
         }
+    }
 
+    public static void collectGateways() throws GatewaysCollectionException {
+        try {
+            Process process = Runtime.getRuntime().exec("sudo /usr/sbin/bmxd -c --gateways");
+            process.waitFor(200, TimeUnit.MILLISECONDS);
+            InputStream inputStream = process.getInputStream();
+            String gateways = new String(inputStream.readAllBytes());
+            inputStream.close();
+            List<String> collect = Arrays.stream(gateways.split("\\n"))
+                    .skip(1)
+                    .map(s -> s.split("\\s+")[1])
+                    .collect(Collectors.toList());
+            if (DataGen.isDebug()) {
+                LOGGER.log(Level.DEBUG, "Collected gateways: {}", collect);
+            }
+            DataGen.getDataHolder().addGateways(collect);
+        } catch (IOException e) {
+            throw new GatewaysCollectionException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new GatewaysCollectionException(e);
+        }
     }
 }

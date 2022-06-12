@@ -26,6 +26,7 @@ package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.datasource.FreifunkApi;
+import de.freifunkdresden.viewerbackend.exception.GatewaysCollectionException;
 import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
 import de.freifunkdresden.viewerbackend.exception.NodeInfoCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
@@ -103,7 +104,7 @@ public class DataGen {
             mysqlDb.closeConnection();
             LOGGER.log(Level.INFO, "Done!");
         } catch (JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException |
-                 RouteCollectionException ex) {
+                 RouteCollectionException | GatewaysCollectionException ex) {
             LOGGER.log(Level.ERROR, "Execution Exception: ", ex);
         }
         if (debug) {
@@ -119,9 +120,10 @@ public class DataGen {
         FreifunkApi.processApi();
     }
 
-    private static void collectLocalData() throws RouteCollectionException {
+    private static void collectLocalData() throws RouteCollectionException, GatewaysCollectionException {
         LOGGER.log(Level.INFO, "Collect local data...");
         LocalDataCollector.collectRoutes();
+        LocalDataCollector.collectGateways();
     }
 
     private static void collectNodeInfo() throws NodeInfoCollectionException {
