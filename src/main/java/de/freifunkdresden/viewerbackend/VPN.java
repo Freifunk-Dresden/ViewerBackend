@@ -50,6 +50,8 @@ public enum VPN {
     VPN18("18", 51042),
     VPN_ZH("ZH", 51064),
     VPN_OFF("OFF", 51051),
+    VPN1_LE("LE1", 51020),
+    VPN2_LE("LE2", 51026),
     NS1("NS1", 3),
     NS2("NS2", 15);
 
