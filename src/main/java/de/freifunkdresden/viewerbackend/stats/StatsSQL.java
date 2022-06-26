@@ -90,7 +90,7 @@ public class StatsSQL {
         synchronized (manufacturer) {
             manufacturer.put(man, manufacturer.getOrDefault(man, 0) + 1);
         }
-        String modWithoutV = mod.replaceAll("(?:\\s\\(IL\\))*(?:N/ND)*(?:N)*(?:ND)*\\s*v\\d+(?:\\.\\d)*$", "").replace("TP-LINK", "TP-Link");
+        String modWithoutV = mod.replaceAll("(?:\\s\\(IL\\))*(?:N/ND)*N*(?:ND)*\\s*v\\d+(?:\\.\\d)*$", "").replace("TP-LINK", "TP-Link");
         synchronized (modelWithoutVersion) {
             modelWithoutVersion.put(modWithoutV, modelWithoutVersion.getOrDefault(modWithoutV, 0) + 1);
         }
