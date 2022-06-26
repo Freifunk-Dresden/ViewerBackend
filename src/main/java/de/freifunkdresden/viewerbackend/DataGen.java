@@ -59,6 +59,7 @@ public class DataGen {
     private static final DataHolder HOLDER = new DataHolder();
     private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
     private static final Config CONFIG = new Config();
+    private static final Cache CACHE = new Cache();
     private static boolean debug = false;
     private static MySQL mysqlDb;
     private static Influx influxDb;
@@ -79,6 +80,10 @@ public class DataGen {
         return CONFIG;
     }
 
+    public static Cache getCache() {
+        return CACHE;
+    }
+
     public static boolean isDebug() {
         return debug;
     }
@@ -90,6 +95,7 @@ public class DataGen {
         }
         try {
             CONFIG.loadConfig();
+            CACHE.initialize();
             setupDatabase();
             processFreifunkApi();
             collectLocalData();

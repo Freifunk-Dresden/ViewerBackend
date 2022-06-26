@@ -28,7 +28,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.exception.ApiProcessingException;
@@ -43,46 +42,39 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class FreifunkApi {
+
+    private static final Logger LOGGER = LogManager.getLogger(FreifunkApi.class);
+    private static final String API_CACHE_FILE_NAME = "api.json";
 
     private FreifunkApi() {
     }
 
-    private static final Logger LOGGER = LogManager.getLogger(FreifunkApi.class);
-
     public static void downloadApiFile() {
-        Gson gson = new Gson();
+        Path cacheFile = DataGen.getCache().resolveCacheFile(API_CACHE_FILE_NAME);
         String apiUrl = DataGen.getConfig().getValue("api_url");
-        String cachePath = DataGen.getConfig().getValue("cache_path");
         try {
-            Path cache = Paths.get(cachePath);
-            if (Files.notExists(cache)) {
-                Files.createDirectory(cache);
-            }
-            Path c = cache.resolve("api.json");
             URLConnection con = new URL(apiUrl).openConnection();
             try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
                 JsonArray api = JsonParser.parseReader(reader).getAsJsonArray();
-                Files.writeString(c, gson.toJson(api), StandardCharsets.UTF_8);
+                Files.writeString(cacheFile, new Gson().toJson(api), StandardCharsets.UTF_8);
             }
-        } catch (JsonSyntaxException | IOException | IllegalStateException e) {
+        } catch (RuntimeException | IOException e) {
             LOGGER.log(Level.WARN, "API download failed", e);
         }
     }
 
     public static void processApi() {
         try {
-            String cachePath = DataGen.getConfig().getValue("cache_path");
-            Path cache = Paths.get(cachePath).resolve("api.json");
-            String json = Files.readString(cache, StandardCharsets.UTF_8);
+            Path cacheFile = DataGen.getCache().resolveCacheFile(API_CACHE_FILE_NAME);
+            String json = Files.readString(cacheFile, StandardCharsets.UTF_8);
             JsonArray api = JsonParser.parseString(json).getAsJsonArray();
             api.forEach(node -> {
                 JsonObject n = node.getAsJsonObject();
                 DataGen.getDataHolder().getNode(n.get("id").getAsInt()).setDpApi(new DataParserAPI(n));
             });
-        } catch (JsonSyntaxException | IOException e) {
+        } catch (RuntimeException | IOException e) {
             throw new ApiProcessingException(e);
         }
     }
