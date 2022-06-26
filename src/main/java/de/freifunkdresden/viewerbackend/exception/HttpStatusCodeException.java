@@ -24,13 +24,13 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
-public class HTTPStatusCodeException extends RuntimeException {
+public class HttpStatusCodeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
     private final int statusCode;
 
-    public HTTPStatusCodeException(int statusCode) {
+    public HttpStatusCodeException(int statusCode) {
         this.statusCode = statusCode;
     }
 

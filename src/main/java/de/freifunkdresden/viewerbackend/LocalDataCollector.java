@@ -61,7 +61,7 @@ public class LocalDataCollector {
                 LOGGER.log(Level.DEBUG, "Collected routes: {}", collect);
             }
             DataGen.getDataHolder().addRoutes(collect);
-        } catch (IOException e) {
+        } catch (RuntimeException | IOException e) {
             throw new RouteCollectionException(e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -84,7 +84,7 @@ public class LocalDataCollector {
                 LOGGER.log(Level.DEBUG, "Collected gateways: {}", collect);
             }
             DataGen.getDataHolder().addGateways(collect);
-        } catch (IOException e) {
+        } catch (RuntimeException | IOException e) {
             throw new GatewaysCollectionException(e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -53,7 +53,7 @@ public class Influx {
             this.connection = InfluxDBFactory.connect(url, username, password);
             this.connection.setDatabase(database);
         } catch (IllegalArgumentException e) {
-            throw new DatabaseConnectionException("Connection to database failed!", e);
+            throw new DatabaseConnectionException("Could not connect to database", e);
         }
     }
 
@@ -61,16 +61,26 @@ public class Influx {
         return this.connection != null;
     }
 
+    public void checkConnection() {
+        if (!hasConnection()) {
+            throw new DatabaseConnectionException("Not connected to database - type: influx");
+        }
+    }
+
     public void write(Point p) {
+        checkConnection();
         this.connection.write(p);
     }
 
     public void write(Collection<Point> points) {
+        checkConnection();
         this.connection.write(BatchPoints.builder().points(points).build());
     }
 
     public void closeConnection() {
-        this.connection.close();
-        this.connection = null;
+        if (this.connection != null) {
+            this.connection.close();
+            this.connection = null;
+        }
     }
 }

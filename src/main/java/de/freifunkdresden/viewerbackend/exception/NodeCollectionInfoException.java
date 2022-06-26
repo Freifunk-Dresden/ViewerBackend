@@ -24,26 +24,26 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
-public class NodeInfoCollectionException extends Exception {
+public class NodeCollectionInfoException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public NodeInfoCollectionException() {
+    public NodeCollectionInfoException() {
     }
 
-    public NodeInfoCollectionException(String message) {
+    public NodeCollectionInfoException(String message) {
         super(message);
     }
 
-    public NodeInfoCollectionException(String message, Throwable cause) {
+    public NodeCollectionInfoException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public NodeInfoCollectionException(Throwable cause) {
-        super(cause);
+    public NodeCollectionInfoException(Throwable cause) {
+        super(cause.getMessage(), cause);
     }
 
-    public NodeInfoCollectionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public NodeCollectionInfoException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

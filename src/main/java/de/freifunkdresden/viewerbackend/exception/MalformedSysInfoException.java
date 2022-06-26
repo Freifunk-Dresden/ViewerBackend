@@ -24,7 +24,7 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
-public class MalformedSysInfoException extends Exception {
+public class MalformedSysInfoException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

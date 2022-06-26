@@ -62,7 +62,7 @@ public class MySQL {
         try {
             this.conn = DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database, username, password);
         } catch (SQLException e) {
-            throw new DatabaseConnectionException("No connection to database", e);
+            throw new DatabaseConnectionException("Could not connect to database", e);
         }
     }
 
@@ -74,7 +74,14 @@ public class MySQL {
         }
     }
 
+    public void checkConnection() {
+        if (!hasConnection()) {
+            throw new DatabaseConnectionException("Not connected to database - type: mysql");
+        }
+    }
+
     public void queryUpdate(String query, @NotNull Object... args) {
+        checkConnection();
         try (PreparedStatement st = conn.prepareStatement(query)) {
             int i = 1;
             for (Object o : args) {
@@ -88,6 +95,7 @@ public class MySQL {
     }
 
     public PreparedUpdate queryPrepUpdate(String query) {
+        checkConnection();
         try (PreparedStatement st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             return new PreparedUpdate(st);
         } catch (SQLException e) {
@@ -97,6 +105,7 @@ public class MySQL {
     }
 
     public ResultSet querySelect(String query, @NotNull Object... args) {
+        checkConnection();
         try (PreparedStatement st = conn.prepareStatement(query)) {
             int i = 1;
             for (Object o : args) {

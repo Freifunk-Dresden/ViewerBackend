@@ -24,7 +24,7 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
-public class EmptyJsonException extends Exception {
+public class EmptyJsonException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

@@ -26,11 +26,9 @@ package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.datasource.FreifunkApi;
-import de.freifunkdresden.viewerbackend.exception.GatewaysCollectionException;
 import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
-import de.freifunkdresden.viewerbackend.exception.NodeInfoCollectionException;
+import de.freifunkdresden.viewerbackend.exception.NodeCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
-import de.freifunkdresden.viewerbackend.exception.RouteCollectionException;
 import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
@@ -109,8 +107,7 @@ public class DataGen {
             influxDb.closeConnection();
             mysqlDb.closeConnection();
             LOGGER.log(Level.INFO, "Done!");
-        } catch (JsonGenerationException | NodeInfoCollectionException | OfflineNodeProcessingException |
-                 RouteCollectionException | GatewaysCollectionException ex) {
+        } catch (RuntimeException ex) {
             LOGGER.log(Level.ERROR, "Execution Exception: ", ex);
         }
         if (debug) {
@@ -126,13 +123,13 @@ public class DataGen {
         FreifunkApi.processApi();
     }
 
-    private static void collectLocalData() throws RouteCollectionException, GatewaysCollectionException {
+    private static void collectLocalData() {
         LOGGER.log(Level.INFO, "Collect local data...");
         LocalDataCollector.collectRoutes();
         LocalDataCollector.collectGateways();
     }
 
-    private static void collectNodeInfo() throws NodeInfoCollectionException {
+    private static void collectNodeInfo() {
         try {
             ExecutorService pool = Executors.newFixedThreadPool(10);
             HOLDER.getNodes().values().stream().filter(n -> getDataHolder().isReachable(n))
@@ -146,7 +143,7 @@ public class DataGen {
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            throw new NodeInfoCollectionException(ex);
+            throw new NodeCollectionException(ex);
         }
     }
 
@@ -162,7 +159,7 @@ public class DataGen {
         }));
     }
 
-    private static void fillOfflineNodes() throws OfflineNodeProcessingException {
+    private static void fillOfflineNodes() {
         LOGGER.log(Level.INFO, "Fill offline nodes from database...");
         String ids = HOLDER.getNodes().values().stream()
                 .map(n -> String.valueOf(n.getId()))
@@ -176,12 +173,12 @@ public class DataGen {
                 dataParserDB.parse(rs);
                 HOLDER.getNode(rs.getInt("id")).setDpDatabase(dataParserDB);
             }
-        } catch (SQLException ex) {
+        } catch (RuntimeException | SQLException ex) {
             throw new OfflineNodeProcessingException(ex);
         }
     }
 
-    private static void genJson() throws JsonGenerationException {
+    private static void genJson() {
         try {
             LOGGER.log(Level.INFO, "Generate JSON files...");
             Path dir = Paths.get(CONFIG.getValue("json_path"));
@@ -192,7 +189,7 @@ public class DataGen {
             jfg.genNodes();
             jfg.genGraph();
             jfg.genMeshViewer();
-        } catch (IOException ex) {
+        } catch (RuntimeException | IOException ex) {
             throw new JsonGenerationException(ex);
         }
     }

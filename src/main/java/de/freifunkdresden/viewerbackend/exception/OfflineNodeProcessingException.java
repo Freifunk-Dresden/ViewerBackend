@@ -24,7 +24,7 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
-public class OfflineNodeProcessingException extends Exception {
+public class OfflineNodeProcessingException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

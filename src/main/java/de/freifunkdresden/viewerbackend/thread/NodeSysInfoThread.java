@@ -37,8 +37,10 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV15;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV16;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV17;
 import de.freifunkdresden.viewerbackend.exception.EmptyJsonException;
-import de.freifunkdresden.viewerbackend.exception.HTTPStatusCodeException;
+import de.freifunkdresden.viewerbackend.exception.HttpStatusCodeException;
 import de.freifunkdresden.viewerbackend.exception.MalformedSysInfoException;
+import de.freifunkdresden.viewerbackend.exception.NodeCollectionException;
+import de.freifunkdresden.viewerbackend.exception.NodeCollectionInfoException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,19 +76,16 @@ public class NodeSysInfoThread implements Runnable {
             return;
         }
         try {
-            String sysInfoString = getSysInfoString();
-            JsonObject json = JsonParser.parseString(sysInfoString).getAsJsonObject();
-            node.setDpSysInfo(getDataParser(json));
+            node.setDpSysInfo(getDataParser(getSysInfo()));
             return;
         } catch (NoRouteToHostException ignored) {
             // Empty on purpose
-        } catch (JsonSyntaxException | EmptyJsonException | MalformedSysInfoException |
-                SocketException | SocketTimeoutException | HTTPStatusCodeException ex) {
-            if (round == RETRY_COUNT && !ex.getMessage().startsWith("No route to host")) {
-                LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), ex.getMessage());
+        } catch (NodeCollectionInfoException e) {
+            if (round == RETRY_COUNT && !e.getMessage().startsWith("No route to host")) {
+                LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), e.getMessage());
             }
-        } catch (IOException | NullPointerException ex) {
-            LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), ex);
+        } catch (RuntimeException | IOException e) {
+            LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), e);
         }
         if (round < RETRY_COUNT) {
             round++;
@@ -94,57 +93,67 @@ public class NodeSysInfoThread implements Runnable {
         }
     }
 
-    private String getSysInfoString() throws IOException {
-        String conString = String.format("http://%s/sysinfo-json.cgi", node.getIpAddressString());
-        HttpURLConnection con = (HttpURLConnection) new URL(conString).openConnection();
-        con.setConnectTimeout(10000);
-        con.setReadTimeout(15000);
-        if (con.getResponseCode() == 200) {
-            String json;
-            try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
-                try (BufferedReader bufferedReader = new BufferedReader(reader)) {
-                    json = bufferedReader.lines().collect(Collectors.joining());
+    private JsonObject getSysInfo() throws IOException {
+        try {
+            String conString = String.format("http://%s/sysinfo-json.cgi", node.getIpAddressString());
+            HttpURLConnection con = (HttpURLConnection) new URL(conString).openConnection();
+            con.setConnectTimeout(10000);
+            con.setReadTimeout(15000);
+            if (con.getResponseCode() == 200) {
+                String json;
+                try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
+                    try (BufferedReader bufferedReader = new BufferedReader(reader)) {
+                        json = bufferedReader.lines().collect(Collectors.joining());
+                    }
                 }
+                //Fix HTML injected in JSON
+                int begin = json.indexOf("<!DOCTYPE html>");
+                if (begin != -1) {
+                    json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*</html>)", "{}");
+                    LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), "Stripped html from json");
+                }
+                return JsonParser.parseString(json).getAsJsonObject();
+            } else {
+                throw new HttpStatusCodeException(con.getResponseCode());
             }
-            //Fix HTML injected in JSON
-            int begin = json.indexOf("<!DOCTYPE html>");
-            if (begin != -1) {
-                json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*</html>)", "{}");
-                LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), "Stripped html from json");
-            }
-            return json;
-        } else {
-            throw new HTTPStatusCodeException(con.getResponseCode());
+        } catch (SocketException | SocketTimeoutException | HttpStatusCodeException | JsonSyntaxException e) {
+            throw new NodeCollectionInfoException(e);
+        } catch (RuntimeException e) {
+            throw new NodeCollectionException(e);
         }
     }
 
     @NotNull
     @Contract("_ -> new")
-    private static DataParserSysInfo getDataParser(@NotNull JsonObject sysInfo) throws EmptyJsonException, MalformedSysInfoException {
-        if (sysInfo.size() == 0) {
-            throw new EmptyJsonException();
-        }
-        if (!sysInfo.has("version") || !sysInfo.has("data")) {
-            throw new MalformedSysInfoException();
-        }
-        int version = sysInfo.get("version").getAsInt();
-        JsonObject data = sysInfo.get("data").getAsJsonObject();
-        if (version >= 17) {
-            return new DataParserSysInfoV17(data);
-        } else if (version >= 16) {
-            return new DataParserSysInfoV16(data);
-        } else if (version >= 15) {
-            return new DataParserSysInfoV15(data);
-        } else if (version >= 14) {
-            return new DataParserSysInfoV14(data);
-        } else if (version >= 13) {
-            return new DataParserSysInfoV13(data);
-        } else if (version >= 11) {
-            return new DataParserSysInfoV11(data);
-        } else if (version >= 10) {
-            return new DataParserSysInfoV10(data);
-        } else {
-            return new DataParserSysInfo(data);
+    private static DataParserSysInfo getDataParser(@NotNull JsonObject sysInfo) {
+        try {
+            if (sysInfo.size() == 0) {
+                throw new EmptyJsonException();
+            }
+            if (!sysInfo.has("version") || !sysInfo.has("data")) {
+                throw new MalformedSysInfoException();
+            }
+            int version = sysInfo.get("version").getAsInt();
+            JsonObject data = sysInfo.get("data").getAsJsonObject();
+            if (version >= 17) {
+                return new DataParserSysInfoV17(data);
+            } else if (version >= 16) {
+                return new DataParserSysInfoV16(data);
+            } else if (version >= 15) {
+                return new DataParserSysInfoV15(data);
+            } else if (version >= 14) {
+                return new DataParserSysInfoV14(data);
+            } else if (version >= 13) {
+                return new DataParserSysInfoV13(data);
+            } else if (version >= 11) {
+                return new DataParserSysInfoV11(data);
+            } else if (version >= 10) {
+                return new DataParserSysInfoV10(data);
+            } else {
+                return new DataParserSysInfo(data);
+            }
+        } catch (EmptyJsonException | MalformedSysInfoException e) {
+            throw new NodeCollectionInfoException(e);
         }
     }
 }

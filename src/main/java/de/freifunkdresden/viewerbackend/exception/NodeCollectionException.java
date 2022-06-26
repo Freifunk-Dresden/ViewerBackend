@@ -24,26 +24,26 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
-public class JsonGenerationException extends RuntimeException {
+public class NodeCollectionException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public JsonGenerationException() {
+    public NodeCollectionException() {
     }
 
-    public JsonGenerationException(String message) {
+    public NodeCollectionException(String message) {
         super(message);
     }
 
-    public JsonGenerationException(String message, Throwable cause) {
+    public NodeCollectionException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public JsonGenerationException(Throwable cause) {
+    public NodeCollectionException(Throwable cause) {
         super(cause);
     }
 
-    public JsonGenerationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public NodeCollectionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

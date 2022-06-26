@@ -24,7 +24,7 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
-public class GatewaysCollectionException extends Exception {
+public class GatewaysCollectionException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
