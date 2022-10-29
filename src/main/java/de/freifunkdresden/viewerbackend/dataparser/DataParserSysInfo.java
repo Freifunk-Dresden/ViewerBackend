@@ -45,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataParserSysInfo {
@@ -243,16 +244,44 @@ public class DataParserSysInfo {
         return system.has("cpucount") ? system.get("cpucount").getAsInt() : 0;
     }
 
-    public Airtime getAirtime2g() {
+    public Optional<Airtime> getAirtime2g() {
         return getAirtime("radio2g");
     }
 
-    public Airtime getAirtime5g() {
+    public Optional<Airtime> getAirtime5g() {
         return getAirtime("radio5g");
     }
 
     public TrafficInfo getTraffic() {
         return new TrafficInfoEmpty();
+    }
+
+    public Optional<Integer> getWifiChannel2g() {
+        switch (getRole()) {
+            case STANDARD:
+            case MOBILE:
+                if (getAirtime2g().isPresent()) {
+                    return Optional.of(13);
+                } else {
+                    return Optional.empty();
+                }
+            default:
+                return Optional.empty();
+        }
+    }
+
+    public Optional<Integer> getWifiChannel5g() {
+        switch (getRole()) {
+            case STANDARD:
+            case MOBILE:
+                if (getAirtime5g().isPresent()) {
+                    return Optional.of(44);
+                } else {
+                    return Optional.empty();
+                }
+            default:
+                return Optional.empty();
+        }
     }
 
     private static int parseMinutes(@NotNull String time) {
@@ -263,7 +292,7 @@ public class DataParserSysInfo {
         }
     }
 
-    private Airtime getAirtime(String radio) {
+    private Optional<Airtime> getAirtime(String radio) {
         JsonElement airtime = data.get("airtime");
         if (airtime != null && airtime.getAsJsonObject().has(radio)) {
             String at = airtime.getAsJsonObject().get(radio).getAsString();
@@ -271,17 +300,17 @@ public class DataParserSysInfo {
                 return parseAirtime(at);
             }
         }
-        return Airtime.EMPTY;
+        return Optional.empty();
     }
 
-    private Airtime parseAirtime(@NotNull String airtime) {
+    private Optional<Airtime> parseAirtime(@NotNull String airtime) {
         String[] split = airtime.split(",");
         try {
-            return new Airtime(Long.parseLong(split[0]), Long.parseLong(split[1]), Long.parseLong(split[2]),
-                    Long.parseLong(split[3]));
+            return Optional.of(new Airtime(Long.parseLong(split[0]), Long.parseLong(split[1]), Long.parseLong(split[2]),
+                    Long.parseLong(split[3])));
         } catch (NumberFormatException e) {
             LOGGER.log(Level.ERROR, String.format("Airtime format (Node: %d)", getNodeId()), e);
-            return Airtime.EMPTY;
+            return Optional.empty();
         }
     }
 }

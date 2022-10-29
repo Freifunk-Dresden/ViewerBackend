@@ -50,12 +50,14 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class NodeSysInfoThread implements Runnable {
@@ -76,15 +78,16 @@ public class NodeSysInfoThread implements Runnable {
             return;
         }
         try {
-            node.setDpSysInfo(getDataParser(getSysInfo()));
-            return;
-        } catch (NoRouteToHostException ignored) {
-            // Empty on purpose
+            Optional<JsonObject> sysInfo = getSysInfo();
+            if (sysInfo.isPresent()) {
+                node.setDpSysInfo(getDataParser(sysInfo.get()));
+                return;
+            }
         } catch (NodeCollectionInfoException e) {
             if (round == RETRY_COUNT && !e.getMessage().startsWith("No route to host")) {
                 LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), e.getMessage());
             }
-        } catch (RuntimeException | IOException e) {
+        } catch (RuntimeException e) {
             LOGGER.log(Level.ERROR, String.format("Node %s: ", node.getId()), e);
         }
         if (round < RETRY_COUNT) {
@@ -93,7 +96,7 @@ public class NodeSysInfoThread implements Runnable {
         }
     }
 
-    private JsonObject getSysInfo() throws IOException {
+    private Optional<JsonObject> getSysInfo() {
         try {
             String conString = String.format("http://%s/sysinfo-json.cgi", node.getIpAddressString());
             HttpURLConnection con = (HttpURLConnection) new URL(conString).openConnection();
@@ -112,13 +115,16 @@ public class NodeSysInfoThread implements Runnable {
                     json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*</html>)", "{}");
                     LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), "Stripped html from json");
                 }
-                return JsonParser.parseString(json).getAsJsonObject();
+                return Optional.of(JsonParser.parseString(json).getAsJsonObject());
             } else {
                 throw new HttpStatusCodeException(con.getResponseCode());
             }
-        } catch (SocketException | SocketTimeoutException | HttpStatusCodeException | JsonSyntaxException e) {
+        } catch (NoRouteToHostException ignored) {
+            return Optional.empty();
+        } catch (UncheckedIOException | SocketException | SocketTimeoutException | HttpStatusCodeException |
+                 JsonSyntaxException e) {
             throw new NodeCollectionInfoException(e);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | IOException e) {
             throw new NodeCollectionException(e);
         }
     }

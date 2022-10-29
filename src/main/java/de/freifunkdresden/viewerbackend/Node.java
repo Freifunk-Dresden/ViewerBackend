@@ -37,6 +37,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 public class Node {
@@ -425,32 +426,46 @@ public class Node {
         return 0;
     }
 
-    public Airtime getAirtime2g() {
+    public Optional<Airtime> getAirtime2g() {
         if (dpSysInfo != null) {
             if (IGNORE_AIRTIME.contains(dpSysInfo.getFirmwareTarget())) {
-                return Airtime.EMPTY;
+                return Optional.empty();
             }
             return dpSysInfo.getAirtime2g();
         }
-        return Airtime.EMPTY;
+        return Optional.empty();
     }
 
-    public Airtime getAirtime5g() {
+    public Optional<Airtime> getAirtime5g() {
         if (dpSysInfo != null) {
             if (IGNORE_AIRTIME.contains(dpSysInfo.getFirmwareTarget())) {
-                return Airtime.EMPTY;
+                return Optional.empty();
             }
             return dpSysInfo.getAirtime5g();
         }
-        return Airtime.EMPTY;
+        return Optional.empty();
     }
 
-    public Airtime getAirtime2GOld() {
-        return airtime2GOld;
+    public Optional<Airtime> getAirtime2GOld() {
+        return Optional.ofNullable(airtime2GOld);
     }
 
-    public Airtime getAirtime5GOld() {
-        return airtime5GOld;
+    public Optional<Airtime> getAirtime5GOld() {
+        return Optional.ofNullable(airtime5GOld);
+    }
+
+    public Optional<Integer> getWifiChannel2g() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getWifiChannel2g();
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Integer> getWifiChannel5g() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getWifiChannel5g();
+        }
+        return Optional.empty();
     }
 
     public TrafficInfo getTraffic() {

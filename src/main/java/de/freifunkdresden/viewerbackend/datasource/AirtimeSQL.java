@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,29 +43,26 @@ public class AirtimeSQL {
     private AirtimeSQL() {
     }
 
+    @Nullable
     public static Airtime getAirtime2G(Node n) {
         return getAirtime(n, 2);
     }
 
+    @Nullable
     public static Airtime getAirtime5G(Node n) {
         return getAirtime(n, 5);
     }
 
     public static void updateAirtime2G(@NotNull Node n) {
-        Airtime at = n.getAirtime2g();
-        if (!Airtime.EMPTY.equals(at)) {
-            updateAirtime(n.getId(), 2, at);
-        }
+        n.getAirtime2g().ifPresent(airtime -> updateAirtime(n.getId(), 2, airtime));
     }
 
     public static void updateAirtime5G(@NotNull Node n) {
-        Airtime at = n.getAirtime5g();
-        if (!Airtime.EMPTY.equals(at)) {
-            updateAirtime(n.getId(), 5, at);
-        }
+        n.getAirtime5g().ifPresent(airtime -> updateAirtime(n.getId(), 5, airtime));
     }
 
-    private static Airtime getAirtime(Node n, int type) {
+    @Nullable
+    private static Airtime getAirtime(@NotNull Node n, int type) {
         try (ResultSet rs = DataGen.getDB().querySelect("SELECT * FROM airtime WHERE id = ? AND type = ?",
                 n.getId(), type)) {
             if (rs.next()) {
@@ -77,7 +75,7 @@ public class AirtimeSQL {
         } catch (SQLException ex) {
             LOGGER.log(Level.ERROR, String.format("DB Airtime %d", n.getId()), ex);
         }
-        return Airtime.EMPTY;
+        return null;
     }
 
     private static void updateAirtime(int id, int type, @NotNull Airtime at) {
