@@ -31,6 +31,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
+
 public class DataParserSysInfoV17 extends DataParserSysInfoV16 {
 
     private static final Logger LOGGER = LogManager.getLogger(DataParserSysInfoV17.class);
@@ -69,5 +71,31 @@ public class DataParserSysInfoV17 extends DataParserSysInfoV16 {
             return trafficInfo;
         }
         return new TrafficInfoEmpty();
+    }
+
+    @Override
+    public Optional<Integer> getWifiChannel2g() {
+        JsonElement wifiChannel2g = data.get("system").getAsJsonObject().get("wifi_2g_channel");
+        if (wifiChannel2g != null) {
+            try {
+                return Optional.of(wifiChannel2g.getAsInt());
+            } catch (NumberFormatException e) {
+                LOGGER.log(Level.WARN, "Node {}: invalid 2g channel number '{}'", getNodeId(), e.getMessage());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Integer> getWifiChannel5g() {
+        JsonElement wifiChannel5g = data.get("system").getAsJsonObject().get("wifi_5g_channel");
+        if (wifiChannel5g != null) {
+            try {
+                return Optional.of(wifiChannel5g.getAsInt());
+            } catch (NumberFormatException e) {
+                LOGGER.log(Level.WARN, "Node {}: invalid 5g channel number '{}'", getNodeId(), e.getMessage());
+            }
+        }
+        return Optional.empty();
     }
 }

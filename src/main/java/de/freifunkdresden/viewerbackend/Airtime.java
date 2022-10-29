@@ -24,6 +24,9 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 public class Airtime {
@@ -83,14 +86,9 @@ public class Airtime {
         return this.equals(EMPTY);
     }
 
-    public static Airtime diff(Airtime a, Airtime b) {
-        if (a == null && b == null) {
-            return Airtime.EMPTY;
-        } else if (a == null) {
-            return b;
-        } else if (b == null) {
-            return a;
-        }
+    @NotNull
+    @Contract("_, _ -> new")
+    public static Airtime diff(@NotNull Airtime a, @NotNull Airtime b) {
         return new Airtime(a.getActive() < b.getActive() ? a.getActive() : a.getActive() - b.getActive(),
                 a.getBusy() < b.getBusy() ? a.getBusy() : a.getBusy() - b.getBusy(),
                 a.getReceive() < b.getReceive() ? a.getReceive() : a.getReceive() - b.getReceive(),

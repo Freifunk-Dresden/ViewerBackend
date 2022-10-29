@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class StatsSQL {
@@ -178,26 +179,28 @@ public class StatsSQL {
                             .tag("node", String.valueOf(e.getId()))
                             .addField("value", e.getUptime())
                             .build());
-                    Airtime airtime2g = e.getAirtime2g();
-                    if (!airtime2g.isEmpty()) {
+                    Optional<Airtime> airtime2g = e.getAirtime2g();
+                    if (airtime2g.isPresent()) {
+                        Airtime airtime = airtime2g.get();
                         nodeAirtime.add(Point.measurement("node_airtime_2g")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", airtime2g.getActive())
-                                .addField("busy", airtime2g.getBusy())
-                                .addField("receive", airtime2g.getReceive())
-                                .addField("transmit", airtime2g.getTransmit())
+                                .addField("active", airtime.getActive())
+                                .addField("busy", airtime.getBusy())
+                                .addField("receive", airtime.getReceive())
+                                .addField("transmit", airtime.getTransmit())
                                 .build());
                     }
-                    Airtime airtime5g = e.getAirtime5g();
-                    if (!airtime5g.isEmpty()) {
+                    Optional<Airtime> airtime5g = e.getAirtime5g();
+                    if (airtime5g.isPresent()) {
+                        Airtime airtime = airtime5g.get();
                         nodeAirtime.add(Point.measurement("node_airtime_5g")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", airtime5g.getActive())
-                                .addField("busy", airtime5g.getBusy())
-                                .addField("receive", airtime5g.getReceive())
-                                .addField("transmit", airtime5g.getTransmit())
+                                .addField("active", airtime.getActive())
+                                .addField("busy", airtime.getBusy())
+                                .addField("receive", airtime.getReceive())
+                                .addField("transmit", airtime.getTransmit())
                                 .build());
                     }
                     TrafficInfo t = e.getTraffic();
