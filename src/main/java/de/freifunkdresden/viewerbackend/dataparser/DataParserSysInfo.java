@@ -305,10 +305,14 @@ public class DataParserSysInfo {
 
     private Optional<Airtime> parseAirtime(@NotNull String airtime) {
         String[] split = airtime.split(",");
+        if (split.length != 4) {
+            LOGGER.log(Level.WARN, "Malformed airtime string (Node: {})", getNodeId());
+            return Optional.empty();
+        }
         try {
             return Optional.of(new Airtime(Long.parseLong(split[0]), Long.parseLong(split[1]), Long.parseLong(split[2]),
                     Long.parseLong(split[3])));
-        } catch (NumberFormatException e) {
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             LOGGER.log(Level.ERROR, String.format("Airtime format (Node: %d)", getNodeId()), e);
             return Optional.empty();
         }
