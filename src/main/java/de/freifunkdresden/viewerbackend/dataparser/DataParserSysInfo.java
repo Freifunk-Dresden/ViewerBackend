@@ -56,8 +56,8 @@ public class DataParserSysInfo {
     private final JsonObject stats;
     private final long lastSeen = System.currentTimeMillis();
     protected Community community;
-    protected AtomicInteger linkCountFastD = new AtomicInteger(0);
-    protected AtomicInteger linkCountWireGuard = new AtomicInteger(0);
+    protected final AtomicInteger linkCountFastD = new AtomicInteger(0);
+    protected final AtomicInteger linkCountWireGuard = new AtomicInteger(0);
     protected Collection<Link> linkCollection = Collections.emptyList();
     protected boolean linksProcessed = false;
 
@@ -258,29 +258,31 @@ public class DataParserSysInfo {
 
     public Optional<Integer> getWifiChannel2g() {
         switch (getRole()) {
-            case STANDARD:
-            case MOBILE:
+            case STANDARD, MOBILE -> {
                 if (getAirtime2g().isPresent()) {
                     return Optional.of(13);
                 } else {
                     return Optional.empty();
                 }
-            default:
+            }
+            default -> {
                 return Optional.empty();
+            }
         }
     }
 
     public Optional<Integer> getWifiChannel5g() {
         switch (getRole()) {
-            case STANDARD:
-            case MOBILE:
+            case STANDARD, MOBILE -> {
                 if (getAirtime5g().isPresent()) {
                     return Optional.of(44);
                 } else {
                     return Optional.empty();
                 }
-            default:
+            }
+            default -> {
                 return Optional.empty();
+            }
         }
     }
 

@@ -24,6 +24,8 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum Community {
     DRESDEN("Dresden"),
     LEIPZIG("Leipzig"),
@@ -42,7 +44,7 @@ public enum Community {
         this.name = name;
     }
 
-    Community(Community community) {
+    Community(@NotNull Community community) {
         this.name = community.name;
     }
 
@@ -54,33 +56,16 @@ public enum Community {
         if (community == null) {
             return DEFAULT;
         }
-        switch (community) {
-            case "Dresden":
-                return DRESDEN;
-            case "Leipzig":
-                return LEIPZIG;
-            case "Meißen":
-            case "Meissen":
-            case "Radebeul":
-            case "Dresden NW":
-                return DRESDEN_NW;
-            case "Dresden NO":
-                return DRESDEN_NO;
-            case "Dresden SO":
-                return DRESDEN_SO;
-            case "Freiberg":
-            case "Freital":
-            case "Tharandt":
-            case "Dresden SW":
-                return DRESDEN_SW;
-            case "OL":
-            case "O.L.":
-            case "Oberlausitz":
-                return OBERLAUSITZ;
-            case "Pirna":
-                return PIRNA;
-            default:
-                return DEFAULT;
-        }
+        return switch (community) {
+            case "Dresden" -> DRESDEN;
+            case "Leipzig" -> LEIPZIG;
+            case "Meißen", "Meissen", "Radebeul", "Dresden NW" -> DRESDEN_NW;
+            case "Dresden NO" -> DRESDEN_NO;
+            case "Dresden SO" -> DRESDEN_SO;
+            case "Freiberg", "Freital", "Tharandt", "Dresden SW" -> DRESDEN_SW;
+            case "OL", "O.L.", "Oberlausitz" -> OBERLAUSITZ;
+            case "Pirna" -> PIRNA;
+            default -> DEFAULT;
+        };
     }
 }

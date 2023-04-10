@@ -27,39 +27,7 @@ package de.freifunkdresden.viewerbackend;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
-public class Airtime {
-
-    public static final Airtime EMPTY = new Airtime(0, 0, 0, 0);
-
-    private final long active;
-    private final long busy;
-    private final long receive;
-    private final long transmit;
-
-    public Airtime(long active, long busy, long receive, long transmit) {
-        this.active = active;
-        this.busy = busy;
-        this.receive = receive;
-        this.transmit = transmit;
-    }
-
-    public long getActive() {
-        return active;
-    }
-
-    public long getBusy() {
-        return busy;
-    }
-
-    public long getReceive() {
-        return receive;
-    }
-
-    public long getTransmit() {
-        return transmit;
-    }
+public record Airtime(long active, long busy, long receive, long transmit) {
 
     @Override
     public boolean equals(Object o) {
@@ -73,25 +41,16 @@ public class Airtime {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(active, busy, receive, transmit);
-    }
-
-    @Override
     public String toString() {
         return String.format("a: %d \t b: %d \t r: %d \t t: %d", active, busy, receive, transmit);
-    }
-
-    public boolean isEmpty() {
-        return this.equals(EMPTY);
     }
 
     @NotNull
     @Contract("_, _ -> new")
     public static Airtime diff(@NotNull Airtime a, @NotNull Airtime b) {
-        return new Airtime(a.getActive() < b.getActive() ? a.getActive() : a.getActive() - b.getActive(),
-                a.getBusy() < b.getBusy() ? a.getBusy() : a.getBusy() - b.getBusy(),
-                a.getReceive() < b.getReceive() ? a.getReceive() : a.getReceive() - b.getReceive(),
-                a.getTransmit() < b.getTransmit() ? a.getTransmit() : a.getTransmit() - b.getTransmit());
+        return new Airtime(a.active() < b.active() ? a.active() : a.active() - b.active(),
+                a.busy() < b.busy() ? a.busy() : a.busy() - b.busy(),
+                a.receive() < b.receive() ? a.receive() : a.receive() - b.receive(),
+                a.transmit() < b.transmit() ? a.transmit() : a.transmit() - b.transmit());
     }
 }

@@ -185,10 +185,10 @@ public class StatsSQL {
                         nodeAirtime.add(Point.measurement("node_airtime_2g")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", airtime.getActive())
-                                .addField("busy", airtime.getBusy())
-                                .addField("receive", airtime.getReceive())
-                                .addField("transmit", airtime.getTransmit())
+                                .addField("active", airtime.active())
+                                .addField("busy", airtime.busy())
+                                .addField("receive", airtime.receive())
+                                .addField("transmit", airtime.transmit())
                                 .build());
                     }
                     Optional<Airtime> airtime5g = e.getAirtime5g();
@@ -197,10 +197,10 @@ public class StatsSQL {
                         nodeAirtime.add(Point.measurement("node_airtime_5g")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", airtime.getActive())
-                                .addField("busy", airtime.getBusy())
-                                .addField("receive", airtime.getReceive())
-                                .addField("transmit", airtime.getTransmit())
+                                .addField("active", airtime.active())
+                                .addField("busy", airtime.busy())
+                                .addField("receive", airtime.receive())
+                                .addField("transmit", airtime.transmit())
                                 .build());
                     }
                     TrafficInfo t = e.getTraffic();

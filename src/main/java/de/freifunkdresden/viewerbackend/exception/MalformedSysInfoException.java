@@ -24,8 +24,11 @@
 
 package de.freifunkdresden.viewerbackend.exception;
 
+import java.io.Serial;
+
 public class MalformedSysInfoException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Override

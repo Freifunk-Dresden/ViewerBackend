@@ -97,27 +97,19 @@ public class Node {
     }
 
     public boolean isShown() {
-        switch (getRole()) {
-            case STANDARD:
-                return hasValidLocation();
-            case MOBILE:
-                return hasValidLocation() && isOnline()
-                        && isFWVersionHigher(6, 0, 9);
-            case SERVER:
-            default:
-                return false;
-        }
+        return switch (getRole()) {
+            case STANDARD -> hasValidLocation();
+            case MOBILE -> hasValidLocation() && isOnline()
+                    && isFWVersionHigher(6, 0, 9);
+            case SERVER -> false;
+        };
     }
 
     public boolean canHasClients() {
-        switch (getRole()) {
-            case STANDARD:
-            case MOBILE:
-                return true;
-            case SERVER:
-            default:
-                return false;
-        }
+        return switch (getRole()) {
+            case STANDARD, MOBILE -> true;
+            case SERVER -> false;
+        };
     }
 
     public boolean isOnline() {
@@ -505,8 +497,8 @@ public class Node {
         Double lon = null;
         if (hasValidLocation()) {
             Location l = getLocation();
-            lat = l.getLatitude();
-            lon = l.getLongitude();
+            lat = l.latitude();
+            lon = l.longitude();
         }
         String community = getCommunity().getName();
         String role = getRole().name();

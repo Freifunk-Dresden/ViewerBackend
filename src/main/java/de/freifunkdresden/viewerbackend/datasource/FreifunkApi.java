@@ -37,7 +37,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -55,12 +56,12 @@ public class FreifunkApi {
         Path cacheFile = DataGen.getCache().resolveCacheFile(API_CACHE_FILE_NAME);
         String apiUrl = DataGen.getConfig().getValue("api_url");
         try {
-            URLConnection con = new URL(apiUrl).openConnection();
+            URLConnection con = new URI(apiUrl).toURL().openConnection();
             try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)) {
                 JsonArray api = JsonParser.parseReader(reader).getAsJsonArray();
                 Files.writeString(cacheFile, new Gson().toJson(api), StandardCharsets.UTF_8);
             }
-        } catch (RuntimeException | IOException e) {
+        } catch (RuntimeException | IOException | URISyntaxException e) {
             LOGGER.log(Level.WARN, "API download failed", e);
         }
     }

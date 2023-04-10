@@ -236,10 +236,10 @@ public class JsonNodeGen {
     @Nullable
     private static JsonObject getJsonAirtime(@Nullable Airtime diff, int freq) {
         if (diff != null) {
-            double a = diff.getActive();
-            double b = diff.getBusy();
-            double r = diff.getReceive();
-            double t = diff.getTransmit();
+            double a = diff.active();
+            double b = diff.busy();
+            double r = diff.receive();
+            double t = diff.transmit();
             double busy = b / a;
             double rx = r / a;
             double tx = t / a;
@@ -259,8 +259,8 @@ public class JsonNodeGen {
     @Nullable
     private static Number getWirelessAirtime(@Nullable Airtime diff) {
         if (diff != null) {
-            double b = diff.getBusy();
-            double a = diff.getActive();
+            double b = diff.busy();
+            double a = diff.active();
             double airtime = b / a;
             return Double.isFinite(airtime) ? airtime : null;
         }

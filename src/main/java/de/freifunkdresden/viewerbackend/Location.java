@@ -25,11 +25,12 @@
 package de.freifunkdresden.viewerbackend;
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Location {
+public record Location(double latitude, double longitude) {
 
     private static final List<Location> INVALID_LOCATIONS = Arrays.asList(
             new Location(51.05405, 13.74364),
@@ -38,26 +39,11 @@ public class Location {
             new Location(51.05448, 13.74362)
     );
 
-    private final double latitude;
-    private final double longitude;
-
-    public Location(double latitude, double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
     public boolean isValid() {
         return !(INVALID_LOCATIONS.contains(this) || Double.isNaN(latitude) || Double.isNaN(longitude));
     }
 
+    @NotNull
     public JsonObject toJson() {
         JsonObject location = new JsonObject();
         location.addProperty("latitude", latitude);

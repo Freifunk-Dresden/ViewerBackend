@@ -35,14 +35,10 @@ public class DataParserSysInfoV13 extends DataParserSysInfoV11 {
 
     @Override
     public NodeType getRole() {
-        switch (data.get("system").getAsJsonObject().get("node_type").getAsString().toLowerCase()) {
-            default:
-            case "node":
-                return NodeType.STANDARD;
-            case "mobile":
-                return NodeType.MOBILE;
-            case "server":
-                return NodeType.SERVER;
-        }
+        return switch (data.get("system").getAsJsonObject().get("node_type").getAsString().toLowerCase()) {
+            default -> NodeType.STANDARD;
+            case "mobile" -> NodeType.MOBILE;
+            case "server" -> NodeType.SERVER;
+        };
     }
 }

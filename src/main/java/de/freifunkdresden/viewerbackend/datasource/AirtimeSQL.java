@@ -82,7 +82,7 @@ public class AirtimeSQL {
         DataGen.getDB().queryUpdate("INSERT INTO airtime SET id = ?, type = ?, active = ?, busy = ?, " +
                         "receive = ?, transmit = ? ON DUPLICATE KEY UPDATE active = ?, busy = ?, receive = ?, " +
                         "transmit = ?",
-                id, type, at.getActive(), at.getBusy(), at.getReceive(), at.getTransmit(), at.getActive(), at.getBusy(),
-                at.getReceive(), at.getTransmit());
+                id, type, at.active(), at.busy(), at.receive(), at.transmit(), at.active(), at.busy(),
+                at.receive(), at.transmit());
     }
 }

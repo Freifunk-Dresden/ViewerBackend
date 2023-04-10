@@ -46,7 +46,7 @@ public class LocalDataCollector {
 
     public static void collectRoutes() throws RouteCollectionException {
         try {
-            Process process = Runtime.getRuntime().exec("ip r list table bat_route");
+            Process process = new ProcessBuilder("ip", "r", "list", "table", "bat_route").start();
             process.waitFor(200, TimeUnit.MILLISECONDS);
             InputStream inputStream = process.getInputStream();
             String routes = new String(inputStream.readAllBytes());
@@ -71,7 +71,7 @@ public class LocalDataCollector {
 
     public static void collectGateways() throws GatewaysCollectionException {
         try {
-            Process process = Runtime.getRuntime().exec("sudo /usr/sbin/bmxd -c --gateways");
+            Process process = new ProcessBuilder("sudo", "/usr/sbin/bmxd", "-c", "--gateways").start();
             process.waitFor(200, TimeUnit.MILLISECONDS);
             InputStream inputStream = process.getInputStream();
             String gateways = new String(inputStream.readAllBytes());

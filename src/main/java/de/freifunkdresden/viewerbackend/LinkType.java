@@ -51,39 +51,20 @@ public enum LinkType {
 
     @Contract(pure = true)
     public static LinkType getTypeByInterface(@NotNull String interfaceName) {
-        switch (interfaceName.toLowerCase()) {
-            case "wlan0":
-            case "mesh-80211s":
-            case "mesh-adhoc":
-            case "mesh2g-80211s":
-            case "mesh5g-80211s":
-                return LinkType.WIRELESS;
-            case "br-tbb":
-            case "br-meshwire":
-            case "br-mesh_lan":
-            case "br-mesh_wan":
-                return LinkType.OTHER;
-            case "tbb-fastd":
-            case "tbb_fastd":
-            case "tbb_fastd2":
-            default:
-                return LinkType.TUNNEL;
-        }
+        return switch (interfaceName.toLowerCase()) {
+            case "wlan0", "mesh-80211s", "mesh-adhoc", "mesh2g-80211s", "mesh5g-80211s" -> LinkType.WIRELESS;
+            case "br-tbb", "br-meshwire", "br-mesh_lan", "br-mesh_wan" -> LinkType.OTHER;
+            default -> LinkType.TUNNEL; // Implicit "tbb-fastd", "tbb_fastd", "tbb_fastd2"
+        };
     }
 
     @Contract(pure = true)
     public static LinkType getTypeByType(@NotNull String type) {
-        switch (type.toLowerCase()) {
-            case "lan":
-                return LinkType.OTHER;
-            case "wifi":
-            case "wifi_mesh":
-            case "wifi_adhoc":
-                return LinkType.WIRELESS;
-            case "backbone":
-            default:
-                return LinkType.TUNNEL;
-        }
+        return switch (type.toLowerCase()) {
+            case "lan" -> LinkType.OTHER;
+            case "wifi", "wifi_mesh", "wifi_adhoc" -> LinkType.WIRELESS;
+            default -> LinkType.TUNNEL; // Implicit "backbone"
+        };
     }
 
     public static LinkType getTypeFromLink(@NotNull JsonObject l) {

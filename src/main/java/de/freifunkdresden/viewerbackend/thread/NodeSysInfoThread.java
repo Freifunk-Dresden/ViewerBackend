@@ -55,7 +55,8 @@ import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -99,7 +100,7 @@ public class NodeSysInfoThread implements Runnable {
     private Optional<JsonObject> getSysInfo() {
         try {
             String conString = String.format("http://%s/sysinfo-json.cgi", node.getIpAddressString());
-            HttpURLConnection con = (HttpURLConnection) new URL(conString).openConnection();
+            HttpURLConnection con = (HttpURLConnection) new URI(conString).toURL().openConnection();
             con.setConnectTimeout(10000);
             con.setReadTimeout(15000);
             if (con.getResponseCode() == 200) {
@@ -124,7 +125,7 @@ public class NodeSysInfoThread implements Runnable {
         } catch (UncheckedIOException | SocketException | SocketTimeoutException | HttpStatusCodeException |
                  JsonSyntaxException e) {
             throw new NodeCollectionInfoException(e);
-        } catch (RuntimeException | IOException e) {
+        } catch (RuntimeException | IOException | URISyntaxException e) {
             throw new NodeCollectionException(e);
         }
     }
