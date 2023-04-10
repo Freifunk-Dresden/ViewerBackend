@@ -143,17 +143,17 @@ public class NodeSysInfoThread implements Runnable {
             JsonObject data = sysInfo.get("data").getAsJsonObject();
             if (version >= 17) {
                 return new DataParserSysInfoV17(data);
-            } else if (version >= 16) {
+            } else if (version == 16) {
                 return new DataParserSysInfoV16(data);
-            } else if (version >= 15) {
+            } else if (version == 15) {
                 return new DataParserSysInfoV15(data);
-            } else if (version >= 14) {
+            } else if (version == 14) {
                 return new DataParserSysInfoV14(data);
-            } else if (version >= 13) {
+            } else if (version == 13) {
                 return new DataParserSysInfoV13(data);
             } else if (version >= 11) {
                 return new DataParserSysInfoV11(data);
-            } else if (version >= 10) {
+            } else if (version == 10) {
                 return new DataParserSysInfoV10(data);
             } else {
                 return new DataParserSysInfo(data);

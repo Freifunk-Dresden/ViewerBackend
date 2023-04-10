@@ -477,7 +477,10 @@ public class Node {
 
     public String getHostname() {
         String name = getName();
-        return (name == null || name.isEmpty()) ? String.valueOf(id) : id + "-" + name;
+        if (name == null || name.isBlank() || DataGen.getWordFilter().check(name)) {
+            return String.valueOf(id);
+        }
+        return String.format("%d - %s", id, name);
     }
 
     public String getFakeMac() {

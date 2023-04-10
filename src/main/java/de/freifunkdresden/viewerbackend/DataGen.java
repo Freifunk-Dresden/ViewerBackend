@@ -29,6 +29,7 @@ import de.freifunkdresden.viewerbackend.datasource.FreifunkApi;
 import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
 import de.freifunkdresden.viewerbackend.exception.NodeCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
+import de.freifunkdresden.viewerbackend.filter.WordFilter;
 import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
@@ -58,6 +59,7 @@ public class DataGen {
     private static final ExecutorService POOL = Executors.newFixedThreadPool(10);
     private static final Config CONFIG = new Config();
     private static final Cache CACHE = new Cache();
+    private static final WordFilter WORD_FILTER = new WordFilter();
     private static boolean debug = false;
     private static MySQL mysqlDb;
     private static Influx influxDb;
@@ -82,6 +84,10 @@ public class DataGen {
         return CACHE;
     }
 
+    public static WordFilter getWordFilter() {
+        return WORD_FILTER;
+    }
+
     public static boolean isDebug() {
         return debug;
     }
@@ -94,6 +100,7 @@ public class DataGen {
         try {
             CONFIG.loadConfig();
             CACHE.initialize();
+            WORD_FILTER.setup();
             setupDatabase();
             processFreifunkApi();
             collectLocalData();
