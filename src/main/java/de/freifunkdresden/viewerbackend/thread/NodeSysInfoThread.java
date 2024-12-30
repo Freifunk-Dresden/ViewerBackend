@@ -36,6 +36,7 @@ import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV14;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV15;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV16;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV17;
+import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfoV18;
 import de.freifunkdresden.viewerbackend.exception.EmptyJsonException;
 import de.freifunkdresden.viewerbackend.exception.HttpStatusCodeException;
 import de.freifunkdresden.viewerbackend.exception.MalformedSysInfoException;
@@ -142,7 +143,9 @@ public class NodeSysInfoThread implements Runnable {
             }
             int version = sysInfo.get("version").getAsInt();
             JsonObject data = sysInfo.get("data").getAsJsonObject();
-            if (version >= 17) {
+            if (version >= 18) {
+                return new DataParserSysInfoV18(data);
+            } else if (version == 17) {
                 return new DataParserSysInfoV17(data);
             } else if (version == 16) {
                 return new DataParserSysInfoV16(data);

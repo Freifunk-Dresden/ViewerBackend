@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2020 Niklas Merkelt.
+ * Copyright 2021 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,36 +26,26 @@ package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class TrafficInfoV15 extends TrafficInfo {
+public class DataParserSysInfoV18 extends DataParserSysInfoV17 {
+
+    private static final Logger LOGGER = LogManager.getLogger(DataParserSysInfoV18.class);
+
+    public DataParserSysInfoV18(JsonObject data) {
+        super(data);
+    }
 
     @Override
-    public void readValues(JsonObject stats) {
-        boolean fromTo = false;
-        for (Interface out : Interface.values()) {
-            for (Interface in : Interface.values()) {
-                String name = String.format("traffic_%s_%s", out.getInterfaceNamePre17(), in.getInterfaceNamePre17());
-                JsonElement j = stats.get(name);
-                if (j != null && !j.getAsString().isEmpty()) {
-                    fromTo = true;
-                    trafficOut.put(out, getOutput(out) + j.getAsLong());
-                    trafficIn.put(in, getInput(in) + j.getAsLong());
-                }
-            }
+    public TrafficInfo getTraffic() {
+        JsonElement statistic = data.get("statistic");
+        if (statistic != null) {
+            JsonElement network = statistic.getAsJsonObject().get("network");
+            TrafficInfo trafficInfo = new TrafficInfoV18();
+            trafficInfo.readValues(network.getAsJsonObject());
+            return trafficInfo;
         }
-        if (fromTo) {
-            return;
-        }
-        for (Interface i : Interface.values()) {
-            String name = String.format("traffic_%s", i.getInterfaceNamePre17());
-            JsonElement j = stats.get(name);
-            if (j != null) {
-                String[] t = j.getAsString().split(",");
-                if (t.length == 2) {
-                    trafficIn.put(i, Long.parseLong(t[0]));
-                    trafficOut.put(i, Long.parseLong(t[1]));
-                }
-            }
-        }
+        return new TrafficInfoEmpty();
     }
 }

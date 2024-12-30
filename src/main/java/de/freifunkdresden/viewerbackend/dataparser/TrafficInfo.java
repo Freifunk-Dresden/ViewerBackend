@@ -25,8 +25,9 @@
 package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -37,7 +38,7 @@ public abstract class TrafficInfo {
     protected final Map<Interface, Long> trafficIn = new EnumMap<>(Interface.class);
     protected final Map<Interface, Long> trafficOut = new EnumMap<>(Interface.class);
 
-    public abstract void readValues(JsonObject stats);
+    public abstract void readValues(JsonObject json);
 
     public boolean isEmpty() {
         return trafficIn.isEmpty() && trafficOut.isEmpty();
@@ -60,37 +61,104 @@ public abstract class TrafficInfo {
         StringBuilder sb = new StringBuilder();
         for (Interface i : Interface.values()) {
             if (hasInterface(i)) {
-                sb.append(String.format("%s: %d<>%d%n", i.name().toLowerCase(), getInput(i), getOutput(i)));
+                sb.append(String.format("%s: %d<>%d%n", i.name(), getInput(i), getOutput(i)));
             }
         }
         return sb.toString();
     }
 
     public enum Interface {
-        LAN,
-        WAN,
-        ADHOC("wifi_adhoc"),
-        AP("wifi2"),
-        OVPN,
-        GWT("ffgw"),
-        PRIVNET,
-        TBB_FASTD("tbb_fastd"),
-        TBB_WG("tbb_wg"),
-        MESH_LAN("mesh_lan"),
-        MESH_WAN("mesh_wan"),
-        MESH_VLAN("mesh_vlan"),
-        MESH2G("wifi_mesh2g"),
-        MESH5G("wifi_mesh5g"),
+        WAN(
+                new String[]{"wan"},
+                NetworkInfoType.BASIC,
+                "wan"
+        ),
+        ADHOC(
+                new String[]{"adhoc"},
+                NetworkInfoType.NO_NETWORK,
+                null,
+                "wifi_adhoc"
+        ),
+        AP(
+                new String[]{"ap"},
+                NetworkInfoType.BASIC,
+                "ap",
+                "wifi2"
+        ),
+        OVPN(
+                new String[]{"ovpn"},
+                NetworkInfoType.BASIC,
+                "vpn"
+        ),
+        TBB_FASTD(
+                new String[]{"tbb_fastd"},
+                NetworkInfoType.DETAILS,
+                "backbone_mesh_fastd",
+                "tbb_fastd"
+        ),
+        TBB_WG(
+                new String[]{"tbb_wg"},
+                NetworkInfoType.DETAILS,
+                "backbone_mesh_wg",
+                "tbb_wg"
+        ),
+        MESH_CABLE(
+                new String[]{"mesh_lan", "mesh_wan", "mesh_vlan"},
+                NetworkInfoType.BASIC,
+                "cable_mesh",
+                "mesh_lan", "mesh_wan", "mesh_vlan"
+        ),
+        MESH2G(
+                new String[]{"mesh2g"},
+                NetworkInfoType.DETAILS,
+                "wifi_mesh_2g",
+                "wifi_mesh2g"
+        ),
+        MESH5G(
+                new String[]{"mesh5g"},
+                NetworkInfoType.DETAILS,
+                "wifi_mesh_5g",
+                "wifi_mesh5g"
+        ),
         ;
 
-        private final List<String> interfaceNames = new ArrayList<>();
+        private final List<String> interfaceNamePre17;
+        private final NetworkInfoType networkInfoType;
+        private final String networkName;
+        private final List<String> interfaceNames;
 
-        Interface(String... interfaceNames) {
-            this.interfaceNames.addAll(Arrays.asList(interfaceNames));
+        Interface(@NotNull String[] interfaceNamePre17, @NotNull NetworkInfoType networkType, @Nullable String networkName, @NotNull String... interfaceNames) {
+            this.interfaceNamePre17 = Arrays.asList(interfaceNamePre17);
+            this.networkInfoType = networkType;
+            this.networkName = networkName;
+            this.interfaceNames = Arrays.asList(interfaceNames);
         }
 
-        public List<String> getInterfaceNames() {
+        public @NotNull List<String> getInterfaceNamePre17() {
+            return interfaceNamePre17;
+        }
+
+        public @NotNull String getStatName() {
+            return this.name().toLowerCase();
+        }
+
+        public @NotNull NetworkInfoType getNetworkInfoType() {
+            return networkInfoType;
+        }
+
+        public @Nullable String getNetworkName() {
+            return networkName;
+        }
+
+        public @NotNull List<String> getInterfaceNames() {
             return interfaceNames;
+        }
+
+        public enum NetworkInfoType {
+            NO_NETWORK,
+            BASIC,
+            DETAILS,
+            ;
         }
     }
 }
