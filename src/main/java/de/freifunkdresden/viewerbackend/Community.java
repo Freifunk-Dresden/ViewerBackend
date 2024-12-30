@@ -31,6 +31,7 @@ public enum Community {
     LEIPZIG("Leipzig"),
     OBERLAUSITZ("Oberlausitz"),
     PIRNA("Pirna"),
+    GERINGSWALDE("Geringswalde"),
     DRESDEN_NW("Dresden Nord-West"),
     DRESDEN_NO("Dresden Nord-Ost"),
     DRESDEN_SO("Dresden Süd-Ost"),
@@ -65,6 +66,7 @@ public enum Community {
             case "Freiberg", "Freital", "Tharandt", "Dresden SW" -> DRESDEN_SW;
             case "OL", "O.L.", "Oberlausitz" -> OBERLAUSITZ;
             case "Pirna" -> PIRNA;
+            case "Geringswalde" -> GERINGSWALDE;
             default -> DEFAULT;
         };
     }
