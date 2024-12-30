@@ -26,12 +26,8 @@ package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class DataParserSysInfoV18 extends DataParserSysInfoV17 {
-
-    private static final Logger LOGGER = LogManager.getLogger(DataParserSysInfoV18.class);
 
     public DataParserSysInfoV18(JsonObject data) {
         super(data);

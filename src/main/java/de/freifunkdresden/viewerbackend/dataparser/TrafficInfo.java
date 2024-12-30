@@ -158,7 +158,6 @@ public abstract class TrafficInfo {
             NO_NETWORK,
             BASIC,
             DETAILS,
-            ;
         }
     }
 }

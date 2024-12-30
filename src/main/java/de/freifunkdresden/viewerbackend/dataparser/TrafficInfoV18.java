@@ -26,9 +26,14 @@ package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 public class TrafficInfoV18 extends TrafficInfoV15 {
+
+    private static final Logger LOGGER = LogManager.getLogger(TrafficInfoV18.class);
 
     @Override
     public void readValues(@NotNull JsonObject networks) {
@@ -60,6 +65,7 @@ public class TrafficInfoV18 extends TrafficInfoV15 {
                         trafficOut.put(i, getOutput(i) + jTx.getAsLong());
                     }
                 } catch (NumberFormatException e) {
+                    LOGGER.log(Level.ERROR, String.format("Interface %s: values unreadable (%s,%s)", networkName, jRx, jTx));
                 }
             }
         }

@@ -210,7 +210,7 @@ public class StatsSQL {
                                 nodeTraffic.add(Point.measurement("node_traffic")
                                         .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                         .tag("node", String.valueOf(e.getId()))
-                                        .tag("interface", i.name().toLowerCase())
+                                        .tag("interface", i.getStatName())
                                         .addField("in", t.getInput(i))
                                         .addField("out", t.getOutput(i))
                                         .build());
