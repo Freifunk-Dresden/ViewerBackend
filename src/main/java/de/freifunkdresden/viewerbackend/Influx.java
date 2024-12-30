@@ -68,11 +68,17 @@ public class Influx {
     }
 
     public void write(Point p) {
+        if (DataGen.isReadOnly()) {
+            return;
+        }
         checkConnection();
         this.connection.write(p);
     }
 
     public void write(Collection<Point> points) {
+        if (DataGen.isReadOnly()) {
+            return;
+        }
         checkConnection();
         this.connection.write(BatchPoints.builder().points(points).build());
     }

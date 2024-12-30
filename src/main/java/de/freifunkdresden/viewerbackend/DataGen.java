@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -61,6 +62,7 @@ public class DataGen {
     private static final Cache CACHE = new Cache();
     private static final WordFilter WORD_FILTER = new WordFilter();
     private static boolean debug = false;
+    private static boolean readOnly = false;
     private static MySQL mysqlDb;
     private static Influx influxDb;
 
@@ -92,10 +94,19 @@ public class DataGen {
         return debug;
     }
 
+    public static boolean isReadOnly() {
+        return readOnly;
+    }
+
     public static void main(@NotNull String[] args) {
-        if (args.length == 1 && args[0].equalsIgnoreCase("--debug")) {
-            debug = true;
-            LOGGER.log(Level.INFO, "DEBUG mode on");
+        if (args.length > 0) {
+            if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--debug"))) {
+                debug = true;
+                LOGGER.log(Level.INFO, "=== Running in debug mode ===");
+            } else if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--read-only"))) {
+                readOnly = true;
+                LOGGER.log(Level.INFO, "=== Running in read-only mode ===");
+            }
         }
         try {
             CONFIG.loadConfig();
@@ -117,7 +128,7 @@ public class DataGen {
         } catch (RuntimeException ex) {
             LOGGER.log(Level.ERROR, "Execution Exception: ", ex);
         }
-        if (debug) {
+        if (isDebug()) {
             LOGGER.log(Level.DEBUG, "{} nodes, {} nodes online",
                     getDataHolder().getNodes().size(),
                     getDataHolder().getNodes().values().stream().filter(Node::isOnline).count());
@@ -202,9 +213,6 @@ public class DataGen {
     }
 
     private static void startDbSave() {
-        if (debug) {
-            return;
-        }
         LOGGER.log(Level.INFO, "Start Save to database");
         HOLDER.getNodes().values().stream()
                 .filter(Node::isOnline)
@@ -214,9 +222,6 @@ public class DataGen {
     }
 
     private static void endDbSave() {
-        if (debug) {
-            return;
-        }
         LOGGER.log(Level.INFO, "End Save to database...");
         try {
             if (!POOL.awaitTermination(3, TimeUnit.MINUTES)) {
@@ -230,9 +235,6 @@ public class DataGen {
     }
 
     private static void saveStats() {
-        if (debug) {
-            return;
-        }
         LOGGER.log(Level.INFO, "Save stats to database...");
         HOLDER.getNodes().values().stream().filter(Node::isDisplayed)
                 .forEach(Node::collectStats);

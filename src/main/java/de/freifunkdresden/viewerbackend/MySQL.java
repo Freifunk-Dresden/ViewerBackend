@@ -81,6 +81,9 @@ public class MySQL {
     }
 
     public void queryUpdate(String query, @NotNull Object... args) {
+        if (DataGen.isReadOnly()) {
+            return;
+        }
         checkConnection();
         try (PreparedStatement st = conn.prepareStatement(query)) {
             int i = 1;
@@ -95,6 +98,9 @@ public class MySQL {
     }
 
     public PreparedUpdate queryPrepUpdate(String query) {
+        if (DataGen.isReadOnly()) {
+            return null;
+        }
         checkConnection();
         try (PreparedStatement st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             return new PreparedUpdate(st);
