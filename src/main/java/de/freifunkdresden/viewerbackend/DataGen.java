@@ -103,7 +103,8 @@ public class DataGen {
             if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--debug"))) {
                 debug = true;
                 LOGGER.log(Level.INFO, "=== Running in debug mode ===");
-            } else if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--read-only"))) {
+            }
+            if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--read-only"))) {
                 readOnly = true;
                 LOGGER.log(Level.INFO, "=== Running in read-only mode ===");
             }
