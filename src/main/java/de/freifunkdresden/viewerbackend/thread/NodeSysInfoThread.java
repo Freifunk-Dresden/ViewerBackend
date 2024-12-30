@@ -114,7 +114,7 @@ public class NodeSysInfoThread implements Runnable {
                 int begin = json.indexOf("<!DOCTYPE html>");
                 if (begin != -1) {
                     json = json.replaceAll("(<!DOCTYPE html>[\\S\\s]*</html>)", "{}");
-                    LOGGER.log(Level.WARN, "Node {}: {}", node.getId(), "Stripped html from json");
+                    LOGGER.log(Level.WARN, "Node {}: Stripped html from json", node.getId());
                 }
                 return Optional.of(JsonParser.parseString(json).getAsJsonObject());
             } else {
@@ -134,7 +134,7 @@ public class NodeSysInfoThread implements Runnable {
     @Contract("_ -> new")
     private static DataParserSysInfo getDataParser(@NotNull JsonObject sysInfo) {
         try {
-            if (sysInfo.size() == 0) {
+            if (sysInfo.isEmpty()) {
                 throw new EmptyJsonException();
             }
             if (!sysInfo.has("version") || !sysInfo.has("data")) {

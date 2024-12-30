@@ -54,8 +54,8 @@ public record Location(double latitude, double longitude) {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + (int) (Double.doubleToLongBits(this.latitude) ^ (Double.doubleToLongBits(this.latitude) >>> 32));
-        hash = 97 * hash + (int) (Double.doubleToLongBits(this.longitude) ^ (Double.doubleToLongBits(this.longitude) >>> 32));
+        hash = 97 * hash + Long.hashCode(Double.doubleToLongBits(this.latitude));
+        hash = 97 * hash + Long.hashCode(Double.doubleToLongBits(this.longitude));
         return hash;
     }
 

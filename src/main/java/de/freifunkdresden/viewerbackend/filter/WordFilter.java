@@ -27,6 +27,7 @@ package de.freifunkdresden.viewerbackend.filter;
 import de.freifunkdresden.viewerbackend.DataGen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -97,21 +98,25 @@ public class WordFilter {
             this.visitFile = visitFile;
         }
 
+        @NotNull
         @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+        public FileVisitResult preVisitDirectory(Path dir, @NotNull BasicFileAttributes attrs) {
             return FileVisitResult.CONTINUE;
         }
 
+        @NotNull
         @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+        public FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) {
             return visitFile.apply(file);
         }
 
+        @NotNull
         @Override
-        public FileVisitResult visitFileFailed(Path file, IOException exc) {
+        public FileVisitResult visitFileFailed(Path file, @NotNull IOException exc) {
             return FileVisitResult.CONTINUE;
         }
 
+        @NotNull
         @Override
         public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
             return FileVisitResult.CONTINUE;
