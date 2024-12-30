@@ -25,6 +25,9 @@
 package de.freifunkdresden.viewerbackend;
 
 import de.freifunkdresden.viewerbackend.exception.DatabaseConnectionException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -33,6 +36,8 @@ import org.influxdb.dto.Point;
 import java.util.Collection;
 
 public class Influx {
+
+    private static final Logger LOGGER = LogManager.getLogger(Influx.class);
 
     private final String url;
     private final String username;
@@ -68,6 +73,9 @@ public class Influx {
     }
 
     public void write(Point p) {
+        if (DataGen.isDebug()) {
+            LOGGER.log(Level.DEBUG, "[Influx] Write Point: {}", p);
+        }
         if (DataGen.isReadOnly()) {
             return;
         }
@@ -76,6 +84,11 @@ public class Influx {
     }
 
     public void write(Collection<Point> points) {
+        if (DataGen.isDebug()) {
+            for (Point p : points) {
+                LOGGER.log(Level.DEBUG, "[Influx] Write Multi-Point: {}", p);
+            }
+        }
         if (DataGen.isReadOnly()) {
             return;
         }
