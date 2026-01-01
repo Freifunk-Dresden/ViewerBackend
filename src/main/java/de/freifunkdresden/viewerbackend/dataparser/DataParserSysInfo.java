@@ -28,13 +28,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Airtime;
-import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.LinkType;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.NodeType;
+import de.freifunkdresden.viewerbackend.config.CommunityDirectory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,7 +55,7 @@ public class DataParserSysInfo {
     final JsonObject data;
     private final JsonObject stats;
     private final long lastSeen = System.currentTimeMillis();
-    protected Community community;
+    protected CommunityDirectory.Community community;
     protected final AtomicInteger linkCountFastD = new AtomicInteger(0);
     protected final AtomicInteger linkCountWireGuard = new AtomicInteger(0);
     protected Collection<Link> linkCollection = Collections.emptyList();
@@ -73,8 +73,8 @@ public class DataParserSysInfo {
 
     protected void checkCommunity() {
         String c = data.get("common").getAsJsonObject().get("city").getAsString();
-        community = Community.getCommunity(c);
-        if (community == Community.DEFAULT) {
+        community = DataGen.getConfig().getCommunityDirectory().getCommunityMapping(c);
+        if (DataGen.getConfig().getCommunityDirectory().existsMapping(c)) {
             LOGGER.log(Level.WARN, "Node {} has invalid community `{}` (Name: {})", getNodeId(), c, getName());
         }
     }
@@ -87,7 +87,7 @@ public class DataParserSysInfo {
         return data.get("common").getAsJsonObject().get("node").getAsInt();
     }
 
-    public Community getCommunity() {
+    public CommunityDirectory.Community getCommunity() {
         return community;
     }
 

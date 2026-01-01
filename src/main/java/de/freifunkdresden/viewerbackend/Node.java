@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.config.CommunityDirectory;
 import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
@@ -276,14 +277,14 @@ public class Node {
         return null;
     }
 
-    public Community getCommunity() {
+    public CommunityDirectory.Community getCommunity() {
         if (dpSysInfo != null) {
             return dpSysInfo.getCommunity();
         }
         if (dpDatabase != null) {
             return dpDatabase.getCommunity();
         }
-        return Community.DEFAULT;
+        return DataGen.getConfig().getCommunityDirectory().getDefaultCommunity();
     }
 
     public Node getGateway() {
@@ -501,7 +502,7 @@ public class Node {
             lat = l.latitude();
             lon = l.longitude();
         }
-        String community = getCommunity().getName();
+        String community = getCommunity().name();
         String role = getRole().name();
         String model = getModel();
         long firstSeen = getFirstSeen() / 1000;

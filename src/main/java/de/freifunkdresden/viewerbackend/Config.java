@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.config.CommunityDirectory;
 import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
 import de.freifunkdresden.viewerbackend.exception.ConfigurationException;
 
@@ -39,6 +40,7 @@ public class Config {
 
     private final Map<String, String> configValues = new HashMap<>();
     private final VpnServerDirectory vpnServerDirectory = new VpnServerDirectory();
+    private final CommunityDirectory communityDirectory = new CommunityDirectory();
 
     public void loadConfig() {
         Path path = Paths.get("config.ini");
@@ -54,6 +56,7 @@ public class Config {
             throw new ConfigurationException("Config file couldn't be loaded", ex);
         }
         vpnServerDirectory.loadConfig();
+        communityDirectory.loadConfig();
     }
 
     public String getValue(String key) {
@@ -62,5 +65,9 @@ public class Config {
 
     public VpnServerDirectory getVpnServerDirectory() {
         return vpnServerDirectory;
+    }
+
+    public CommunityDirectory getCommunityDirectory() {
+        return communityDirectory;
     }
 }

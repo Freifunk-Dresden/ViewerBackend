@@ -24,9 +24,10 @@
 
 package de.freifunkdresden.viewerbackend.dataparser;
 
-import de.freifunkdresden.viewerbackend.Community;
+import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Location;
 import de.freifunkdresden.viewerbackend.NodeType;
+import de.freifunkdresden.viewerbackend.config.CommunityDirectory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,9 +39,10 @@ import java.sql.SQLException;
 public class DataParserDB {
 
     private static final Logger LOGGER = LogManager.getLogger(DataParserDB.class);
+    private static final CommunityDirectory COMMUNITY_DIRECTORY = DataGen.getConfig().getCommunityDirectory();
 
     private boolean autoUpdate;
-    private Community community = Community.DEFAULT;
+    private CommunityDirectory.Community community = COMMUNITY_DIRECTORY.getDefaultCommunity();
     private String eMail;
     private String firmwareBase;
     private String firmwareVersion;
@@ -59,7 +61,7 @@ public class DataParserDB {
             LOGGER.log(Level.ERROR, "DB_READ `auto_update` failed", e);
         }
         try {
-            community = Community.getCommunity(rs.getString("community"));
+            community = COMMUNITY_DIRECTORY.getCommunityMapping(rs.getString("community"));
         } catch (SQLException e) {
             LOGGER.log(Level.ERROR, "DB_READ `community` failed", e);
         }
@@ -119,7 +121,7 @@ public class DataParserDB {
         return autoUpdate;
     }
 
-    public Community getCommunity() {
+    public CommunityDirectory.Community getCommunity() {
         return community;
     }
 

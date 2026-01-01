@@ -25,9 +25,9 @@
 package de.freifunkdresden.viewerbackend.stats;
 
 import de.freifunkdresden.viewerbackend.Airtime;
-import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
+import de.freifunkdresden.viewerbackend.config.CommunityDirectory;
 import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import org.influxdb.dto.Point;
@@ -74,9 +74,9 @@ public class StatsSQL {
         }
     }
 
-    public static void addCommunity(@NotNull Community c) {
+    public static void addCommunity(@NotNull CommunityDirectory.Community c) {
         synchronized (communities) {
-            String cName = c.getName();
+            String cName = c.name();
             communities.put(cName, communities.getOrDefault(cName, 0) + 1);
         }
     }

@@ -59,7 +59,7 @@ public class JsonNodeGen {
             nodeinfo.add("network", network);
             nodeinfo.addProperty("hostname", n.getHostname());
             JsonObject system = new JsonObject();
-            system.addProperty("site_code", n.getCommunity().getName());
+            system.addProperty("site_code", n.getCommunity().name());
             system.addProperty("role", n.getRole().name().toLowerCase());
             nodeinfo.add("system", system);
             JsonObject hardware = new JsonObject();
@@ -148,7 +148,7 @@ public class JsonNodeGen {
             JsonArray addresses = new JsonArray();
             addresses.add(n.getIpAddressString());
             node.add("addresses", addresses);
-            node.addProperty("site_code", n.getCommunity().getName());
+            node.addProperty("site_code", n.getCommunity().name());
             node.addProperty("hostname", n.getHostname());
             if (n.isShown()) {
                 node.add("location", n.getLocation().toJson());

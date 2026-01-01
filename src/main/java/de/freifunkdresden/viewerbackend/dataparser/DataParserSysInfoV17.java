@@ -26,7 +26,7 @@ package de.freifunkdresden.viewerbackend.dataparser;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.freifunkdresden.viewerbackend.Community;
+import de.freifunkdresden.viewerbackend.DataGen;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,8 +46,8 @@ public class DataParserSysInfoV17 extends DataParserSysInfoV16 {
         JsonObject common = data.get("common").getAsJsonObject();
         if (common.has("community")) {
             String c = common.get("community").getAsString();
-            community = Community.getCommunity(c);
-            if (community == Community.DEFAULT) {
+            community = DataGen.getConfig().getCommunityDirectory().getCommunityMapping(c);
+            if (DataGen.getConfig().getCommunityDirectory().existsMapping(c)) {
                 LOGGER.log(Level.WARN, "Node {} has invalid community `{}` (Name: {})", getNodeId(), c, getName());
             }
         } else {
