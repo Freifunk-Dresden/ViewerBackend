@@ -29,6 +29,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.exception.ConfigurationException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +42,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VpnServerDirectory {
+
+    private static final Logger LOGGER = LogManager.getLogger(VpnServerDirectory.class);
 
     private final Map<Integer, VpnServer> vpnServers = new HashMap<>();
 
@@ -58,6 +63,13 @@ public class VpnServerDirectory {
             });
         } catch (RuntimeException | IOException e) {
             throw new ConfigurationException(e);
+        }
+        if (DataGen.isDebug()) {
+            LOGGER.log(Level.DEBUG, "== vpn configuration ==");
+            LOGGER.log(Level.DEBUG, "vpn servers:");
+            vpnServers.values().forEach(vpnServer -> {
+                LOGGER.log(Level.DEBUG, "VPN: {} -> Node: {}", vpnServer.vpnId, vpnServer.nodeId);
+            });
         }
     }
 

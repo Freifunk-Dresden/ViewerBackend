@@ -29,6 +29,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.exception.ConfigurationException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +42,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommunityDirectory {
+
+    private static final Logger LOGGER = LogManager.getLogger(CommunityDirectory.class);
 
     private final Map<String, Community> communityMapping = new HashMap<>();
     private Community defaultCommunity;
@@ -66,6 +71,14 @@ public class CommunityDirectory {
             });
         } catch (RuntimeException | IOException e) {
             throw new ConfigurationException(e);
+        }
+        if (DataGen.isDebug()) {
+            LOGGER.log(Level.DEBUG, "== community configuration ==");
+            LOGGER.log(Level.DEBUG, "default community: {}", defaultCommunity.name());
+            LOGGER.log(Level.DEBUG, "community mappings:");
+            communityMapping.forEach((mapping, community) -> {
+                LOGGER.log(Level.DEBUG, "{} -> {}", mapping, community.name());
+            });
         }
     }
 
