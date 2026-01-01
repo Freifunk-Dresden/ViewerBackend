@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2020 Niklas Merkelt.
+ * Copyright 2026 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,45 +22,48 @@
  * THE SOFTWARE.
  */
 
-package de.freifunkdresden.viewerbackend;
+package de.freifunkdresden.viewerbackend.config;
 
-import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.exception.ConfigurationException;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class Config {
+public class VpnServerDirectory {
 
-    private final Map<String, String> configValues = new HashMap<>();
-    private final VpnServerDirectory vpnServerDirectory = new VpnServerDirectory();
+    private final Map<Integer, VpnServer> vpnServers = new HashMap<>();
 
     public void loadConfig() {
-        Path path = Paths.get("config.ini");
-        if (!Files.exists(path) || !Files.isReadable(path)) {
-            throw new ConfigurationException("Config files don't exist");
+        Path vpnConfig = Paths.get(DataGen.getConfig().getValue("config_path"), "vpn.json");
+        if (!Files.exists(vpnConfig) || !Files.isReadable(vpnConfig)) {
+            throw new ConfigurationException("VPN config file don't exist");
         }
         try {
-            List<String> lines = Files.readAllLines(path);
-            lines.stream().filter(line -> !(line.startsWith("#")))
-                    .map(line -> line.split("=", 2))
-                    .forEachOrdered(split -> configValues.put(split[0], split[1]));
-        } catch (RuntimeException | IOException ex) {
-            throw new ConfigurationException("Config file couldn't be loaded", ex);
+            String json = Files.readString(vpnConfig, StandardCharsets.UTF_8);
+            JsonArray vpnArray = JsonParser.parseString(json).getAsJsonArray();
+            vpnArray.forEach(vpn -> {
+                JsonObject v = vpn.getAsJsonObject();
+                String vpnId = v.get("vpnId").getAsString();
+                int nodeId = v.get("nodeId").getAsInt();
+                vpnServers.put(nodeId, new VpnServer(vpnId, nodeId));
+            });
+        } catch (RuntimeException | IOException e) {
+            throw new ConfigurationException(e);
         }
-        vpnServerDirectory.loadConfig();
     }
 
-    public String getValue(String key) {
-        return configValues.get(key);
+    public VpnServer getServerByNode(int nodeId) {
+        return vpnServers.get(nodeId);
     }
 
-    public VpnServerDirectory getVpnServerDirectory() {
-        return vpnServerDirectory;
-    }
+    public record VpnServer(String vpnId, int nodeId){}
 }

@@ -28,7 +28,7 @@ import de.freifunkdresden.viewerbackend.Airtime;
 import de.freifunkdresden.viewerbackend.Community;
 import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.Node;
-import de.freifunkdresden.viewerbackend.VPN;
+import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
 import org.influxdb.dto.Point;
 import org.jetbrains.annotations.NotNull;
@@ -97,28 +97,28 @@ public class StatsSQL {
         }
     }
 
-    public static void addVpnUsage(@NotNull VPN vpn, int usage) {
+    public static void addVpnUsage(@NotNull VpnServerDirectory.VpnServer vpn, int usage) {
         synchronized (vpnUsage) {
             vpnUsage.add(Point.measurement("vpn_usage")
-                    .tag("vpn", vpn.getVpnId())
+                    .tag("vpn", vpn.vpnId())
                     .addField("usage", usage)
                     .build());
         }
     }
 
-    public static void addVpnUsageFastD(@NotNull VPN vpn, int usage) {
+    public static void addVpnUsageFastD(@NotNull VpnServerDirectory.VpnServer vpn, int usage) {
         synchronized (vpnUsageFastD) {
             vpnUsageFastD.add(Point.measurement("vpn_usage_fastd")
-                    .tag("vpn", vpn.getVpnId())
+                    .tag("vpn", vpn.vpnId())
                     .addField("usage", usage)
                     .build());
         }
     }
 
-    public static void addVpnUsageWireGuard(@NotNull VPN vpn, int usage) {
+    public static void addVpnUsageWireGuard(@NotNull VpnServerDirectory.VpnServer vpn, int usage) {
         synchronized (vpnUsageWireGuard) {
             vpnUsageWireGuard.add(Point.measurement("vpn_usage_wg")
-                    .tag("vpn", vpn.getVpnId())
+                    .tag("vpn", vpn.vpnId())
                     .addField("usage", usage)
                     .build());
         }

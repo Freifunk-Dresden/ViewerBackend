@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserAPI;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserSysInfo;
@@ -537,7 +538,7 @@ public class Node {
             StatsSQL.addGatewayUsage(getGateway());
             StatsSQL.addGatewayUsageClients(getGateway(), getClients());
         }
-        VPN vpn = VPN.getVPN(id);
+        VpnServerDirectory.VpnServer vpn = DataGen.getConfig().getVpnServerDirectory().getServerByNode(id);
         if (vpn != null) {
             StatsSQL.addVpnUsage(vpn, getLinks().size());
             StatsSQL.addVpnUsageFastD(vpn, getFastDCount());

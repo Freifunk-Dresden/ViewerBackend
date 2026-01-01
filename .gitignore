@@ -1,7 +1,8 @@
 /target/
 /nbproject/
 /config.ini
-/data
-/logs
-/cache
+/data/
+/logs/
+/cache/
 .idea/
+/config/
