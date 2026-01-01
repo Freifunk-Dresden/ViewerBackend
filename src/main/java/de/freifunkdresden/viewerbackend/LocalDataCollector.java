@@ -79,7 +79,7 @@ public class LocalDataCollector {
             List<String> collect = Arrays.stream(gateways.split("\\n"))
                     .skip(1)
                     .map(s -> s.split("\\s+")[1])
-                    .collect(Collectors.toList());
+                    .toList();
             if (DataGen.isDebug()) {
                 LOGGER.log(Level.DEBUG, "Collected gateways: {}", collect);
             }

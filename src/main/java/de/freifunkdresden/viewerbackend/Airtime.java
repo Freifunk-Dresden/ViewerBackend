@@ -40,6 +40,7 @@ public record Airtime(long active, long busy, long receive, long transmit) {
                 transmit == airtime.transmit;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return String.format("a: %d \t b: %d \t r: %d \t t: %d", active, busy, receive, transmit);
