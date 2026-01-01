@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.freifunk-dresden</groupId>
   <artifactId>ViewerBackend</artifactId>
-  <version>0.23.0-SNAPSHOT</version>
+  <version>0.23.0</version>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.4.2</version>
+        <version>3.5.0</version>
         <configuration>
           <archive>
             <manifest>
@@ -19,7 +19,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.1</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -35,7 +35,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>3.14.1</version>
         <configuration>
           <showDeprecation>true</showDeprecation>
         </configuration>
@@ -43,12 +43,12 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.8.6.6</version>
+        <version>4.9.8.2</version>
         <dependencies>
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs</artifactId>
-            <version>4.8.6</version>
+            <version>4.9.8</version>
           </dependency>
         </dependencies>
       </plugin>
