@@ -47,7 +47,7 @@ public class DataParserSysInfoV17 extends DataParserSysInfoV16 {
         if (common.has("community")) {
             String c = common.get("community").getAsString();
             community = DataGen.getConfig().getCommunityDirectory().getCommunityMapping(c);
-            if (DataGen.getConfig().getCommunityDirectory().existsMapping(c)) {
+            if (!DataGen.getConfig().getCommunityDirectory().existsMapping(c)) {
                 LOGGER.log(Level.WARN, "Node {} has invalid community `{}` (Name: {})", getNodeId(), c, getName());
             }
         } else {

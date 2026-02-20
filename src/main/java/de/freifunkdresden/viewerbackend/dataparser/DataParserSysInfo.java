@@ -74,7 +74,7 @@ public class DataParserSysInfo {
     protected void checkCommunity() {
         String c = data.get("common").getAsJsonObject().get("city").getAsString();
         community = DataGen.getConfig().getCommunityDirectory().getCommunityMapping(c);
-        if (DataGen.getConfig().getCommunityDirectory().existsMapping(c)) {
+        if (!DataGen.getConfig().getCommunityDirectory().existsMapping(c)) {
             LOGGER.log(Level.WARN, "Node {} has invalid community `{}` (Name: {})", getNodeId(), c, getName());
         }
     }
