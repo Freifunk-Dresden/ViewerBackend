@@ -27,6 +27,8 @@ package de.freifunkdresden.viewerbackend.dataparser;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.Optional;
+
 public class DataParserSysInfoV16 extends DataParserSysInfoV15 {
 
     public DataParserSysInfoV16(JsonObject data) {
@@ -36,18 +38,38 @@ public class DataParserSysInfoV16 extends DataParserSysInfoV15 {
     @Override
     public short getClients() {
         short client = 0;
-        JsonElement stats = data.get("statistic");
-        if (stats != null) {
-            JsonElement c2g = stats.getAsJsonObject().get("client2g");
-            if (c2g != null) {
-                client += c2g.getAsJsonObject().get("5min").getAsShort();
-            }
-            JsonElement c5g = stats.getAsJsonObject().get("client5g");
-            if (c5g != null) {
-                client += c5g.getAsJsonObject().get("5min").getAsShort();
-            }
+        Optional<Short> c2g = getClients2g();
+        if (c2g.isPresent()) {
+            client += c2g.get();
+        }
+        Optional<Short> c5g = getClients5g();
+        if (c5g.isPresent()) {
+            client += c5g.get();
         }
         return client;
     }
 
+    @Override
+    public Optional<Short> getClients2g() {
+        JsonElement stats = data.get("statistic");
+        if (stats != null) {
+            JsonElement c2g = stats.getAsJsonObject().get("client2g");
+            if (c2g != null) {
+                return Optional.of(c2g.getAsJsonObject().get("5min").getAsShort());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Short> getClients5g() {
+        JsonElement stats = data.get("statistic");
+        if (stats != null) {
+            JsonElement c2g = stats.getAsJsonObject().get("client5g");
+            if (c2g != null) {
+                return Optional.of(c2g.getAsJsonObject().get("5min").getAsShort());
+            }
+        }
+        return Optional.empty();
+    }
 }

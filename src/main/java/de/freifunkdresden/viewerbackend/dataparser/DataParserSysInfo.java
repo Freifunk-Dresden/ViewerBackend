@@ -176,6 +176,14 @@ public class DataParserSysInfo {
         return 0;
     }
 
+    public Optional<Short> getClients2g() {
+        return Optional.empty();
+    }
+
+    public Optional<Short> getClients5g() {
+        return Optional.empty();
+    }
+
     public Collection<Link> getLinkSet() {
         return linkCollection;
     }

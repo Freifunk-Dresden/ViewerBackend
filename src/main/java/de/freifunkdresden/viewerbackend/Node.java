@@ -205,6 +205,20 @@ public class Node {
         return 0;
     }
 
+    public short getClients2g() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getClients2g().orElse((short) 0);
+        }
+        return 0;
+    }
+
+    public short getClients5g() {
+        if (dpSysInfo != null) {
+            return dpSysInfo.getClients5g().orElse((short) 0);
+        }
+        return 0;
+    }
+
     public double getMemoryUsage() {
         if (dpSysInfo != null) {
             return dpSysInfo.getMemoryUsage();

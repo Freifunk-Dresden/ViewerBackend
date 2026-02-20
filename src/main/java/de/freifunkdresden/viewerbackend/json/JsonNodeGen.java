@@ -130,8 +130,8 @@ public class JsonNodeGen {
             node.addProperty("is_gateway", n.isGateway());
             node.addProperty("is_online", n.isOnline());
             node.addProperty("clients", n.getClients());
-            node.addProperty("clients_wifi24", n.getClients());
-            node.addProperty("clients_wifi5", 0);
+            node.addProperty("clients_wifi24", n.getClients2g());
+            node.addProperty("clients_wifi5", n.getClients5g());
             node.addProperty("clients_other", 0);
             if (n.isOnline()) {
                 node.addProperty("loadavg", n.getLoadAvg());
