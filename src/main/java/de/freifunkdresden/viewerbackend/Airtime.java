@@ -27,7 +27,19 @@ package de.freifunkdresden.viewerbackend;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 public record Airtime(long active, long busy, long receive, long transmit) {
+
+    public boolean isInvalid() {
+        if (active < busy || active < receive || active < transmit) {
+            return true;
+        }
+        if (active < (busy + receive + transmit)) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -48,10 +60,18 @@ public record Airtime(long active, long busy, long receive, long transmit) {
 
     @NotNull
     @Contract("_, _ -> new")
-    public static Airtime diff(@NotNull Airtime a, @NotNull Airtime b) {
-        return new Airtime(a.active() < b.active() ? a.active() : a.active() - b.active(),
+    public static Optional<Airtime> diff(@NotNull Optional<Airtime> airtimeA, @NotNull Optional<Airtime> airtimeB) {
+        if (airtimeA.isEmpty() || airtimeB.isEmpty()) {
+            return Optional.empty();
+        }
+        Airtime a = airtimeA.get();
+        Airtime b = airtimeB.get();
+        if (a.isInvalid() || b.isInvalid()) {
+            return Optional.empty();
+        }
+        return Optional.of(new Airtime(a.active() < b.active() ? a.active() : a.active() - b.active(),
                 a.busy() < b.busy() ? a.busy() : a.busy() - b.busy(),
                 a.receive() < b.receive() ? a.receive() : a.receive() - b.receive(),
-                a.transmit() < b.transmit() ? a.transmit() : a.transmit() - b.transmit());
+                a.transmit() < b.transmit() ? a.transmit() : a.transmit() - b.transmit()));
     }
 }

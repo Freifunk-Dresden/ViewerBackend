@@ -47,8 +47,8 @@ public class JsonNodeGen {
 
     @Nullable
     public static JsonObject getJsonObject(@NotNull Node n, @NotNull DateFormat df) {
-        Airtime a2g = getAirtimeDiff(n, 2);
-        Airtime a5g = getAirtimeDiff(n, 5);
+        Optional<Airtime> a2g = Airtime.diff(n.getAirtime2g(), n.getAirtime2GOld());
+        Optional<Airtime> a5g = Airtime.diff(n.getAirtime5g(), n.getAirtime5GOld());
         try {
             JsonObject node = new JsonObject();
             JsonObject nodeinfo = new JsonObject();
@@ -177,18 +177,18 @@ public class JsonNodeGen {
     }
 
     @NotNull
-    private static JsonArray getHopGlassAirtimeArray(@NotNull Node n, @Nullable Airtime a2g, @Nullable Airtime a5g) {
+    private static JsonArray getHopGlassAirtimeArray(@NotNull Node n, @NotNull Optional<Airtime> a2g, @NotNull Optional<Airtime> a5g) {
         JsonArray airtime = new JsonArray();
         Optional<Integer> wifiChannel2g = n.getWifiChannel2g();
-        if (wifiChannel2g.isPresent()) {
-            JsonObject ja2 = getJsonAirtime(a2g, 2407 + wifiChannel2g.get() * 5);
+        if (wifiChannel2g.isPresent() && a2g.isPresent()) {
+            JsonObject ja2 = getJsonAirtime(a2g.get(), 2407 + wifiChannel2g.get() * 5);
             if (ja2 != null) {
                 airtime.add(ja2);
             }
         }
         Optional<Integer> wifiChannel5g = n.getWifiChannel5g();
-        if (wifiChannel5g.isPresent()) {
-            JsonObject ja5 = getJsonAirtime(a5g, 5000 + wifiChannel5g.get() * 5);
+        if (wifiChannel5g.isPresent() && a5g.isPresent()) {
+            JsonObject ja5 = getJsonAirtime(a5g.get(), 5000 + wifiChannel5g.get() * 5);
             if (ja5 != null) {
                 airtime.add(ja5);
             }
@@ -197,73 +197,47 @@ public class JsonNodeGen {
     }
 
     @NotNull
-    private static JsonObject getHopGlassAirtimeObject(@NotNull Node n, @Nullable Airtime a2g, @Nullable Airtime a5g,
-                                                       @NotNull JsonObject wireless) {
+    private static JsonObject getHopGlassAirtimeObject(@NotNull Node n, @NotNull Optional<Airtime> a2g,
+                                                       @NotNull Optional<Airtime> a5g, @NotNull JsonObject wireless) {
         JsonObject w = new JsonObject();
-        Number wat2 = getWirelessAirtime(a2g);
         Optional<Integer> wifiChannel2g = n.getWifiChannel2g();
-        if (wat2 != null && wifiChannel2g.isPresent()) {
+        if (a2g.isPresent() && wifiChannel2g.isPresent()) {
             wireless.addProperty("chan2", wifiChannel2g.get());
-            w.addProperty("airtime2", wat2);
+            w.addProperty("airtime2", getWirelessAirtime(a2g.get()));
         }
-        Number wat5 = getWirelessAirtime(a5g);
         Optional<Integer> wifiChannel5g = n.getWifiChannel5g();
-        if (wat5 != null && wifiChannel5g.isPresent()) {
+        if (a5g.isPresent() && wifiChannel5g.isPresent()) {
             wireless.addProperty("chan5", wifiChannel5g.get());
-            w.addProperty("airtime5", wat5);
+            w.addProperty("airtime5", getWirelessAirtime(a5g.get()));
         }
         return w;
     }
 
     @Nullable
-    private static Airtime getAirtimeDiff(@NotNull Node n, int band) {
-        if (band == 2) {
-            Optional<Airtime> airtime2g = n.getAirtime2g();
-            Optional<Airtime> airtime2GOld = n.getAirtime2GOld();
-            if (airtime2g.isPresent() && airtime2GOld.isPresent()) {
-                return Airtime.diff(airtime2g.get(), airtime2GOld.get());
-            }
-        } else if (band == 5) {
-            Optional<Airtime> airtime5g = n.getAirtime5g();
-            Optional<Airtime> airtime5GOld = n.getAirtime5GOld();
-            if (airtime5g.isPresent() && airtime5GOld.isPresent()) {
-                return Airtime.diff(airtime5g.get(), airtime5GOld.get());
-            }
+    private static JsonObject getJsonAirtime(@NotNull Airtime diff, int freq) {
+        double a = diff.active();
+        double b = diff.busy();
+        double r = diff.receive();
+        double t = diff.transmit();
+        double busy = b / a;
+        double rx = r / a;
+        double tx = t / a;
+        if (!Double.isFinite(busy) || !Double.isFinite(rx) || !Double.isFinite(tx)) {
+            return null;
         }
-        return null;
+        JsonObject ja = new JsonObject();
+        ja.addProperty("frequency", freq);
+        ja.addProperty("busy", busy);
+        ja.addProperty("rx", rx);
+        ja.addProperty("tx", tx);
+        return ja;
     }
 
     @Nullable
-    private static JsonObject getJsonAirtime(@Nullable Airtime diff, int freq) {
-        if (diff != null) {
-            double a = diff.active();
-            double b = diff.busy();
-            double r = diff.receive();
-            double t = diff.transmit();
-            double busy = b / a;
-            double rx = r / a;
-            double tx = t / a;
-            if (!Double.isFinite(busy) || !Double.isFinite(rx) || !Double.isFinite(tx)) {
-                return null;
-            }
-            JsonObject ja = new JsonObject();
-            ja.addProperty("frequency", freq);
-            ja.addProperty("busy", busy);
-            ja.addProperty("rx", rx);
-            ja.addProperty("tx", tx);
-            return ja;
-        }
-        return null;
-    }
-
-    @Nullable
-    private static Number getWirelessAirtime(@Nullable Airtime diff) {
-        if (diff != null) {
-            double b = diff.busy();
-            double a = diff.active();
-            double airtime = b / a;
-            return Double.isFinite(airtime) ? airtime : null;
-        }
-        return null;
+    private static Number getWirelessAirtime(@NotNull Airtime diff) {
+        double b = diff.busy();
+        double a = diff.active();
+        double airtime = b / a;
+        return Double.isFinite(airtime) ? airtime : null;
     }
 }
