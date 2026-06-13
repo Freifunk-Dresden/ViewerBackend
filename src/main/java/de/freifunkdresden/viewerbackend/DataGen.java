@@ -63,6 +63,7 @@ public class DataGen {
     private static final WordFilter WORD_FILTER = new WordFilter();
     private static boolean debug = false;
     private static boolean readOnly = false;
+    private static boolean toolMode = false;
     private static MySQL mysqlDb;
     private static Influx influxDb;
 
@@ -98,6 +99,10 @@ public class DataGen {
         return readOnly;
     }
 
+    public static boolean isToolMode() {
+        return toolMode;
+    }
+
     public static void main(@NotNull String[] args) {
         if (args.length > 0) {
             if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--debug"))) {
@@ -107,6 +112,11 @@ public class DataGen {
             if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--read-only"))) {
                 readOnly = true;
                 LOGGER.log(Level.INFO, "=== Running in read-only mode ===");
+            }
+            if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--tool"))) {
+                readOnly = true;
+                toolMode = true;
+                LOGGER.log(Level.INFO, "=== Running in tool mode ===");
             }
         }
         try {
@@ -123,6 +133,7 @@ public class DataGen {
             genJson();
             saveStats();
             endDbSave();
+            enterToolMode();
             influxDb.closeConnection();
             mysqlDb.closeConnection();
             LOGGER.log(Level.INFO, "Done!");
@@ -167,6 +178,9 @@ public class DataGen {
     }
 
     private static void collectLinks() {
+        if (isToolMode()) {
+            return;
+        }
         LOGGER.log(Level.INFO, "Collect links...");
         HOLDER.getNodes().values().forEach(node -> node.getLinks().forEach(link -> {
             Link lnk = HOLDER.getLink(link.getSource(), link.getTarget(), link.getType());
@@ -198,6 +212,9 @@ public class DataGen {
     }
 
     private static void genJson() {
+        if (isToolMode()) {
+            return;
+        }
         try {
             LOGGER.log(Level.INFO, "Generate JSON files...");
             Path dir = Paths.get(CONFIG.getValue("json_path"));
@@ -214,6 +231,9 @@ public class DataGen {
     }
 
     private static void startDbSave() {
+        if (isToolMode()) {
+            return;
+        }
         LOGGER.log(Level.INFO, "Start Save to database");
         HOLDER.getNodes().values().stream()
                 .filter(Node::isOnline)
@@ -223,6 +243,9 @@ public class DataGen {
     }
 
     private static void endDbSave() {
+        if (isToolMode()) {
+            return;
+        }
         LOGGER.log(Level.INFO, "End Save to database...");
         try {
             if (!POOL.awaitTermination(3, TimeUnit.MINUTES)) {
@@ -236,6 +259,9 @@ public class DataGen {
     }
 
     private static void saveStats() {
+        if (isToolMode()) {
+            return;
+        }
         LOGGER.log(Level.INFO, "Save stats to database...");
         HOLDER.getNodes().values().stream().filter(Node::isDisplayed)
                 .forEach(Node::collectStats);
@@ -246,6 +272,14 @@ public class DataGen {
                 .reduce(BigInteger.ZERO, (result, node) -> result.add(BigInteger.valueOf(node.getClients())), BigInteger::add)
                 .intValue());
         StatsSQL.processStats();
+    }
+
+    private static void enterToolMode() {
+        if (!isToolMode()) {
+            return;
+        }
+        ToolMode toolMode = new ToolMode();
+        toolMode.start();
     }
 
     private static void setupDatabase() {
