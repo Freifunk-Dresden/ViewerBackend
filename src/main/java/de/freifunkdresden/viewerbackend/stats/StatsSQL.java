@@ -162,6 +162,8 @@ public class StatsSQL {
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
                                 .addField("value", e.getClients())
+                                .addField("2g", e.getClients2g())
+                                .addField("5g", e.getClients5g())
                                 .build());
                     }
                     nodeLoad.add(Point.measurement("node_load")
