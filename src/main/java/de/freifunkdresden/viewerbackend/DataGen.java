@@ -30,7 +30,6 @@ import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;
 import de.freifunkdresden.viewerbackend.exception.NodeCollectionException;
 import de.freifunkdresden.viewerbackend.exception.OfflineNodeProcessingException;
 import de.freifunkdresden.viewerbackend.filter.WordFilter;
-import de.freifunkdresden.viewerbackend.json.JsonFileGen;
 import de.freifunkdresden.viewerbackend.stats.GeneralStatType;
 import de.freifunkdresden.viewerbackend.stats.StatsSQL;
 import de.freifunkdresden.viewerbackend.thread.NodeSysInfoThread;
@@ -41,9 +40,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -217,14 +213,8 @@ public class DataGen {
         }
         try {
             LOGGER.log(Level.INFO, "Generate JSON files...");
-            Path dir = Paths.get(CONFIG.getValue("json_path"));
-            if (Files.notExists(dir)) {
-                Files.createDirectory(dir);
-            }
-            JsonFileGen jfg = new JsonFileGen(dir);
-            jfg.genNodes();
-            jfg.genGraph();
-            jfg.genMeshViewer();
+            OutputManager outputManager = new OutputManager();
+            outputManager.generate();
         } catch (RuntimeException | IOException ex) {
             throw new JsonGenerationException(ex);
         }

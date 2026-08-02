@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2020 Niklas Merkelt.
+ * Copyright 2026 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,13 @@
  * THE SOFTWARE.
  */
 
-package de.freifunkdresden.viewerbackend.json;
+package de.freifunkdresden.viewerbackend.output;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.freifunkdresden.viewerbackend.Airtime;
+import de.freifunkdresden.viewerbackend.Link;
 import de.freifunkdresden.viewerbackend.Node;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -34,19 +36,102 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class JsonNodeGen {
+public class HopGlass extends OutputGenerator {
 
-    private static final Logger LOGGER = LogManager.getLogger(JsonNodeGen.class);
+    private static final Logger LOGGER = LogManager.getLogger(HopGlass.class);
 
-    private JsonNodeGen() {
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    private final Gson gson = new Gson();
+    private final JsonArray nodes = new JsonArray();
+    private final JsonArray graphNodes = new JsonArray();
+    private final JsonArray graphLinks = new JsonArray();
+    private final AtomicInteger index = new AtomicInteger(0);
+    private final Map<Node, Integer> nodeMapping = new HashMap<>();
+
+    @Override
+    public void initialize() {
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    @Override
+    public void save(@NotNull Path path) throws IOException {
+        genNodesJson(path);
+        genGraphJson(path);
+    }
+
+    @Override
+    public void addNode(@NotNull Node node) {
+        int i = index.getAndIncrement();
+        JsonObject hopNode = getNodeJsonObject(node);
+        if (hopNode != null) {
+            nodes.add(hopNode);
+        }
+        JsonObject graphNode = new JsonObject();
+        graphNode.addProperty("node_id", String.valueOf(node.getId()));
+        graphNode.addProperty("id", String.valueOf(node.getId()));
+        graphNode.addProperty("seq", i);
+        graphNodes.add(graphNode);
+        nodeMapping.put(node, i);
+    }
+
+    @Override
+    public void addLink(@NotNull Link link) {
+        Integer source = nodeMapping.get(link.getSource());
+        Integer target = nodeMapping.get(link.getTarget());
+        JsonObject jsonLink = new JsonObject();
+        jsonLink.addProperty("source", source);
+        jsonLink.addProperty("target", target);
+        jsonLink.addProperty("tq", Link.convertToHop(link.getSourceTq()));
+        jsonLink.addProperty("type", link.getType().getHopGlass());
+        graphLinks.add(jsonLink);
+        if (link.getTargetTq() != -1) {
+            jsonLink = new JsonObject();
+            jsonLink.addProperty("source", target);
+            jsonLink.addProperty("target", source);
+            jsonLink.addProperty("tq", Link.convertToHop(link.getTargetTq()));
+            jsonLink.addProperty("type", link.getType().getHopGlass());
+            graphLinks.add(jsonLink);
+        }
+    }
+
+    private void genNodesJson(@NotNull Path path) throws IOException {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add("nodes", nodes);
+        jsonObject.addProperty("timestamp", dateFormat.format(new Date()));
+        jsonObject.addProperty("version", 2);
+        Path fp = path.resolve("nodes.json");
+        Files.writeString(fp, gson.toJson(jsonObject), StandardCharsets.UTF_8);
+    }
+
+    private void genGraphJson(@NotNull Path path) throws IOException {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("version", 1);
+        JsonObject batadv = new JsonObject();
+        batadv.addProperty("multigraph", false);
+        batadv.addProperty("directed", true);
+        batadv.add("graph", new JsonArray());
+        batadv.add("nodes", graphNodes);
+        batadv.add("links", graphLinks);
+        jsonObject.add("batadv", batadv);
+        Path fp = path.resolve("graph.json");
+        Files.writeString(fp, gson.toJson(jsonObject), StandardCharsets.UTF_8);
     }
 
     @Nullable
-    public static JsonObject getJsonObject(@NotNull Node n, @NotNull DateFormat df) {
+    public JsonObject getNodeJsonObject(@NotNull Node n) {
         Optional<Airtime> a2g = Airtime.diff(n.getAirtime2g(), n.getAirtime2GOld());
         Optional<Airtime> a5g = Airtime.diff(n.getAirtime5g(), n.getAirtime5GOld());
         try {
@@ -98,10 +183,10 @@ public class JsonNodeGen {
                 statistics.addProperty("uptime", n.getUptime());
                 statistics.addProperty("memory_usage", n.getMemoryUsage());
                 statistics.addProperty("loadavg", n.getLoadAvg());
-                statistics.add("airtime", getHopGlassAirtimeArray(n, a2g, a5g));
+                statistics.add("airtime", getAirtimeArray(n, a2g, a5g));
                 JsonObject wireless = new JsonObject();
                 nodeinfo.add("wireless", wireless);
-                statistics.add("wireless", getHopGlassAirtimeObject(n, a2g, a5g, wireless));
+                statistics.add("wireless", getAirtimeObject(n, a2g, a5g, wireless));
             }
             if (!n.isGateway() && n.getGateway() != null) {
                 statistics.addProperty("gateway", n.getGateway().getIpAddressString());
@@ -112,63 +197,8 @@ public class JsonNodeGen {
             flags.addProperty("backbone", n.hasBackbone());
             flags.addProperty("online", n.isOnline());
             node.add("flags", flags);
-            node.addProperty("firstseen", df.format(new Date(n.getFirstSeen())));
-            node.addProperty("lastseen", df.format(new Date(n.getLastSeen())));
-            return node;
-        } catch (Exception e) {
-            LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", n.getId()), e);
-        }
-        return null;
-    }
-
-    @Nullable
-    public static JsonObject getMeshViewerObj(@NotNull Node n, @NotNull DateFormat df) {
-        try {
-            JsonObject node = new JsonObject();
-            node.addProperty("firstseen", df.format(new Date(n.getFirstSeen())));
-            node.addProperty("lastseen", df.format(new Date(n.getLastSeen())));
-            node.addProperty("is_gateway", n.isGateway());
-            node.addProperty("is_online", n.isOnline());
-            node.addProperty("clients", n.getClients());
-            node.addProperty("clients_wifi24", n.getClients2g());
-            node.addProperty("clients_wifi5", n.getClients5g());
-            node.addProperty("clients_other", 0);
-            if (n.isOnline()) {
-                node.addProperty("loadavg", n.getLoadAvg());
-                node.addProperty("memory_usage", n.getMemoryUsage());
-                Date date = new Date(System.currentTimeMillis() - (long) (n.getUptime() * 1000));
-                node.addProperty("uptime", df.format(date));
-                node.addProperty("nproc", n.getCpuCount());
-            }
-            if (!n.isGateway() && n.getGateway() != null) {
-                node.addProperty("gateway", n.getGateway().getFakeId());
-                node.addProperty("gateway_nexthop", n.getGateway().getFakeId()); //TODO: Correct value
-            }
-            node.addProperty("node_id", n.getFakeId());
-            JsonArray addresses = new JsonArray();
-            addresses.add(n.getIpAddressString());
-            node.add("addresses", addresses);
-            node.addProperty("site_code", n.getCommunity().name());
-            node.addProperty("hostname", n.getHostname());
-            if (n.isShown()) {
-                node.add("location", n.getLocation().toJson());
-            }
-            if (n.getFirmwareVersion() != null && !n.getFirmwareVersion().isEmpty()) {
-                JsonObject firmware = new JsonObject();
-                firmware.addProperty("release", n.getFirmwareVersion());
-                firmware.addProperty("base", n.getFirmwareBase());
-                node.add("firmware", firmware);
-            }
-            if (n.getModel() != null && !n.getModel().isEmpty()) {
-                node.addProperty("model", n.getModel());
-            }
-            node.addProperty("contact", n.getEMail());
-            JsonObject autoupdater = new JsonObject();
-            autoupdater.addProperty("enabled", n.isAutoUpdateEnabled());
-            autoupdater.addProperty("branch", "stable");
-            node.add("autoupdater", autoupdater);
-            node.addProperty("vpn", n.hasBackbone());
-            node.addProperty("mac", n.getFakeMac());
+            node.addProperty("firstseen", dateFormat.format(new Date(n.getFirstSeen())));
+            node.addProperty("lastseen", dateFormat.format(new Date(n.getLastSeen())));
             return node;
         } catch (Exception e) {
             LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", n.getId()), e);
@@ -177,7 +207,7 @@ public class JsonNodeGen {
     }
 
     @NotNull
-    private static JsonArray getHopGlassAirtimeArray(@NotNull Node n, @NotNull Optional<Airtime> a2g, @NotNull Optional<Airtime> a5g) {
+    private static JsonArray getAirtimeArray(@NotNull Node n, @NotNull Optional<Airtime> a2g, @NotNull Optional<Airtime> a5g) {
         JsonArray airtime = new JsonArray();
         Optional<Integer> wifiChannel2g = n.getWifiChannel2g();
         if (wifiChannel2g.isPresent() && a2g.isPresent()) {
@@ -197,8 +227,7 @@ public class JsonNodeGen {
     }
 
     @NotNull
-    private static JsonObject getHopGlassAirtimeObject(@NotNull Node n, @NotNull Optional<Airtime> a2g,
-                                                       @NotNull Optional<Airtime> a5g, @NotNull JsonObject wireless) {
+    private static JsonObject getAirtimeObject(@NotNull Node n, @NotNull Optional<Airtime> a2g, @NotNull Optional<Airtime> a5g, @NotNull JsonObject wireless) {
         JsonObject w = new JsonObject();
         Optional<Integer> wifiChannel2g = n.getWifiChannel2g();
         if (a2g.isPresent() && wifiChannel2g.isPresent()) {
