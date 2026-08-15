@@ -24,6 +24,8 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.database.Influx;
+import de.freifunkdresden.viewerbackend.database.MySQL;
 import de.freifunkdresden.viewerbackend.dataparser.DataParserDB;
 import de.freifunkdresden.viewerbackend.datasource.FreifunkApi;
 import de.freifunkdresden.viewerbackend.exception.JsonGenerationException;

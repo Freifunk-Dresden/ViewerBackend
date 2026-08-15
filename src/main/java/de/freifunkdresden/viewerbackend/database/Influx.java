@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2019 Niklas Merkelt.
+ * Copyright 2026 Niklas Merkelt.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,9 @@
  * THE SOFTWARE.
  */
 
-package de.freifunkdresden.viewerbackend;
+package de.freifunkdresden.viewerbackend.database;
 
+import de.freifunkdresden.viewerbackend.DataGen;
 import de.freifunkdresden.viewerbackend.exception.DatabaseConnectionException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
