@@ -7,17 +7,6 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.5.0</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>de.freifunkdresden.viewerbackend.DataGen</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.6.2</version>
         <executions>
@@ -31,6 +20,11 @@
         <configuration>
           <shadedArtifactAttached>true</shadedArtifactAttached>
           <shadedClassifierName>all</shadedClassifierName>
+          <transformers>
+            <transformer>
+              <mainClass>de.freifunkdresden.viewerbackend.DataGen</mainClass>
+            </transformer>
+          </transformers>
         </configuration>
       </plugin>
       <plugin>
