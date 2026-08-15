@@ -45,9 +45,6 @@ public class MySQL {
 
     private Connection conn;
 
-    public MySQL() {
-    }
-
     public void openConnection() {
         String host = DataGen.getConfig().getValue("mysql_host");
         short port = Short.parseShort(DataGen.getConfig().getValue("mysql_port"));
@@ -65,7 +62,7 @@ public class MySQL {
     public boolean hasConnection() {
         try {
             return this.conn != null && this.conn.isValid(1);
-        } catch (SQLException e) {
+        } catch (SQLException _) {
             return false;
         }
     }

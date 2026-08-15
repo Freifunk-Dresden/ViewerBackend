@@ -42,9 +42,6 @@ public class Influx {
 
     private InfluxDB connection;
 
-    public Influx() {
-    }
-
     public void openConnection() {
         String url = DataGen.getConfig().getValue("influx_url");
         String username = DataGen.getConfig().getValue("influx_username");
