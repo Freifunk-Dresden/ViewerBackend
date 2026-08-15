@@ -24,6 +24,7 @@
 
 package de.freifunkdresden.viewerbackend;
 
+import de.freifunkdresden.viewerbackend.config.AirtimeConfig;
 import de.freifunkdresden.viewerbackend.config.CommunityDirectory;
 import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
 import de.freifunkdresden.viewerbackend.exception.ConfigurationException;
@@ -41,6 +42,7 @@ public class Config {
     private final Map<String, String> configValues = new HashMap<>();
     private final VpnServerDirectory vpnServerDirectory = new VpnServerDirectory();
     private final CommunityDirectory communityDirectory = new CommunityDirectory();
+    private final AirtimeConfig airtimeConfig = new AirtimeConfig();
 
     public void loadConfig() {
         Path path = Paths.get("config.ini");
@@ -57,6 +59,7 @@ public class Config {
         }
         vpnServerDirectory.loadConfig();
         communityDirectory.loadConfig();
+        airtimeConfig.loadConfig();
     }
 
     public String getValue(String key) {
@@ -69,5 +72,9 @@ public class Config {
 
     public CommunityDirectory getCommunityDirectory() {
         return communityDirectory;
+    }
+
+    public AirtimeConfig getAirtimeConfig() {
+        return airtimeConfig;
     }
 }

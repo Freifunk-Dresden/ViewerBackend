@@ -40,12 +40,10 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
 public class Node {
 
     private static final long DAYS_30 = 1000L * 60 * 60 * 24 * 30;
-    private static final Set<String> IGNORE_AIRTIME = Set.of("ipq40xx/generic", "ramips/rt305x");
 
     private final int id;
     private InetAddress ip;
@@ -436,7 +434,7 @@ public class Node {
 
     public Optional<Airtime> getAirtime2g() {
         if (dpSysInfo != null) {
-            if (IGNORE_AIRTIME.contains(dpSysInfo.getFirmwareTarget())) {
+            if (DataGen.getConfig().getAirtimeConfig().isTargetIgnored2g(dpSysInfo.getFirmwareTarget())) {
                 return Optional.empty();
             }
             return dpSysInfo.getAirtime2g();
@@ -446,7 +444,7 @@ public class Node {
 
     public Optional<Airtime> getAirtime5g() {
         if (dpSysInfo != null) {
-            if (IGNORE_AIRTIME.contains(dpSysInfo.getFirmwareTarget())) {
+            if (DataGen.getConfig().getAirtimeConfig().isTargetIgnored5g(dpSysInfo.getFirmwareTarget())) {
                 return Optional.empty();
             }
             return dpSysInfo.getAirtime5g();
