@@ -39,15 +39,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 public class MeshViewer extends OutputGenerator {
 
     private static final Logger LOGGER = LogManager.getLogger(MeshViewer.class);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     private final Gson gson = new Gson();
     private final JsonArray nodes = new JsonArray();
     private final JsonArray links = new JsonArray();
@@ -55,7 +54,7 @@ public class MeshViewer extends OutputGenerator {
     @Override
     public void save(@NotNull Path path) throws IOException {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("timestamp", dateFormat.format(new Date()));
+        jsonObject.addProperty("timestamp", DATE_TIME_FORMATTER.format(Instant.now()));
         jsonObject.add("nodes", nodes);
         jsonObject.add("links", links);
         Path fp = path.resolve("meshviewer.json");
@@ -87,8 +86,8 @@ public class MeshViewer extends OutputGenerator {
     private JsonObject getNodeJsonObject(@NotNull Node n) {
         try {
             JsonObject node = new JsonObject();
-            node.addProperty("firstseen", dateFormat.format(new Date(n.getFirstSeen())));
-            node.addProperty("lastseen", dateFormat.format(new Date(n.getLastSeen())));
+            node.addProperty("firstseen", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(n.getFirstSeen())));
+            node.addProperty("lastseen", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(n.getLastSeen())));
             node.addProperty("is_gateway", n.isGateway());
             node.addProperty("is_online", n.isOnline());
             node.addProperty("clients", n.getClients());
@@ -98,8 +97,8 @@ public class MeshViewer extends OutputGenerator {
             if (n.isOnline()) {
                 node.addProperty("loadavg", n.getLoadAvg());
                 node.addProperty("memory_usage", n.getMemoryUsage());
-                Date date = new Date(System.currentTimeMillis() - (long) (n.getUptime() * 1000));
-                node.addProperty("uptime", dateFormat.format(date));
+                Instant dateTime = Instant.now().minusMillis((long) (n.getUptime() * 1000));
+                node.addProperty("uptime", DATE_TIME_FORMATTER.format(dateTime));
                 node.addProperty("nproc", n.getCpuCount());
             }
             if (!n.isGateway() && n.getGateway() != null) {

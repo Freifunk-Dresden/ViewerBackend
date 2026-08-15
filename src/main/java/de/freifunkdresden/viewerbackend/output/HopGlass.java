@@ -40,31 +40,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HopGlass extends OutputGenerator {
 
     private static final Logger LOGGER = LogManager.getLogger(HopGlass.class);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private final Gson gson = new Gson();
     private final JsonArray nodes = new JsonArray();
     private final JsonArray graphNodes = new JsonArray();
     private final JsonArray graphLinks = new JsonArray();
     private final AtomicInteger index = new AtomicInteger(0);
     private final Map<Node, Integer> nodeMapping = new HashMap<>();
-
-    @Override
-    public void initialize() {
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     @Override
     public void save(@NotNull Path path) throws IOException {
@@ -110,7 +103,7 @@ public class HopGlass extends OutputGenerator {
     private void genNodesJson(@NotNull Path path) throws IOException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("nodes", nodes);
-        jsonObject.addProperty("timestamp", dateFormat.format(new Date()));
+        jsonObject.addProperty("timestamp", DATE_TIME_FORMATTER.format(Instant.now()));
         jsonObject.addProperty("version", 2);
         Path fp = path.resolve("nodes.json");
         Files.writeString(fp, gson.toJson(jsonObject), StandardCharsets.UTF_8);
@@ -197,8 +190,8 @@ public class HopGlass extends OutputGenerator {
             flags.addProperty("backbone", n.hasBackbone());
             flags.addProperty("online", n.isOnline());
             node.add("flags", flags);
-            node.addProperty("firstseen", dateFormat.format(new Date(n.getFirstSeen())));
-            node.addProperty("lastseen", dateFormat.format(new Date(n.getLastSeen())));
+            node.addProperty("firstseen", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(n.getFirstSeen())));
+            node.addProperty("lastseen", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(n.getLastSeen())));
             return node;
         } catch (Exception e) {
             LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", n.getId()), e);
