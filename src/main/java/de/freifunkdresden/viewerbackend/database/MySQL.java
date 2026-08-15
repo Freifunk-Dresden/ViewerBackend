@@ -43,23 +43,18 @@ public class MySQL {
 
     private static final Logger LOGGER = LogManager.getLogger(MySQL.class);
 
-    private final String host;
-    private final short port;
-    private final String username;
-    private final String password;
-    private final String database;
-
     private Connection conn;
 
     public MySQL() {
-        host = DataGen.getConfig().getValue("mysql_host");
-        port = Short.parseShort(DataGen.getConfig().getValue("mysql_port"));
-        username = DataGen.getConfig().getValue("mysql_username");
-        password = DataGen.getConfig().getValue("mysql_password");
-        database = DataGen.getConfig().getValue("mysql_database");
     }
 
     public void openConnection() {
+        String host = DataGen.getConfig().getValue("mysql_host");
+        short port = Short.parseShort(DataGen.getConfig().getValue("mysql_port"));
+        String username = DataGen.getConfig().getValue("mysql_username");
+        String password = DataGen.getConfig().getValue("mysql_password");
+        String database = DataGen.getConfig().getValue("mysql_database");
+
         try {
             this.conn = DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database, username, password);
         } catch (SQLException e) {

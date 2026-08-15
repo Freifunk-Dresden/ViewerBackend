@@ -40,21 +40,17 @@ public class Influx {
 
     private static final Logger LOGGER = LogManager.getLogger(Influx.class);
 
-    private final String url;
-    private final String username;
-    private final String password;
-    private final String database;
-
     private InfluxDB connection;
 
     public Influx() {
-        url = DataGen.getConfig().getValue("influx_url");
-        username = DataGen.getConfig().getValue("influx_username");
-        password = DataGen.getConfig().getValue("influx_password");
-        database = DataGen.getConfig().getValue("influx_database");
     }
 
     public void openConnection() {
+        String url = DataGen.getConfig().getValue("influx_url");
+        String username = DataGen.getConfig().getValue("influx_username");
+        String password = DataGen.getConfig().getValue("influx_password");
+        String database = DataGen.getConfig().getValue("influx_database");
+
         try {
             this.connection = InfluxDBFactory.connect(url, username, password);
             this.connection.setDatabase(database);
