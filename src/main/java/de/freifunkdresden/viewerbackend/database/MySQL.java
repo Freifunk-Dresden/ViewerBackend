@@ -62,7 +62,7 @@ public class MySQL {
     public boolean hasConnection() {
         try {
             return this.conn != null && this.conn.isValid(1);
-        } catch (SQLException _) {
+        } catch (SQLException e) {
             return false;
         }
     }
