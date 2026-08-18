@@ -41,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HopGlass extends OutputGenerator {
 
     private static final Logger LOGGER = LogManager.getLogger(HopGlass.class);
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneOffset.UTC);
 
     private final Gson gson = new Gson();
     private final JsonArray nodes = new JsonArray();
