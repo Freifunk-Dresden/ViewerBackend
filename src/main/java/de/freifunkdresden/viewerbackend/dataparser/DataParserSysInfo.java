@@ -167,9 +167,9 @@ public class DataParserSysInfo {
 
     public float getLoadAvg() {
         if (stats.has("cpu_load")) {
-            return 0f;
+            return Float.parseFloat(stats.get("cpu_load").getAsString().split(" ")[1]);
         }
-        return Float.parseFloat(stats.get("cpu_load").getAsString().split(" ")[1]);
+        return 0f;
     }
 
     public short getClients() {
