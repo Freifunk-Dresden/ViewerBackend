@@ -30,6 +30,9 @@ import de.freifunkdresden.viewerbackend.Node;
 import de.freifunkdresden.viewerbackend.config.CommunityDirectory;
 import de.freifunkdresden.viewerbackend.config.VpnServerDirectory;
 import de.freifunkdresden.viewerbackend.dataparser.TrafficInfo;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.influxdb.dto.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +45,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class StatsSQL {
+
+    private static final Logger LOGGER = LogManager.getLogger(StatsSQL.class);
 
     private StatsSQL() {
     }
@@ -156,68 +161,72 @@ public class StatsSQL {
         DataGen.getDataHolder().getNodes().values().stream()
                 .filter(Node::isOnline)
                 .forEach(e -> {
-                    long currentTimeMillis = System.currentTimeMillis();
-                    if (e.canHasClients()) {
-                        nodeClients.add(Point.measurement("node_clients")
+                    try {
+                        long currentTimeMillis = System.currentTimeMillis();
+                        if (e.canHasClients()) {
+                            nodeClients.add(Point.measurement("node_clients")
+                                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                                    .tag("node", String.valueOf(e.getId()))
+                                    .addField("value", e.getClients())
+                                    .addField("2g", e.getClients2g())
+                                    .addField("5g", e.getClients5g())
+                                    .build());
+                        }
+                        nodeLoad.add(Point.measurement("node_load")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("value", e.getClients())
-                                .addField("2g", e.getClients2g())
-                                .addField("5g", e.getClients5g())
+                                .addField("value", e.getLoadAvg())
                                 .build());
-                    }
-                    nodeLoad.add(Point.measurement("node_load")
-                            .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                            .tag("node", String.valueOf(e.getId()))
-                            .addField("value", e.getLoadAvg())
-                            .build());
-                    nodeMemory.add(Point.measurement("node_memory")
-                            .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                            .tag("node", String.valueOf(e.getId()))
-                            .addField("value", e.getMemoryUsage())
-                            .build());
-                    nodeUptime.add(Point.measurement("node_uptime")
-                            .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                            .tag("node", String.valueOf(e.getId()))
-                            .addField("value", e.getUptime())
-                            .build());
-                    Optional<Airtime> airtime2g = e.getAirtime2g();
-                    if (airtime2g.isPresent()) {
-                        Airtime airtime = airtime2g.get();
-                        nodeAirtime.add(Point.measurement("node_airtime_2g")
+                        nodeMemory.add(Point.measurement("node_memory")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", airtime.active())
-                                .addField("busy", airtime.busy())
-                                .addField("receive", airtime.receive())
-                                .addField("transmit", airtime.transmit())
+                                .addField("value", e.getMemoryUsage())
                                 .build());
-                    }
-                    Optional<Airtime> airtime5g = e.getAirtime5g();
-                    if (airtime5g.isPresent()) {
-                        Airtime airtime = airtime5g.get();
-                        nodeAirtime.add(Point.measurement("node_airtime_5g")
+                        nodeUptime.add(Point.measurement("node_uptime")
                                 .time(currentTimeMillis, TimeUnit.MILLISECONDS)
                                 .tag("node", String.valueOf(e.getId()))
-                                .addField("active", airtime.active())
-                                .addField("busy", airtime.busy())
-                                .addField("receive", airtime.receive())
-                                .addField("transmit", airtime.transmit())
+                                .addField("value", e.getUptime())
                                 .build());
-                    }
-                    TrafficInfo t = e.getTraffic();
-                    if (!t.isEmpty()) {
-                        for (TrafficInfo.Interface i : TrafficInfo.Interface.values()) {
-                            if (t.hasInterface(i)) {
-                                nodeTraffic.add(Point.measurement("node_traffic")
-                                        .time(currentTimeMillis, TimeUnit.MILLISECONDS)
-                                        .tag("node", String.valueOf(e.getId()))
-                                        .tag("interface", i.getStatName())
-                                        .addField("in", t.getInput(i))
-                                        .addField("out", t.getOutput(i))
-                                        .build());
+                        Optional<Airtime> airtime2g = e.getAirtime2g();
+                        if (airtime2g.isPresent()) {
+                            Airtime airtime = airtime2g.get();
+                            nodeAirtime.add(Point.measurement("node_airtime_2g")
+                                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                                    .tag("node", String.valueOf(e.getId()))
+                                    .addField("active", airtime.active())
+                                    .addField("busy", airtime.busy())
+                                    .addField("receive", airtime.receive())
+                                    .addField("transmit", airtime.transmit())
+                                    .build());
+                        }
+                        Optional<Airtime> airtime5g = e.getAirtime5g();
+                        if (airtime5g.isPresent()) {
+                            Airtime airtime = airtime5g.get();
+                            nodeAirtime.add(Point.measurement("node_airtime_5g")
+                                    .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                                    .tag("node", String.valueOf(e.getId()))
+                                    .addField("active", airtime.active())
+                                    .addField("busy", airtime.busy())
+                                    .addField("receive", airtime.receive())
+                                    .addField("transmit", airtime.transmit())
+                                    .build());
+                        }
+                        TrafficInfo t = e.getTraffic();
+                        if (!t.isEmpty()) {
+                            for (TrafficInfo.Interface i : TrafficInfo.Interface.values()) {
+                                if (t.hasInterface(i)) {
+                                    nodeTraffic.add(Point.measurement("node_traffic")
+                                            .time(currentTimeMillis, TimeUnit.MILLISECONDS)
+                                            .tag("node", String.valueOf(e.getId()))
+                                            .tag("interface", i.getStatName())
+                                            .addField("in", t.getInput(i))
+                                            .addField("out", t.getOutput(i))
+                                            .build());
+                                }
                             }
                         }
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.ERROR, String.format("Fehler bei Node %s", e.getId()), ex);
                     }
                 });
         DataGen.getInflux().write(nodeClients);
