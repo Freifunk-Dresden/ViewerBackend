@@ -106,10 +106,12 @@ public class MeshViewer extends OutputGenerator {
                 node.addProperty("gateway_nexthop", n.getGateway().getFakeId()); //TODO: Correct value
             }
             node.addProperty("node_id", n.getFakeId());
+            node.addProperty("custom_node_id", n.getId());
             JsonArray addresses = new JsonArray();
             addresses.add(n.getIpAddressString());
             node.add("addresses", addresses);
             node.addProperty("site_code", n.getCommunity().name());
+            node.addProperty("domain", n.getCommunity().name());
             node.addProperty("hostname", n.getHostname());
             if (n.isShown()) {
                 node.add("location", n.getLocation().toJson());
